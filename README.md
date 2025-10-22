@@ -3,16 +3,18 @@
 # Solseek
 ## A TUI Package Manager for Solus
 
+[Features](#features) | [Requirements & Installation](#requirements)
+
 Solseek is a simple terminal user interface which allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools; bash, eopkg, flatpak, etc. to avoid complications. It uses the power of fzf for the ui/ux and filtering.
 
-Note: This is a work in progress!
+⚠️ Note: This is a work in progress!
 
 <p align="center">Click image below to see a short demo video</p>
 
 [![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://www.youtube.com/watch?v=qAFCz32Buvw)
 
 
-## Features
+### Features
   - Select and install multiple packages at once
   - View package details
   - Manage system updates for installed tools such as; eopkg, flatpak, snap, distrobox, and fwupd
