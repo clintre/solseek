@@ -1,7 +1,7 @@
 <img src="/assets/solseek-logo.png" align="left" width="64"/>
 
 # solseek
-## A TUI Package Manager for Solus Packages
+## A TUI Package Manager for Solus
 
 solseek is a simple terminal user interface which allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. 
 
@@ -14,12 +14,28 @@ solseek is a simple terminal user interface which allows you to browse, search, 
   - View system configurations
 
 ## Planned
+  - Official package in the Solus repo
   - Ability to search and install/uninstall flatpaks
-  - Additional languages
+  - Update checks and notifications
+  - Additional languages (looking for help on this)
 
-## Libraries Used
+## Requirements
+  - [Solus](https://getsol.us/)
   - [eopkg](https://github.com/getsolus/eopkg)
   - [fzf](https://github.com/junegunn/fzf)
+
+## Installation
+  - Requirements: git and make
+```
+sudo eopkg it git
+sudo eopkg it make
+```
+  - Install Steps
+```
+git clone https://github.com/clintre/solseek.git
+cd ./solseek/package
+sudo make install
+```
 
 ## Inspirations from other distro tools
   - [pacseek](https://github.com/moson-mo/pacseek)
