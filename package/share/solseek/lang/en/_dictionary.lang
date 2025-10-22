@@ -19,7 +19,7 @@ MSG_GEN_AVAILABLE="Available"
 MSG_GEN_INFO="Information"
 MSG_GEN_SEL_ITEM="Select Item"
 
-MSG_FTR_NAVI="Navigate"
+MSG_FTR_NAVI="Nav"
 MSG_FTR_SEL="Select"
 MSG_FTR_BACK="Ctrl-C Back"
 MSG_FTR_MS="Multi: Shift+Tab / Ctrl+Mouse"
