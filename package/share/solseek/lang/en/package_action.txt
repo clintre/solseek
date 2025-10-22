@@ -1,0 +1,14 @@
+
+Available Package Actions
+
+Installed Packages
+
+    - Reinstall: runs sudo eopkg it --resintall <package>
+    - Update: runs sudo eopkg up <package>
+    - Check: runs sudo eopkg check <package>
+    - Remove: runs sudo eopkg rm <package>
+
+
+Available Packages
+
+    - Install: runs sudo eopkg it <package>
