@@ -5,6 +5,9 @@
 
 solseek is a simple terminal user interface which allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. 
 
+[![See it in Action](https://img.youtube.com/vi/qAFCz32Buvw/0.jpg)](https://www.youtube.com/watch?v=qAFCz32Buvw)
+
+
 ## Features
   - Select and install multiple packages at once
   - View package details
