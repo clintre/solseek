@@ -1,7 +1,0 @@
-Information
-
-View and export details from eopkg and flatpak, including...
-
-    - History
-    - Installed Packages
-    - Repo Configuration
