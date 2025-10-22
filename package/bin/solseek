@@ -1,0 +1,520 @@
+#!/bin/bash
+SS_VERSION="0.1.0"
+
+#Create cache directory if it does'nt exist
+mkdir -p "$HOME/.cache/solseek"
+
+SS_DATA_PATH="/usr/share/solseek"
+# Get Language
+SS_LANG=${LANG:0:2}
+SS_LANG_PATH="$SS_DATA_PATH/lang/$SS_LANG"
+
+if [ ! -d "$SS_LANG_PATH" ]; then
+  SS_LANG_PATH="$SS_DATA_PATH/lang/en"
+fi
+if [ ! -f "$SS_LANG_PATH/_dictionary.lang" ]; then
+  . "$SS_DATA_PATH/lang/en/_dictionary.lang"
+else
+  . "$SS_LANG_PATH/_dictionary.lang"
+fi
+# Cache settings
+# Cache expires time in minutes - will move to config file later to override this if set
+SS_CACHE_EXPIRES=5
+PA_CACHE_FILE="$HOME/.cache/solseek/apackages"
+PI_CACHE_FILE="$HOME/.cache/solseek/ipackages"
+PU_CACHE_FILE="$HOME/.cache/solseek/upackages"
+
+# Make sure dependencies are met
+if ! command -v eopkg &> /dev/null; then
+  echo "$MSG_DEP_EOPKG_ERROR"
+  exit 1
+fi
+if ! command -v fzf &> /dev/null; then
+    printf "$MSG_DEP_FZF_ERROR\n\n" >&2
+    read -p "$MSG_DEP_FZF_INTQ" response
+    case "${response,,}" in
+    y|'')
+        echo "$MSG_DEP_FZF_INTY"
+        sudo eopkg it fzf -y
+        ;;
+    n)
+        echo "$MSG_DEP_FZF_INTN"
+        exit 1
+        ;;
+    *)
+        echo "$MSG_DEP_FZF_INTI"
+        exit 1
+        ;;
+    esac
+fi
+
+#Supported Update Systems
+has_flatpak=0
+has_snap=0
+has_distrobox=0
+has_firmware=0
+
+if command -v "flatpak" &> /dev/null; then
+  has_flatpak=1
+fi
+if command -v "snap" &> /dev/null; then
+  has_snap=1
+fi
+if command -v "distrobox" &> /dev/null; then
+  has_distrobox=1
+fi
+if command -v "fwupdmgr" &> /dev/null; then
+  has_firmware=1
+fi
+
+clean_cache(){
+    if [ -f "$PI_CACHE_FILE" ]; then
+      rm -f "$PI_CACHE_FILE"
+    fi
+    if [ -f "$PU_CACHE_FILE" ]; then
+      rm -f "$PU_CACHE_FILE"
+    fi
+    if [ "$1" == "all" ]; then
+      if [ -f "$PA_CACHE_FILE" ]; then
+        rm -f "$PA_CACHE_FILE"
+      fi
+    fi
+}
+hr(){
+  line="─"
+  if [ "$1" = "2" ]; then
+    line="═"
+  elif [ "$1" = "3" ]; then
+    line="━"
+  fi
+  printf "%.0s$line" $(seq 1 "$(tput cols)"); echo
+}
+# Help and calls
+case "$1" in
+  "-h" | "--help" )
+  printf "$(<$SS_LANG_PATH/help.txt )"
+  exit 0
+  ;;
+  "--version")
+  echo "solseek $SS_VERSION"
+  exit 0
+  ;;
+esac
+if [ "$1" == "-ssh" ]; then
+  case "$2" in
+    "$ACT_MAIN_LISTAPKGS" | "$ACT_MAIN_LISTIPKGS" | "$ACT_MAIN_LISTUPKGS")
+      printf "$(<$SS_LANG_PATH/list.txt )" ;;
+    "$ACT_MAIN_UPDATESYS")
+      printf "$(<$SS_LANG_PATH/update_system.txt )" ;;
+    "$ACT_PKG_REINSTALL"  | "$ACT_PKG_REMOVE" | "$ACT_PKG_CHECK" | "$ACT_PKG_UPDATE")
+      printf "$MSG_PKG_ISTATMSG\n"
+      printf "$(<$SS_LANG_PATH/package_action.txt )" ;;
+    "$ACT_PKG_INSTALL")
+      printf "$MSG_PKG_ASTATMSG\n"
+      printf "$(<$SS_LANG_PATH/package_action.txt )" ;;
+    "$ACT_MAIN_INFORMATION")
+      printf "$(<$SS_LANG_PATH/information.txt )" ;;
+    "$ACT_MAIN_WELCOME")
+      printf "$(<$SS_LANG_PATH/welcome.txt )" ;;
+    "$ACT_GEN_BACK")
+      echo "$MSG_GEN_BACK" ;;
+    "selpkg")
+      printf "Selected Package(s)\n"
+      hr
+      echo "$3"| tr -s ' ' '\n'
+      hr
+      printf "$MSG_PKG_ISTATMSG\n"
+      printf "$(<$SS_LANG_PATH/package_action.txt )"
+      ;;
+    "$ACT_MAIN_QUIT")
+      echo "$MSG_GEN_EXIT" ;;
+    *) echo "$MSG_APP_NAME" ;;
+  esac
+  exit 0
+elif [ "$1" == "-ssi" ]; then
+  if [ -n "$2" ]; then
+    eopkg info $2 2>/dev/null
+  else
+    echo "$MSG_GEN_SEL_ITEM"
+  fi
+  exit 0
+elif [ "$1" == "-sse" ]; then
+  sse_export=0
+  sse_export_fn=""
+  sse_sudo=0
+  sse_type="eopkg"
+
+  case "$2" in
+  "$ACT_INFO_FPLA" | "$ACT_INFO_FPLU")
+      sse_type="flatpak" ;;
+  esac
+
+  if [ "$sse_type" = "eopkg" ]; then
+
+    if [ "$2" = "$ACT_INFO_EHIST" ]; then
+      sse_cmd="hs"
+      sse_export_fn="$HOME/eopkg_history.txt"
+      sse_sudo=1
+    elif [ "$2" = "$ACT_INFO_EINST" ]; then
+      sse_cmd="li"
+      sse_export_fn="$HOME/eopkg_all_installed.txt"
+    elif [ "$2" = "$ACT_INFO_EUSER" ]; then
+      sse_cmd="li -e"
+      sse_export_fn="$HOME/eopkg_user_installed.txt"
+    elif [ "$2" = "$ACT_INFO_LREPO" ]; then
+      sse_cmd="lr"
+      sse_export_fn="$HOME/eopkg_repos.txt"
+    elif [ "$2" = "$ACT_INFO_CHECK" ]; then
+      if [ "$3" == "run" ]; then
+        sudo eopkg check
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        printf "$(<$SS_LANG_PATH/eopkg_check.txt )"
+      fi
+      exit 0
+    else
+      echo "$MSG_GEN_BACK"
+      exit 0
+    fi
+
+    if [ "$3" == "export" ]; then
+      if (( sse_sudo == 1 )); then
+        sudo eopkg "$sse_cmd" > $sse_export_fn
+      else
+        eopkg $sse_cmd > $sse_export_fn
+      fi
+      hr 3
+      echo "$MSG_GEN_EXPTO: $sse_export_fn"
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo "$MSG_INFO_EXPPVTOP"
+      hr
+      eopkg $sse_cmd 2>/dev/null
+    fi
+  elif [ "$sse_type" = "flatpak" ]; then
+    if [ "$2" = "$ACT_INFO_FPLA" ]; then
+      sse_cmd="list"
+      sse_export_fn="$HOME/flatpak_all_installed.txt"
+      sse_sudo=1
+    elif [ "$2" = "$ACT_INFO_FPLU" ]; then
+      sse_cmd="list --app"
+      sse_export_fn="$HOME/flatpak_user_installed.txt"
+    fi
+    if [ "$3" == "export" ]; then
+      flatpak $sse_cmd > $sse_export_fn
+      hr 3
+      echo "$MSG_GEN_EXPTO: $sse_export_fn"
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo "$MSG_INFO_EXPPVTOP"
+      hr
+      printf "$(flatpak $sse_cmd --columns=name,version 2>/dev/null)"
+    fi
+
+  fi
+  exit 0
+elif [ "$1" == "-ssp" ]; then
+  if [ $# -lt 3 ]; then
+    echo "$MSG_GEN_INVPARAM"
+    read -p "$MSG_GEN_PRESSENTER..."
+  else
+      pkgvars="${3//$'\n'/ }"
+      if [ "$2" == "install" ]; then
+        pkg_mgmt_act="it"
+        pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"
+      elif [ "$2" == "reinstall" ]; then
+        pkg_mgmt_act="it --reinstall"
+        pkg_mgmt_title="$ACT_PKG_REINSTALL: $pkgvars"
+      elif [ "$2" == "update" ]; then
+        pkg_mgmt_act="up"
+        pkg_mgmt_title="$ACT_PKG_UPDATE: $pkgvars"
+      elif [ "$2" == "remove" ]; then
+        pkg_mgmt_act="rm"
+        pkg_mgmt_title="$ACT_PKG_REMOVE: $pkgvars"
+      elif [ "$2" == "check" ]; then
+        pkg_mgmt_act="check"
+        pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
+      fi
+
+      hr 3
+      echo -e "\e[1;31m$MSG_PKG_TTLSTART $pkg_mgmt_title\e[0m"
+      hr
+      sudo eopkg $pkg_mgmt_act $pkgvars
+      clean_cache
+      hr 3
+      echo "$MSG_GEN_PROCCOMP"
+      read -p "$MSG_GEN_PRESSENTER..."
+  fi
+  exit 0
+elif [ "$1" == "-u" ]; then
+  shift $((OPTIND-1))
+  up_eo=0
+  up_fp=0
+  up_sn=0
+  up_db=0
+  up_fw=0
+  for arg in "$@"; do
+    if [[ "$arg" == *"="* ]]; then
+      key="${arg%%=*}"
+      value="${arg#*=}"
+      declare "$key=$value"
+    fi
+  done
+
+  hr 3
+  echo -e "\e[1;31m$MSG_UPD_TTLSTART\e[0m"
+  if (( up_eo == 1 )); then
+    hr
+    echo -e "\e[1;34m█ EOPKG\e[0m\n"
+    sudo eopkg up && clean_cache
+  fi
+  if (( up_fp == 1 && has_flatpak == 1 )); then
+    hr
+    echo -e "\e[1;34m█ FLATPAK\e[0m\n"
+    flatpak update -y
+  fi
+  if (( up_sn == 1 && has_snap == 1 )); then
+    hr
+    echo -e "\e[1;34m█ SNAP\e[0m\n"
+    sudo snap refresh
+  fi
+  if (( up_db == 1 && has_distrobox == 1 )); then
+    hr
+    echo -e "\e[1;34m█ DISTROBOX\e[0m\n"
+    distrobox upgrade -a
+  fi
+  if (( up_fw == 1 && has_firmware == 1 )); then
+    hr
+    echo -e "\e[1;34m█ FIRMWARE\e[0m\n"
+    fwupdmgr refresh --force
+    fwupdmgr get-updates -y > /dev/null
+    fwupdmgr update
+  fi
+  hr 3
+  echo "$MSG_GEN_PROCCOMP"
+  read -p "$MSG_GEN_PRESSENTER..."
+  exit 0
+elif [ -n "$1" ]; then
+  # If a paramater is passed, no matches above, pass off to eopkg
+  eopkg "$@"
+  exit 0
+fi
+
+clear
+
+# Launch with a clean cache
+clean_cache "all"
+
+while true; do
+  clear
+  # Main
+  mode=$(printf "$ACT_MAIN_WELCOME\n$ACT_MAIN_LISTAPKGS\n$ACT_MAIN_LISTIPKGS\n$ACT_MAIN_LISTUPKGS\n$ACT_MAIN_UPDATESYS\n$ACT_MAIN_INFORMATION\n$ACT_MAIN_QUIT" | \
+    fzf --prompt="" \
+        --no-input\
+        --disabled\
+        --border\
+        --border-label="$MSG_APP_NAME"\
+        --footer-border \
+        --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
+        --highlight-line\
+        --height=100% \
+        --min-height=30 \
+        --wrap \
+        --preview 'solseek -ssh {} 2>/dev/null' \
+        --preview-label="$MSG_GEN_HELP"\
+        --preview-window=right:wrap:70%\
+        --reverse)
+
+  case "$mode" in
+    "$ACT_MAIN_QUIT" | "") exit 0 ;;
+    "$ACT_MAIN_LISTIPKGS")
+      solseek_action="li"
+      ;;
+    "$ACT_MAIN_LISTAPKGS")
+      solseek_action="la"
+      ;;
+    "$ACT_MAIN_LISTUPKGS")
+      solseek_action="lui"
+      ;;
+    "$ACT_MAIN_UPDATESYS") solseek_action="up" ;;
+    "$ACT_MAIN_INFORMATION") solseek_action="info" ;;
+    *) continue ;;
+  esac
+  if [ "$solseek_action" = "up" ]; then
+
+    upmode_opts="$ACT_UPD_EOPKG"
+    # Check with other systems are install that provide update_systems
+    if [ "$has_flatpak" = 1 ]; then
+      upmode_opts="$upmode_opts\n$ACT_UPD_FLATPAK"
+    fi
+    if [ "$has_snap" = 1 ]; then
+      upmode_opts="$upmode_opts\n$ACT_UPD_SNAP"
+    fi
+    upmode_opts="$upmode_opts\n$ACT_UPD_ALL"
+
+    if [ "$has_distrobox" = 1 ]; then
+      upmode_opts="$upmode_opts\n$ACT_UPD_DISTROBOX"
+    fi
+    if [ "$has_firmware" = 1 ]; then
+      upmode_opts="$upmode_opts\n$ACT_UPD_FIRMWARE"
+
+    fi
+
+    upmode_opts="$upmode_opts\n$ACT_UPD_EVERYTHING\n$ACT_GEN_BACK"
+
+    upmode=$(printf "$upmode_opts" | \
+    fzf --prompt="" \
+        --header="$MSG_UPD_HEADER" \
+        --no-input\
+        --disabled\
+        --border\
+        --border-label="$MSG_APP_NAME"\
+        --footer-border \
+        --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
+        --highlight-line\
+        --height=100% \
+        --min-height=30 \
+        --preview "solseek -ssh '$ACT_MAIN_UPDATESYS'" \
+        --preview-label="$MSG_GEN_HELP"\
+        --preview-window=right:wrap:70%\
+        --reverse)
+
+    case "$upmode" in
+      "$ACT_UPD_EOPKG") solseek -u up_eo=1;;
+      "$ACT_UPD_FLATPAK") solseek -u up_fp=1;;
+      "$ACT_UPD_SNAP") solseek -u up_sn=1;;
+      "$ACT_UPD_ALL") solseek -u up_eo=1 up_fp=1 up_sn=1;;
+      "$ACT_UPD_DISTROBOX") solseek -u up_db=1;;
+      "$ACT_UPD_FIRMWARE") solseek -u up_fw=1;;
+      "$ACT_UPD_EVERYTHING") solseek -u up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1;;
+      "$ACT_GEN_BACK" | "") continue ;;
+    esac
+
+    elif [ "$solseek_action" = "info" ]; then
+
+    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_GEN_BACK" | \
+    fzf --prompt="" \
+        --no-input\
+        --disabled\
+        --border\
+        --border-label="$MSG_APP_NAME"\
+        --footer-border \
+        --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
+        --highlight-line\
+        --height=100% \
+        --min-height=30 \
+        --preview 'solseek -sse {}' \
+        --preview-label="$MSG_GEN_INFO"\
+        --preview-window=right:wrap:70%\
+        --reverse)
+
+    case "$toolAction" in
+      "$ACT_INFO_EHIST") solseek -sse "$toolAction" export ;;
+      "$ACT_INFO_EINST") solseek -sse "$toolAction" export ;;
+      "$ACT_INFO_EUSER") solseek -sse "$toolAction" export ;;
+      "$ACT_INFO_LREPO") solseek -sse "$toolAction" export ;;
+      "$ACT_INFO_FPLA") solseek -sse "$toolAction" export ;;
+      "$ACT_INFO_FPLU") solseek -sse "$toolAction" export ;;
+      "$ACT_INFO_CHECK") solseek -sse "$toolAction" run ;;
+      *) continue ;;
+    esac
+  else
+    # PACKAGE LIST
+    if [ ! -f "$PI_CACHE_FILE" ] || [ -n "$(find "$PI_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+        eopkg li 2>/dev/null | awk 'NR>2 {print $1}' > "$PI_CACHE_FILE"
+    fi
+
+    if [ "$solseek_action" = "lui" ]; then
+      if [ ! -f "$PU_CACHE_FILE" ] || [ -n "$(find "$PU_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+          eopkg li -e 2>/dev/null | awk 'NR>2 {print $1}' > "$PU_CACHE_FILE"
+      fi
+      package_list=$(
+        awk '{print "\033[32m" $1 " 🗹\033[0m"}' "$PU_CACHE_FILE"
+      )
+      pkg_list_type="$MSG_PKG_LTYPE_USR"
+    else
+      if [ "$solseek_action" = "la" ]; then
+        if [ ! -f "$PA_CACHE_FILE" ] || [ -n "$(find "$PA_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+          eopkg la -U 2>/dev/null | awk 'NR>2 {print $1}' > "$PA_CACHE_FILE"
+        fi
+        package_list=$(
+          {
+            awk '{print "\033[32m" $1 " 🗹\033[0m"}' "$PI_CACHE_FILE"
+            grep -vxFf "$PI_CACHE_FILE" "$PA_CACHE_FILE"
+          } | sort -ud
+        )
+        pkg_list_type="$MSG_PKG_LTYPE_ALL"
+      else
+        package_list=$(
+          awk '{print "\033[32m" $1 " 🗹\033[0m"}' "$PI_CACHE_FILE"
+        )
+        pkg_list_type="$MSG_PKG_LTYPE_INS"
+      fi
+    fi
+
+    pkg=$(echo "$package_list" | \
+      fzf --ansi \
+          --border\
+          --header="$MSG_PKG_HEADER: $pkg_list_type"\
+          --border-label="$MSG_APP_NAME"\
+          --prompt="$MSG_PKG_PROMPT: " \
+          --footer-border \
+          --footer-label="$MSG_FTR_MS" \
+          --footer-label-pos=0 \
+          --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
+          --highlight-line\
+          --height=100% \
+          --min-height=30 \
+          --multi \
+          --reverse \
+          --preview 'solseek -ssi {1}' \
+          --preview-label="$MSG_PKG_LABEL" \
+          --preview-window=right:wrap:70%)
+
+    # Return to main menu
+    [ -z "$pkg" ] && continue
+
+    # Clean package name
+    package=$(echo "$pkg" | sed 's/ 🗹//' | sed 's/\x1b\[[0-9;]*m//g')
+
+    if grep -q -x "$package" "$PI_CACHE_FILE"; then
+        pkg_status="$MSG_GEN_INSTALLED"
+        pkg_options="$ACT_PKG_REINSTALL\n$ACT_PKG_UPDATE\n$ACT_PKG_CHECK\n$ACT_PKG_REMOVE\n$ACT_GEN_BACK"
+    else
+        pkg_status="$MSG_GEN_AVAILABLE"
+        pkg_options="$ACT_PKG_INSTALL\n$ACT_GEN_BACK"
+    fi
+    package="${package//$'\n'/ }"
+    # PACKAGE ACTION
+    pkgAction=$(printf "$pkg_options" | \
+        fzf --prompt="$MSG_PKGACT_PROMPT: " \
+            --no-input\
+            --disabled\
+            --border\
+            --border-label="$MSG_APP_NAME"\
+            --header="$MSG_GEN_SEL" \
+            --footer-border \
+            --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
+            --highlight-line\
+            --height=100% \
+            --min-height=30 \
+            --preview "solseek -ssh selpkg '$package'" \
+            --preview-label="$MSG_GEN_INFO"\
+            --preview-window=right:wrap:70%\
+            --reverse)
+
+    case "$pkgAction" in
+      "$ACT_PKG_INSTALL") solseek -ssp install "$package" ;;
+      "$ACT_PKG_REINSTALL") solseek -ssp reinstall "$package" ;;
+      "$ACT_PKG_REMOVE") solseek -ssp remove "$package" ;;
+      "$ACT_PKG_CHECK") solseek -ssp check "$package" ;;
+      "$ACT_PKG_UPDATE") solseek -ssp update "$package" ;;
+      "$ACT_GEN_BACK" | "") continue ;;
+    esac
+
+  fi
+done
