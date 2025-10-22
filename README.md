@@ -1,6 +1,6 @@
 <img src="/assets/solseek-logo.png" align="left" width="64"/>
 
-# solseek
+# solseek (warning in testing)
 ## A TUI Package Manager for Solus
 
 solseek is a simple terminal user interface which allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. 
