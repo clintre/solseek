@@ -5,9 +5,7 @@
 
 [Features](#features) | [Requirements & Installation](#requirements)
 
-Solseek is a simple terminal user interface which allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools; bash, eopkg, flatpak, etc. to avoid complications. It uses the power of fzf for the ui/ux and filtering.
-
-⚠️ Note: This is a work in progress!
+Solseek is a simple terminal user interface that allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications. It uses the power of fzf for the ui/ux and filtering.
 
 <p align="center">Click image below to see a short demo video</p>
 
@@ -36,7 +34,7 @@ Solseek is a simple terminal user interface which allows you to browse, search, 
   - [eopkg](https://github.com/getsolus/eopkg)
   - [fzf](https://github.com/junegunn/fzf)
 
-## Installation
+## Installation & Updating
   - Requirements: git and make
 ```
 sudo eopkg it git
@@ -48,10 +46,33 @@ git clone https://github.com/clintre/solseek.git
 cd ./solseek/package
 sudo make install
 ```
+  - To Update: Delete the ~/solseek folder and run through the Install Steps again. It updates the files automatically.
+
+## Add Menu Entry
+If you would like an entry in your menu to launch Solseek...
+  - Create Solseek.desktop file in ~/.local/share/applications/
+```
+nano ~/.local/share/applications/Solseek.desktop
+```
+  - Add the following data
+```
+[Desktop Entry]
+Version=0.1.0
+Name=Solseek
+Comment=Solseek Package Manager
+Exec=solseek
+Icon=utilities-terminal
+Terminal=true
+Type=Application
+Categories=System;
+```
+  - Save, and you should now have a menu entry. It will have a terminal icon.
+  - I do intend to add this in a future release.
+
+
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
-There was no need to write some system to extract the data, the Solus team has done a wonderful job 
-with eopkg and it allows me to simply wrap this tool around the strengths of it.
+There was no need to write some system to extract the data as the Solus team has done a wonderful job already with eopkg and it allows me to simply wrap this tool around the strengths of it.
     
 ## Inspirations from other distro tools
   - [pacseek](https://github.com/moson-mo/pacseek)
