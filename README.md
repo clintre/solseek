@@ -50,7 +50,7 @@ sudo make install
 ```
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
-There was no need to write some extraction for the data, the Solus team has done a wonderful job 
+There was no need to write some system to extract the data, the Solus team has done a wonderful job 
 with eopkg and it allows me to simply wrap this tool around the strengths of it.
     
 ## Inspirations from other distro tools
