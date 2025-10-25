@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=0.1.0
+Name=Solseek
+Comment=Solseek Package Manager
+Exec=solseek
+Icon=solseek
+Terminal=true
+Type=Application
+Categories=System;
