@@ -47,7 +47,7 @@ cd ./solseek/package
 sudo make install
 ```
   - To Update: Delete the ~/solseek folder and run through the Install Steps again. It updates the files automatically.
-  - If you created the Solseek.desktop in ./local/applications you can now remove it. It is created with an icon on install/update.
+  - If you created the Solseek.desktop in ./local/share/applications you can now remove it. It is created with an icon on install/update.
 
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
