@@ -1,4 +1,4 @@
-MSG_APP_NAME="Solseek Package Manager"
+MSG_APP_NAME="Solseek"
 MSG_DEP_EOPKG_ERROR="Error: eopkg not found! Aborting"
 MSG_DEP_FZF_ERROR="Error: The required package fzf is not installed!"
 MSG_DEP_FZF_INTQ="Would you like to install fzf now? [Y/n]"
@@ -58,6 +58,7 @@ ACT_INFO_CHECK="EOPKG Run Check"
 ACT_INFO_LREPO="EOPKG Repo Settings"
 ACT_INFO_FPLA="FLATPAK Installed - All"
 ACT_INFO_FPLU="FLATPAK Installed - User"
+ACT_INFO_INXI="INXI System Info"
 
 ACT_UPD_EOPKG="System Packages"
 ACT_UPD_FLATPAK="Flatpaks"
