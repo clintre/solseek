@@ -1,7 +1,9 @@
-Information
+System & Packages Information Tools
 
-View and export details from eopkg and flatpak, including...
+View and export system and package info, including...
 
-    - History
-    - Installed Packages
-    - Repo Configuration
+    - History (eopkg)
+    - Installed Packages (eopkg & flatpak)
+    - Repo Configuration (eopkg)
+    - Verify Packages (eopkg)
+    - System Check (inxi -b)

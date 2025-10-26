@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.1.0"
+SS_VERSION="0.2.0"
 
 #Create cache directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -147,6 +147,8 @@ elif [ "$1" == "-sse" ]; then
   case "$2" in
   "$ACT_INFO_FPLA" | "$ACT_INFO_FPLU")
       sse_type="flatpak" ;;
+  "$ACT_INFO_INXI")
+      sse_type="inxi" ;;
   esac
 
   if [ "$sse_type" = "eopkg" ]; then
@@ -213,6 +215,19 @@ elif [ "$1" == "-sse" ]; then
       echo "$MSG_INFO_EXPPVTOP"
       hr
       printf "$(flatpak $sse_cmd --columns=name,version 2>/dev/null)"
+    fi
+  elif [ "$sse_type" = "inxi" ]; then
+    sse_export_fn="$HOME/inxi_output.txt"
+    if [ "$3" == "export" ]; then
+      inxi -b > $sse_export_fn
+      hr 3
+      echo "$MSG_GEN_EXPTO: $sse_export_fn"
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo "$MSG_INFO_EXPPVTOP"
+      hr
+      inxi -b --tty -y 80 2>/dev/null
     fi
 
   fi
@@ -317,7 +332,7 @@ while true; do
         --no-input\
         --disabled\
         --border\
-        --border-label="$MSG_APP_NAME"\
+        --border-label="$MSG_APP_NAME - v$SS_VERSION"\
         --footer-border \
         --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
         --highlight-line\
@@ -372,7 +387,7 @@ while true; do
         --no-input\
         --disabled\
         --border\
-        --border-label="$MSG_APP_NAME"\
+        --border-label="$MSG_APP_NAME - v$SS_VERSION"\
         --footer-border \
         --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
         --highlight-line\
@@ -396,12 +411,12 @@ while true; do
 
     elif [ "$solseek_action" = "info" ]; then
 
-    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_GEN_BACK" | \
+    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_INFO_INXI\n$ACT_GEN_BACK" | \
     fzf --prompt="" \
         --no-input\
         --disabled\
         --border\
-        --border-label="$MSG_APP_NAME"\
+        --border-label="$MSG_APP_NAME - v$SS_VERSION"\
         --footer-border \
         --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
         --highlight-line\
@@ -419,6 +434,7 @@ while true; do
       "$ACT_INFO_LREPO") solseek -sse "$toolAction" export ;;
       "$ACT_INFO_FPLA") solseek -sse "$toolAction" export ;;
       "$ACT_INFO_FPLU") solseek -sse "$toolAction" export ;;
+      "$ACT_INFO_INXI") solseek -sse "$toolAction" export ;;
       "$ACT_INFO_CHECK") solseek -sse "$toolAction" run ;;
       *) continue ;;
     esac
@@ -460,7 +476,7 @@ while true; do
       fzf --ansi \
           --border\
           --header="$MSG_PKG_HEADER: $pkg_list_type"\
-          --border-label="$MSG_APP_NAME"\
+          --border-label="$MSG_APP_NAME - v$SS_VERSION"\
           --prompt="$MSG_PKG_PROMPT: " \
           --footer-border \
           --footer-label="$MSG_FTR_MS" \
@@ -495,7 +511,7 @@ while true; do
             --no-input\
             --disabled\
             --border\
-            --border-label="$MSG_APP_NAME"\
+            --border-label="$MSG_APP_NAME - v$SS_VERSION"\
             --header="$MSG_GEN_SEL" \
             --footer-border \
             --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
