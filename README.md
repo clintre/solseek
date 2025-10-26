@@ -47,28 +47,7 @@ cd ./solseek/package
 sudo make install
 ```
   - To Update: Delete the ~/solseek folder and run through the Install Steps again. It updates the files automatically.
-
-## Add Menu Entry
-If you would like an entry in your menu to launch Solseek...
-  - Create Solseek.desktop file in ~/.local/share/applications/
-```
-nano ~/.local/share/applications/Solseek.desktop
-```
-  - Add the following data
-```
-[Desktop Entry]
-Version=0.1.0
-Name=Solseek
-Comment=Solseek Package Manager
-Exec=solseek
-Icon=utilities-terminal
-Terminal=true
-Type=Application
-Categories=System;
-```
-  - Save, and you should now have a menu entry. It will have a terminal icon.
-  - I do intend to add this in a future release.
-
+  - If you created the Solseek.desktop in ./local/applications you can now remove it. It is created with an icon on install/update.
 
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
