@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.clintre.solseek</id>
+  <launchable type="desktop-id">Solseek.desktop</launchable>
+  <name>Solseek</name>
+  <summary>A TUI Package Manager for Solus</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0</project_license>
+  <categories>
+    <category>Utility</category>
+  </categories>
+  <url type="homepage">https://github.com/clintre/solseek</url>
+  <url type="bugtracker">https://github.com/clintre/solseek/issues</url>
+  <description>
+    <p>A TUI Package Manager for Solus</p>
+    <p>Solseek is a simple terminal user interface that allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications. It uses the power of fzf for the ui/ux and filtering.</p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source">https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png</image>
+    </screenshot>
+  </screenshots>
+</component>
