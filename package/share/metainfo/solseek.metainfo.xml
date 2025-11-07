@@ -13,7 +13,7 @@
   <url type="bugtracker">https://github.com/clintre/solseek/issues</url>
   <description>
     <p>A TUI Package Manager for Solus</p>
-    <p>Solseek is a simple terminal user interface that allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications. It uses the power of fzf for the ui/ux and filtering.</p>
+    <p>Solseek is a simple terminal user interface that allows you to browse, search, and manage Solus and Flatpak packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface.</p>
   </description>
   <screenshots>
     <screenshot type="default">
