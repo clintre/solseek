@@ -3,7 +3,7 @@
 # Solseek
 ## A TUI Package Manager for Solus
 
-[Features](#features) | [Requirements & Installation](#requirements)
+[Features](#features) | [Requirements & Installation](#requirements) | [Usage](#usage)
 
 Solseek is a simple terminal user interface that allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications. It uses the power of fzf for the ui/ux and filtering.
 
@@ -11,8 +11,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 [![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://www.youtube.com/watch?v=qAFCz32Buvw)
 
-
-### Features
+## Features
   - Select and install multiple packages at once
   - View package details
   - Manage system updates for installed tools such as; eopkg, flatpak, snap, distrobox, and fwupd
@@ -24,8 +23,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Currently only in English
 
 ## Planned
-  - Official package in the Solus repo
-  - Ability to search and install/uninstall flatpaks
+  - Ability to search and install/uninstall flatpaks [coming soon]
   - Update checks and notifications
   - Additional languages (looking for help on this)
 
@@ -34,20 +32,26 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - [eopkg](https://github.com/getsolus/eopkg)
   - [fzf](https://github.com/junegunn/fzf)
 
-## Installation & Updating
-  - Requirements: git and make
+## Installation
 ```
-sudo eopkg it git
-sudo eopkg it make
+sudo eopkg it solseek
 ```
-  - Install Steps
-```
-git clone https://github.com/clintre/solseek.git
-cd ./solseek/package
-sudo make install
-```
-  - To Update: Delete the ~/solseek folder and run through the Install Steps again. It updates the files automatically.
-  - If you created the Solseek.desktop in ./local/share/applications you can now remove it. It is created with an icon on install/update.
+
+## Usage
+### Launching Solseek
+  - Desktop menu entry Solseek
+  - Terminal `solseek`
+### Navigation
+  - Keyboard
+    - Arrow Keys for up/down navigation
+    - [ENTER] to select menu entry
+    - [ESC] or [CTRL]+[C] to go back
+    - [SHIFT]+[TAB] to select multiple items ([ENTER] to execute action)
+  - Mouse / Touchpad
+    - Scroll up/down
+    - Single left click to view entry
+    - Double left click to execute/select entry
+    - [CTRL]+left click to select multiple items 
 
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
