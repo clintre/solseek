@@ -43,15 +43,15 @@ sudo eopkg it solseek
   - Terminal `solseek`
 ### Navigation
   - Keyboard
-    - Arrow Keys for up/down navigation
-    - [ENTER] to select menu entry
-    - [ESC] or [CTRL]+[C] to go back
-    - [SHIFT]+[TAB] to select multiple items ([ENTER] to execute action)
+    - <kbd>↓</kbd><kbd>↑</kbd> for navigation
+    - <kbd>ENTER</kbd> to select menu entry
+    - <kbd>ESC</kbd> or <kbd>CTRL</kbd>+<kbd>C</kbd> to go back
+    - <kbd>SHIFT</kbd>+<kbd>TAB</kbd> to select multiple items (<kbd>ENTER</kbd> to execute action)
   - Mouse / Touchpad
     - Scroll up/down
     - Single left click to view entry
     - Double left click to execute/select entry
-    - [CTRL]+left click to select multiple items 
+    - <kbd>CTRL</kbd>+left click to select multiple items 
 
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
