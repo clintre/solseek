@@ -5,7 +5,7 @@
 
 [Features](#features) | [Requirements & Installation](#requirements) | [Usage](#usage)
 
-Solseek is a simple terminal user interface that allows you to browse, search, and manage packages from the Solus packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications. It uses the power of fzf for the ui/ux and filtering.
+Solseek is a simple terminal user interface that allows you to browse, search, and manage packages for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
 
 <p align="center">Click image below to see a short demo video</p>
 
@@ -23,14 +23,16 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Currently only in English
 
 ## Planned
-  - Ability to search and install/uninstall flatpaks [coming soon]
-  - Update checks and notifications
   - Additional languages (looking for help on this)
+  - Clean Package Cache
+  - Common package repair tools
+  - Recipes for common installs on Solus (Nvidia, Distrobox, etc)
 
 ## Requirements
   - [Solus](https://getsol.us/)
   - [eopkg](https://github.com/getsolus/eopkg)
   - [fzf](https://github.com/junegunn/fzf)
+  - [appstream](https://www.freedesktop.org/wiki/Distributions/AppStream/)
 
 ## Installation
 ```
