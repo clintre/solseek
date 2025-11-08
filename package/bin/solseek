@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.3.0"
+SS_VERSION="0.3.1"
 
 #Create cache directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -73,6 +73,10 @@ clean_cache(){
       echo "$MSG_GEN_CACHE"
       if [ "$HAS_FLATPAK" -eq 1 ]; then
         flatpak list --app --columns=name,application > "$FI_CACHE_FILE" &
+        if [ ! -s "$FI_CACHE_FILE" ]; then
+          touch "$FI_CACHE_FILE"
+          echo "Empty	empty" > "$FI_CACHE_FILE"
+        fi
         flatpak remote-ls --app flathub --columns=name,application > "$FA_CACHE_FILE" &
       fi
       eopkg li 2>/dev/null | awk 'NR>2 {print $1}' > "$PI_CACHE_FILE" &
@@ -617,6 +621,10 @@ while true; do
     [ -z "$pkg" ] && continue
 
     package=$(echo "$pkg" | awk '{print $NF}')
+
+    if [ "$package" = "empty" ]; then
+      continue
+    fi
 
     if grep -q "$package" "$FI_CACHE_FILE"; then
         pkg_status="Installed"
