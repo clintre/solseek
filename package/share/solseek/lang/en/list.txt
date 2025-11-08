@@ -1,7 +1,6 @@
-List Packages (All or Installed)
+Packages & Flatpaks
 
-Allows you to search for and manage packages available in the
-enabled repository.
+List, search, and manage packages.
 
 When viewing the list, the following options are available.
 
@@ -10,9 +9,16 @@ When viewing the list, the following options are available.
     - Actions for packages, including Install, Reinstall, and Remove
 
 Guide
-    - List All: Shows all packages from the repo
-    - List Installed: Shows only installed packages
-    - List User Installed: Shows only packages installed by the user
+    - Packages - All: All system packages from the repo
+    - Packages - Installed: All installed system packages
+    - Packages - User Installed: System packages installed by user
+    - Flatpaks - All: Shows all flatpaks from flathub
+    - Flatpaks - Installed: Shows only installed flatpaks
     - Type to Search List
     - Up / Down on Keyboard or Scroll on Mouse/Touchpad
     - To select package [Enter] on kb or double click w/ mouse
+
+Notes
+    - Packages = System Packages / EOPKG
+    - All = Both installed and available
+    - If Flatpak is not enabled, it will not show in the list
