@@ -1,30 +1,22 @@
 Welcome to the Solseek Package Manager
 
-This system is designed to work around the Solus package manager
-eopkg. It expands on the base functions to include helpers for
-updating other systems that you may have installed, such as Flatpak,
-Snap, Distrobox, and Firmware updates.
-
-The core features as of this version are...
-    - Listing packages (search and manage packages)
-    - Managing packages (install,update,check,remove)
+The core features...
+    - Listing packages (search,manage) *
+    - Managing packages (install,update,check,remove) *
     - System Updates (eopkg,flatpak,snap,distrobox,firmware)
     - Config and Information view and export
     - eopkg wrapper (ex. sudo solseek up = sudo eopkg up)
 
-Potential future features...
-    - Flatpak capabilities (list,search,install,etc.)
-    - Update check and notify
-    - Additional meta information for packages
+* Currently eopkg and flatpak supported
 
-To do...
-    - Get some help with translation!
-    - Maybe port to a more robust language
-    - Clean up and normalize
+Navigation and Controls
+    🡙 Up/Down arrows / Mouse Scroll to navigate list
+    ⏎ [ENTER] / Double Click to Select
+    - Shift-Tab / Ctrl-Left Mouse Button to Multi Select
+    - Ctrl-C / [ESC] for Previous Window
+
 
 Support...
-Support is best effort at this time.
-You can create an issue at
 https://github.com/clintre/solseek
 
 License...
