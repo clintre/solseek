@@ -3,12 +3,12 @@ Available Package Actions
 
 Installed Packages
 
-    - Reinstall: runs sudo eopkg it --resintall <package>
-    - Update: runs sudo eopkg up <package>
-    - Check: runs sudo eopkg check <package>
-    - Remove: runs sudo eopkg rm <package>
-
+    - Reinstall
+    - Update
+    - Check (eopkg only)
+    - Repair (flatpak only)
+    - Remove
 
 Available Packages
 
-    - Install: runs sudo eopkg it <package>
+    - Install
