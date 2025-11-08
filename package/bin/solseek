@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.2.0"
+SS_VERSION="0.3.0"
 
 #Create cache directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -19,52 +19,35 @@ else
 fi
 # Cache settings
 # Cache expires time in minutes - will move to config file later to override this if set
-SS_CACHE_EXPIRES=5
+SS_CACHE_EXPIRES=15
 PA_CACHE_FILE="$HOME/.cache/solseek/apackages"
 PI_CACHE_FILE="$HOME/.cache/solseek/ipackages"
 PU_CACHE_FILE="$HOME/.cache/solseek/upackages"
-
-# Make sure dependencies are met
-if ! command -v eopkg &> /dev/null; then
-  echo "$MSG_DEP_EOPKG_ERROR"
-  exit 1
-fi
-if ! command -v fzf &> /dev/null; then
-    printf "$MSG_DEP_FZF_ERROR\n\n" >&2
-    read -p "$MSG_DEP_FZF_INTQ" response
-    case "${response,,}" in
-    y|'')
-        echo "$MSG_DEP_FZF_INTY"
-        sudo eopkg it fzf -y
-        ;;
-    n)
-        echo "$MSG_DEP_FZF_INTN"
-        exit 1
-        ;;
-    *)
-        echo "$MSG_DEP_FZF_INTI"
-        exit 1
-        ;;
-    esac
-fi
+FA_CACHE_FILE="$HOME/.cache/solseek/aflatpaks"
+FI_CACHE_FILE="$HOME/.cache/solseek/iflatpaks"
+UP_CACHE_FILE="$HOME/.cache/solseek/updatemsg"
 
 #Supported Update Systems
-has_flatpak=0
-has_snap=0
-has_distrobox=0
-has_firmware=0
+HAS_FLATPAK=0
+HAS_SNAP=0
+HAS_DISTROBOX=0
+HAS_FIRMWARE=0
+HAS_FASTFETCH=0
 
 if command -v "flatpak" &> /dev/null; then
-  has_flatpak=1
+  HAS_FLATPAK=1
 fi
 if command -v "snap" &> /dev/null; then
-  has_snap=1
+  HAS_SNAP=1
 fi
 if command -v "distrobox" &> /dev/null; then
-  has_distrobox=1
+  HAS_DISTROBOX=1
 fi
 if command -v "fwupdmgr" &> /dev/null; then
-  has_firmware=1
+  HAS_FIRMWARE=1
+fi
+if command -v "fastfetch" &> /dev/null; then
+  HAS_FASTFETCH=1
 fi
 
 clean_cache(){
@@ -74,10 +57,27 @@ clean_cache(){
     if [ -f "$PU_CACHE_FILE" ]; then
       rm -f "$PU_CACHE_FILE"
     fi
-    if [ "$1" == "all" ]; then
-      if [ -f "$PA_CACHE_FILE" ]; then
+    if [ -f "$PA_CACHE_FILE" ]; then
         rm -f "$PA_CACHE_FILE"
+    fi
+    if [ -f "$FA_CACHE_FILE" ]; then
+      rm -f "$FA_CACHE_FILE"
+    fi
+    if [ -f "$FI_CACHE_FILE" ]; then
+      rm -f "$FI_CACHE_FILE"
+    fi
+    if [ -f "$UP_CACHE_FILE" ]; then
+        rm -f "$UP_CACHE_FILE"
+    fi
+    if [ "$1" == "regen" ]; then
+      echo "$MSG_GEN_CACHE"
+      if [ "$HAS_FLATPAK" -eq 1 ]; then
+        flatpak list --app --columns=name,application > "$FI_CACHE_FILE" &
+        flatpak remote-ls --app flathub --columns=name,application > "$FA_CACHE_FILE" &
       fi
+      eopkg li 2>/dev/null | awk 'NR>2 {print $1}' > "$PI_CACHE_FILE" &
+      eopkg li -e 2>/dev/null | awk 'NR>2 {print $1}' > "$PU_CACHE_FILE" &
+      eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1}' > "$PA_CACHE_FILE"
     fi
 }
 hr(){
@@ -102,9 +102,52 @@ case "$1" in
 esac
 if [ "$1" == "-ssh" ]; then
   case "$2" in
-    "$ACT_MAIN_LISTAPKGS" | "$ACT_MAIN_LISTIPKGS" | "$ACT_MAIN_LISTUPKGS")
+    "$ACT_MAIN_UPDATESYS" | "$ACT_MAIN_WELCOME")
+
+      if [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+        UPCNT_SOLUS_STBL=`pkcon get-updates --plain | grep -i -c "(Solus)"`
+        UPCNT_SOLUS_USTBL=`pkcon get-updates --plain | grep -i -c "(Unstable)"`
+
+        if [ "$HAS_FLATPAK" -eq 1 ]; then
+          UPCNT_FP=`flatpak remote-ls --updates | wc -l`
+        else
+          UPCNT_FP=0
+        fi
+
+        HASUP=0
+        UPCNT_SOLUS=0
+        UPMSG_FP=""
+
+        if [ "$UPCNT_SOLUS_STBL" -gt 0 ]; then
+          HASUP=1
+          UPCNT_SOLUS=$UPCNT_SOLUS_STBL
+        elif [ "$UPCNT_SOLUS_USTBL" -gt 0 ]; then
+          HASUP=1
+          UPCNT_SOLUS=$UPCNT_SOLUS_USTBL
+        fi
+
+        if [ "$UPCNT_FP" -gt 0 ]; then
+          HASUP=1
+          UPMSG_FP="| $MSG_UPD_FLATPAK: $UPCNT_FP"
+        fi
+
+        if [ "$HASUP" -eq 1 ]; then
+          UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP\n"
+        else
+          UPMSG="$MSG_UPD_NONE\n"
+        fi
+          echo "$UPMSG" > "$UP_CACHE_FILE"
+      fi
+
+      UPMSG="$(<$UP_CACHE_FILE)"
+
+  esac
+  case "$2" in
+    "$ACT_MAIN_LISTAPKGS" | "$ACT_MAIN_LISTIPKGS" | "$ACT_MAIN_LISTUPKGS" | "$ACT_MAIN_LISTAFPS" | "$ACT_MAIN_LISTIFPS")
       printf "$(<$SS_LANG_PATH/list.txt )" ;;
     "$ACT_MAIN_UPDATESYS")
+      printf "󰏖 $MSG_UPD_AVAIL_UPD: $UPMSG"
+      hr
       printf "$(<$SS_LANG_PATH/update_system.txt )" ;;
     "$ACT_PKG_REINSTALL"  | "$ACT_PKG_REMOVE" | "$ACT_PKG_CHECK" | "$ACT_PKG_UPDATE")
       printf "$MSG_PKG_ISTATMSG\n"
@@ -115,15 +158,20 @@ if [ "$1" == "-ssh" ]; then
     "$ACT_MAIN_INFORMATION")
       printf "$(<$SS_LANG_PATH/information.txt )" ;;
     "$ACT_MAIN_WELCOME")
+      printf "󰏖 $MSG_UPD_AVAIL_UPD: $UPMSG"
+      hr
+      if [ "$HAS_FASTFETCH" -eq 1 ]; then
+        fastfetch -c /usr/share/solseek/solseek_fastfetch.jsonc 2>/dev/null
+        hr
+      fi
       printf "$(<$SS_LANG_PATH/welcome.txt )" ;;
     "$ACT_GEN_BACK")
       echo "$MSG_GEN_BACK" ;;
     "selpkg")
-      printf "Selected Package(s)\n"
+      printf "$MSG_PKG_SELECTED\n"
       hr
       echo "$3"| tr -s ' ' '\n'
       hr
-      printf "$MSG_PKG_ISTATMSG\n"
       printf "$(<$SS_LANG_PATH/package_action.txt )"
       ;;
     "$ACT_MAIN_QUIT")
@@ -149,6 +197,9 @@ elif [ "$1" == "-sse" ]; then
       sse_type="flatpak" ;;
   "$ACT_INFO_INXI")
       sse_type="inxi" ;;
+  "$ACT_INFO_SOLUSSUPPORT" | "$ACT_INFO_SOLUSFORUM" | "$ACT_INFO_SOLSEEK" | "$ACT_INFO_LICENSE")
+      echo "$MSG_INFO_OPENWEB"
+      exit 0 ;;
   esac
 
   if [ "$sse_type" = "eopkg" ]; then
@@ -259,7 +310,40 @@ elif [ "$1" == "-ssp" ]; then
       echo -e "\e[1;31m$MSG_PKG_TTLSTART $pkg_mgmt_title\e[0m"
       hr
       sudo eopkg $pkg_mgmt_act $pkgvars
-      clean_cache
+      clean_cache "regen"
+      hr 3
+      echo "$MSG_GEN_PROCCOMP"
+      read -p "$MSG_GEN_PRESSENTER..."
+  fi
+  exit 0
+elif [ "$1" == "-ssf" ]; then
+  if [ $# -lt 3 ]; then
+    echo "$MSG_GEN_INVPARAM"
+    read -p "$MSG_GEN_PRESSENTER..."
+  else
+      pkgvars="${3//$'\n'/ }"
+      if [ "$2" == "install" ]; then
+        pkg_mgmt_act="install"
+        pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"
+      elif [ "$2" == "reinstall" ]; then
+        pkg_mgmt_act="install --reinstall"
+        pkg_mgmt_title="$ACT_PKG_REINSTALL: $pkgvars"
+      elif [ "$2" == "update" ]; then
+        pkg_mgmt_act="update"
+        pkg_mgmt_title="$ACT_PKG_UPDATE: $pkgvars"
+      elif [ "$2" == "remove" ]; then
+        pkg_mgmt_act="remove"
+        pkg_mgmt_title="$ACT_PKG_REMOVE: $pkgvars"
+      elif [ "$2" == "repair" ]; then
+        pkg_mgmt_act="repair"
+        pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
+      fi
+
+      hr 3
+      echo -e "\e[1;31m$MSG_PKG_FPTTLSTART $pkg_mgmt_title\e[0m"
+      hr
+      flatpak $pkg_mgmt_act $pkgvars
+      clean_cache "regen"
       hr 3
       echo "$MSG_GEN_PROCCOMP"
       read -p "$MSG_GEN_PRESSENTER..."
@@ -272,6 +356,8 @@ elif [ "$1" == "-u" ]; then
   up_sn=0
   up_db=0
   up_fw=0
+  ccache=0
+
   for arg in "$@"; do
     if [[ "$arg" == *"="* ]]; then
       key="${arg%%=*}"
@@ -283,31 +369,36 @@ elif [ "$1" == "-u" ]; then
   hr 3
   echo -e "\e[1;31m$MSG_UPD_TTLSTART\e[0m"
   if (( up_eo == 1 )); then
+    ccache=1
     hr
     echo -e "\e[1;34m█ EOPKG\e[0m\n"
-    sudo eopkg up && clean_cache
+    sudo eopkg up
   fi
-  if (( up_fp == 1 && has_flatpak == 1 )); then
+  if (( up_fp == 1 && HAS_FLATPAK == 1 )); then
+    ccache=1
     hr
     echo -e "\e[1;34m█ FLATPAK\e[0m\n"
     flatpak update -y
   fi
-  if (( up_sn == 1 && has_snap == 1 )); then
+  if (( up_sn == 1 && HAS_SNAP == 1 )); then
     hr
     echo -e "\e[1;34m█ SNAP\e[0m\n"
     sudo snap refresh
   fi
-  if (( up_db == 1 && has_distrobox == 1 )); then
+  if (( up_db == 1 && HAS_DISTROBOX == 1 )); then
     hr
     echo -e "\e[1;34m█ DISTROBOX\e[0m\n"
     distrobox upgrade -a
   fi
-  if (( up_fw == 1 && has_firmware == 1 )); then
+  if (( up_fw == 1 && HAS_FIRMWARE == 1 )); then
     hr
     echo -e "\e[1;34m█ FIRMWARE\e[0m\n"
-    fwupdmgr refresh --force
-    fwupdmgr get-updates -y > /dev/null
-    fwupdmgr update
+    sudo fwupdmgr refresh --force
+    sudo fwupdmgr get-updates -y > /dev/null
+    sudo fwupdmgr update
+  fi
+  if [ "$ccache" -eq 1 ]; then
+    clean_cache "regen"
   fi
   hr 3
   echo "$MSG_GEN_PROCCOMP"
@@ -319,18 +410,26 @@ elif [ -n "$1" ]; then
   exit 0
 fi
 
-clear
-
 # Launch with a clean cache
-clean_cache "all"
+if [ ! -f "$PA_CACHE_FILE" ] || [ -n "$(find "$PA_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+  clean_cache "regen"
+fi
+clear
 
 while true; do
   clear
   # Main
-  mode=$(printf "$ACT_MAIN_WELCOME\n$ACT_MAIN_LISTAPKGS\n$ACT_MAIN_LISTIPKGS\n$ACT_MAIN_LISTUPKGS\n$ACT_MAIN_UPDATESYS\n$ACT_MAIN_INFORMATION\n$ACT_MAIN_QUIT" | \
+  MAIN_LIST="$ACT_MAIN_WELCOME\n$ACT_MAIN_LISTAPKGS\n$ACT_MAIN_LISTIPKGS\n$ACT_MAIN_LISTUPKGS"
+  if [ "$HAS_FLATPAK" -eq 1 ]; then
+    MAIN_LIST="$MAIN_LIST\n$ACT_MAIN_LISTAFPS\n$ACT_MAIN_LISTIFPS"
+  fi
+  MAIN_LIST="$MAIN_LIST\n$ACT_MAIN_UPDATESYS\n$ACT_MAIN_INFORMATION\n$ACT_MAIN_QUIT"
+
+  mode=$(printf "$MAIN_LIST" | \
     fzf --prompt="" \
         --no-input\
         --disabled\
+        --style="full"\
         --border\
         --border-label="$MSG_APP_NAME - v$SS_VERSION"\
         --footer-border \
@@ -340,41 +439,47 @@ while true; do
         --min-height=30 \
         --wrap \
         --preview 'solseek -ssh {} 2>/dev/null' \
-        --preview-label="$MSG_GEN_HELP"\
+        --preview-label="$MSG_GEN_INFO"\
         --preview-window=right:wrap:70%\
         --reverse)
 
   case "$mode" in
     "$ACT_MAIN_QUIT" | "") exit 0 ;;
     "$ACT_MAIN_LISTIPKGS")
-      solseek_action="li"
+      SS_ACTION="li"
       ;;
     "$ACT_MAIN_LISTAPKGS")
-      solseek_action="la"
+      SS_ACTION="la"
       ;;
     "$ACT_MAIN_LISTUPKGS")
-      solseek_action="lui"
+      SS_ACTION="lui"
       ;;
-    "$ACT_MAIN_UPDATESYS") solseek_action="up" ;;
-    "$ACT_MAIN_INFORMATION") solseek_action="info" ;;
+    "$ACT_MAIN_LISTAFPS")
+      SS_ACTION="laf"
+      ;;
+    "$ACT_MAIN_LISTIFPS")
+      SS_ACTION="lif"
+      ;;
+    "$ACT_MAIN_UPDATESYS") SS_ACTION="up" ;;
+    "$ACT_MAIN_INFORMATION") SS_ACTION="info" ;;
     *) continue ;;
   esac
-  if [ "$solseek_action" = "up" ]; then
+  if [ "$SS_ACTION" = "up" ]; then
 
     upmode_opts="$ACT_UPD_EOPKG"
     # Check with other systems are install that provide update_systems
-    if [ "$has_flatpak" = 1 ]; then
+    if [ "$HAS_FLATPAK" = 1 ]; then
       upmode_opts="$upmode_opts\n$ACT_UPD_FLATPAK"
     fi
-    if [ "$has_snap" = 1 ]; then
+    if [ "$HAS_SNAP" = 1 ]; then
       upmode_opts="$upmode_opts\n$ACT_UPD_SNAP"
     fi
     upmode_opts="$upmode_opts\n$ACT_UPD_ALL"
 
-    if [ "$has_distrobox" = 1 ]; then
+    if [ "$HAS_DISTROBOX" = 1 ]; then
       upmode_opts="$upmode_opts\n$ACT_UPD_DISTROBOX"
     fi
-    if [ "$has_firmware" = 1 ]; then
+    if [ "$HAS_FIRMWARE" = 1 ]; then
       upmode_opts="$upmode_opts\n$ACT_UPD_FIRMWARE"
 
     fi
@@ -383,8 +488,9 @@ while true; do
 
     upmode=$(printf "$upmode_opts" | \
     fzf --prompt="" \
-        --header="$MSG_UPD_HEADER" \
+        --header="$ACT_MAIN_UPDATESYS" \
         --no-input\
+        --style="full"\
         --disabled\
         --border\
         --border-label="$MSG_APP_NAME - v$SS_VERSION"\
@@ -394,7 +500,7 @@ while true; do
         --height=100% \
         --min-height=30 \
         --preview "solseek -ssh '$ACT_MAIN_UPDATESYS'" \
-        --preview-label="$MSG_GEN_HELP"\
+        --preview-label="$MSG_GEN_INFO"\
         --preview-window=right:wrap:70%\
         --reverse)
 
@@ -409,12 +515,15 @@ while true; do
       "$ACT_GEN_BACK" | "") continue ;;
     esac
 
-    elif [ "$solseek_action" = "info" ]; then
+  elif [ "$SS_ACTION" = "info" ]; then
 
-    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_INFO_INXI\n$ACT_GEN_BACK" | \
+    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_INFO_INXI\n$ACT_INFO_SOLUSSUPPORT\n$ACT_INFO_SOLUSFORUM\n$ACT_INFO_SOLSEEK\n$ACT_INFO_LICENSE\n$ACT_GEN_BACK" | \
     fzf --prompt="" \
+        --header="$ACT_MAIN_INFORMATION" \
+        --header-first\
         --no-input\
         --disabled\
+        --style="full"\
         --border\
         --border-label="$MSG_APP_NAME - v$SS_VERSION"\
         --footer-border \
@@ -436,46 +545,160 @@ while true; do
       "$ACT_INFO_FPLU") solseek -sse "$toolAction" export ;;
       "$ACT_INFO_INXI") solseek -sse "$toolAction" export ;;
       "$ACT_INFO_CHECK") solseek -sse "$toolAction" run ;;
+      "$ACT_INFO_SOLUSSUPPORT") xdg-open "https://github.com/getsolus/packages";;
+      "$ACT_INFO_SOLUSFORUM") xdg-open "https://discuss.getsol.us/" ;;
+      "$ACT_INFO_SOLSEEK") xdg-open "https://github.com/clintre/solseek";;
+      "$ACT_INFO_LICENSE") xdg-open "https://github.com/clintre/solseek?tab=GPL-3.0-1-ov-file" ;;
       *) continue ;;
     esac
+
+  elif [ "$SS_ACTION" = "lif" ] || [ "$SS_ACTION" = "laf" ]; then
+    #Flatpak List
+    if [ ! -f "$FI_CACHE_FILE" ] || [ -n "$(find "$FI_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+        clean_cache "regen"
+    fi
+    #Clean dupes in FP list due to versions
+    sort -u -o "$FA_CACHE_FILE" "$FA_CACHE_FILE"
+
+    #This will be cleaned up. For testing
+    GREEN='\033[32m'
+    RESET='\033[0m'
+
+    if [ "$SS_ACTION" = "lif" ]; then
+      app_list=$(awk -F'\t' -v g="$GREEN" -v r="$RESET" '
+        {
+            app_id = $2
+            app_name = $1
+            # Print all lines in the INSTALLED format
+            printf "%s%s%s 🗹\t%s\n", g, app_name, r, app_id
+        }
+      ' "$FI_CACHE_FILE" | LANG=C sort)
+      pkg_list_type="$ACT_MAIN_LISTIFPS"
+    else
+      app_list=$(awk -F'\t' -v g="$GREEN" -v r="$RESET" '
+          NR==FNR { installed[$2] = 1; next }
+          {
+              app_id = $2
+              app_name = $1
+
+              if (app_id in installed) {
+                  # INSTALLED: Print with name, green color, and checkmark
+                  printf "%s%s%s 🗹\t%s\n", g, app_name, r, app_id
+              } else {
+                  # AVAILABLE: Print normally
+                  printf "%s\t%s\n", app_name, app_id
+              }
+          }
+      ' "$FI_CACHE_FILE" <(tail -n +2 "$FA_CACHE_FILE"))
+      pkg_list_type="$ACT_MAIN_LISTAFPS"
+    fi
+    pkg=$(echo "$app_list" | \
+      fzf --ansi \
+          --with-nth=1..-2 \
+          --style="full"\
+          --header="$pkg_list_type"\
+          --header-first\
+          --border\
+          --border-label="$MSG_APP_NAME - v$SS_VERSION"\
+          --prompt="$MSG_PKG_PROMPT: " \
+          --footer-border \
+          --footer-label="$MSG_FTR_MS" \
+          --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
+          --highlight-line\
+          --height=100% \
+          --min-height=30 \
+          --multi \
+          --reverse \
+          --preview 'appstreamcli get --details {-1}' \
+          --preview-label="$MSG_GEN_INFO" \
+          --preview-window=right:wrap:70%)
+
+    # Return to main menu
+    [ -z "$pkg" ] && continue
+
+    package=$(echo "$pkg" | awk '{print $NF}')
+
+    if grep -q "$package" "$FI_CACHE_FILE"; then
+        pkg_status="Installed"
+        pkg_options="Reinstall\nRemove\nBack"
+        pkg_options="$ACT_PKG_REINSTALL\n$ACT_PKG_UPDATE\n$ACT_PKG_REPAIR\n$ACT_PKG_REMOVE\n$ACT_GEN_BACK"
+    else
+        pkg_status="Available"
+        pkg_options="$ACT_PKG_INSTALL\n$ACT_GEN_BACK"
+    fi
+    package="${package//$'\n'/ }"
+    # PACKAGE ACTION
+    pkgAction=$(printf "$pkg_options" | \
+        fzf --prompt="$MSG_PKG_FPSEL" \
+            --no-input\
+            --disabled\
+            --style="full"\
+            --border\
+            --border-label="$MSG_APP_NAME - v$SS_VERSION"\
+            --header="$MSG_PKG_FPSEL" \
+            --footer-border \
+            --footer=$"🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK" \
+            --highlight-line\
+            --height=100% \
+            --min-height=30 \
+            --preview "solseek -ssh selpkg '$package'" \
+            --preview-label="$MSG_GEN_INFO"\
+            --preview-window=right:wrap:70%\
+            --reverse)
+    case "$pkgAction" in
+      "$ACT_PKG_INSTALL") solseek -ssf install "$package" ;;
+      "$ACT_PKG_REINSTALL") solseek -ssf reinstall "$package" ;;
+      "$ACT_PKG_REMOVE") solseek -ssf remove "$package" ;;
+      "$ACT_PKG_REPAIR") solseek -ssf repair "$package" ;;
+      "$ACT_PKG_UPDATE") solseek -ssf update "$package" ;;
+      "$ACT_GEN_BACK" | "") continue ;;
+    esac
+
   else
     # PACKAGE LIST
     if [ ! -f "$PI_CACHE_FILE" ] || [ -n "$(find "$PI_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
-        eopkg li 2>/dev/null | awk 'NR>2 {print $1}' > "$PI_CACHE_FILE"
+        clean_cache "regen"
     fi
 
-    if [ "$solseek_action" = "lui" ]; then
+    if [ "$SS_ACTION" = "lui" ]; then
       if [ ! -f "$PU_CACHE_FILE" ] || [ -n "$(find "$PU_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
-          eopkg li -e 2>/dev/null | awk 'NR>2 {print $1}' > "$PU_CACHE_FILE"
+          clean_cache "regen"
       fi
       package_list=$(
-        awk '{print "\033[32m" $1 " 🗹\033[0m"}' "$PU_CACHE_FILE"
+        awk '{print "\033[32m" $1 "\033[0m 🗹"}' "$PU_CACHE_FILE"
       )
-      pkg_list_type="$MSG_PKG_LTYPE_USR"
+      pkg_list_type="$ACT_MAIN_LISTUPKGS"
     else
-      if [ "$solseek_action" = "la" ]; then
+      if [ "$SS_ACTION" = "la" ]; then
         if [ ! -f "$PA_CACHE_FILE" ] || [ -n "$(find "$PA_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
-          eopkg la -U 2>/dev/null | awk 'NR>2 {print $1}' > "$PA_CACHE_FILE"
+          clean_cache "regen"
         fi
+
         package_list=$(
           {
-            awk '{print "\033[32m" $1 " 🗹\033[0m"}' "$PI_CACHE_FILE"
-            grep -vxFf "$PI_CACHE_FILE" "$PA_CACHE_FILE"
-          } | sort -ud
+            awk '{print $1 "\t\033[32m" $1 "\033[0m 🗹"}' "$PI_CACHE_FILE"
+
+            grep -vxFf "$PI_CACHE_FILE" "$PA_CACHE_FILE" | awk '{print $1 "\t" $1}'
+          } | \
+          sort -k1,1 -u | \
+          cut -f2-
         )
-        pkg_list_type="$MSG_PKG_LTYPE_ALL"
+
+        pkg_list_type="$ACT_MAIN_LISTAPKGS"
       else
         package_list=$(
-          awk '{print "\033[32m" $1 " 🗹\033[0m"}' "$PI_CACHE_FILE"
+          awk '{print "\033[32m" $1 "\033[0m 🗹"}' "$PI_CACHE_FILE"
         )
-        pkg_list_type="$MSG_PKG_LTYPE_INS"
+        pkg_list_type="$ACT_MAIN_LISTIPKGS"
       fi
     fi
 
     pkg=$(echo "$package_list" | \
       fzf --ansi \
+          --style="full"\
           --border\
-          --header="$MSG_PKG_HEADER: $pkg_list_type"\
+          --header="$pkg_list_type"\
+          --header-first\
           --border-label="$MSG_APP_NAME - v$SS_VERSION"\
           --prompt="$MSG_PKG_PROMPT: " \
           --footer-border \
@@ -488,7 +711,7 @@ while true; do
           --multi \
           --reverse \
           --preview 'solseek -ssi {1}' \
-          --preview-label="$MSG_PKG_LABEL" \
+          --preview-label="$MSG_GEN_INFO" \
           --preview-window=right:wrap:70%)
 
     # Return to main menu
@@ -504,12 +727,14 @@ while true; do
         pkg_status="$MSG_GEN_AVAILABLE"
         pkg_options="$ACT_PKG_INSTALL\n$ACT_GEN_BACK"
     fi
+
     package="${package//$'\n'/ }"
     # PACKAGE ACTION
     pkgAction=$(printf "$pkg_options" | \
         fzf --prompt="$MSG_PKGACT_PROMPT: " \
             --no-input\
             --disabled\
+            --style="full"\
             --border\
             --border-label="$MSG_APP_NAME - v$SS_VERSION"\
             --header="$MSG_GEN_SEL" \
@@ -531,6 +756,5 @@ while true; do
       "$ACT_PKG_UPDATE") solseek -ssp update "$package" ;;
       "$ACT_GEN_BACK" | "") continue ;;
     esac
-
   fi
 done
