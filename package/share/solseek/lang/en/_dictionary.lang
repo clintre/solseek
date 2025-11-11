@@ -49,7 +49,7 @@ MSG_UPD_NONE="None"
 MSG_UPD_SYSTEM="System"
 MSG_UPD_FLATPAK="Flatpak"
 MSG_UPD_AVAIL_UPD="Available Updates"
-MSG_UPD_TTLSTART="Starting System Update"
+MSG_UPD_TTLSTART="Starting System Update\nDiscombobulating update matrix..."
 MSG_UPD_HEADER="Update Options"
 
 ACT_GEN_BACK="Back"
