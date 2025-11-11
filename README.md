@@ -9,7 +9,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 <p align="center">Click image below to see a short demo video</p>
 
-[![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://www.youtube.com/watch?v=qAFCz32Buvw)
+[![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://youtu.be/6WesNbTb_Sk)
 
 ## Features
   - Select and install multiple packages at once
