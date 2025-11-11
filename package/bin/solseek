@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.3.1"
+SS_VERSION="0.3.2"
 
 #Create cache directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -19,7 +19,7 @@ else
 fi
 # Cache settings
 # Cache expires time in minutes - will move to config file later to override this if set
-SS_CACHE_EXPIRES=15
+SS_CACHE_EXPIRES=10
 PA_CACHE_FILE="$HOME/.cache/solseek/apackages"
 PI_CACHE_FILE="$HOME/.cache/solseek/ipackages"
 PU_CACHE_FILE="$HOME/.cache/solseek/upackages"
@@ -50,6 +50,41 @@ if command -v "fastfetch" &> /dev/null; then
   HAS_FASTFETCH=1
 fi
 
+check_updates(){
+  UPCNT_SOLUS_STBL=`pkcon get-updates --plain | grep -i -c "(Solus)"`
+  UPCNT_SOLUS_USTBL=`pkcon get-updates --plain | grep -i -c "(Unstable)"`
+
+  if [ "$HAS_FLATPAK" -eq 1 ]; then
+    UPCNT_FP=`flatpak remote-ls --updates | wc -l`
+  else
+    UPCNT_FP=0
+  fi
+
+  HASUP=0
+  UPCNT_SOLUS=0
+  UPMSG_FP=""
+
+  if [ "$UPCNT_SOLUS_STBL" -gt 0 ]; then
+    HASUP=1
+    UPCNT_SOLUS=$UPCNT_SOLUS_STBL
+  elif [ "$UPCNT_SOLUS_USTBL" -gt 0 ]; then
+    HASUP=1
+    UPCNT_SOLUS=$UPCNT_SOLUS_USTBL
+  fi
+
+  if [ "$UPCNT_FP" -gt 0 ]; then
+    HASUP=1
+    UPMSG_FP="| $MSG_UPD_FLATPAK: $UPCNT_FP"
+  fi
+
+  if [ "$HASUP" -eq 1 ]; then
+    UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
+  else
+    UPMSG="$MSG_UPD_NONE"
+  fi
+    echo "$UPMSG" > "$UP_CACHE_FILE"
+}
+
 clean_cache(){
     if [ -f "$PI_CACHE_FILE" ]; then
       rm -f "$PI_CACHE_FILE"
@@ -79,6 +114,7 @@ clean_cache(){
         fi
         flatpak remote-ls --app flathub --columns=name,application > "$FA_CACHE_FILE" &
       fi
+      check_updates &
       eopkg li 2>/dev/null | awk 'NR>2 {print $1}' > "$PI_CACHE_FILE" &
       eopkg li -e 2>/dev/null | awk 'NR>2 {print $1}' > "$PU_CACHE_FILE" &
       eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1}' > "$PA_CACHE_FILE"
@@ -109,38 +145,7 @@ if [ "$1" == "-ssh" ]; then
     "$ACT_MAIN_UPDATESYS" | "$ACT_MAIN_WELCOME")
 
       if [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
-        UPCNT_SOLUS_STBL=`pkcon get-updates --plain | grep -i -c "(Solus)"`
-        UPCNT_SOLUS_USTBL=`pkcon get-updates --plain | grep -i -c "(Unstable)"`
-
-        if [ "$HAS_FLATPAK" -eq 1 ]; then
-          UPCNT_FP=`flatpak remote-ls --updates | wc -l`
-        else
-          UPCNT_FP=0
-        fi
-
-        HASUP=0
-        UPCNT_SOLUS=0
-        UPMSG_FP=""
-
-        if [ "$UPCNT_SOLUS_STBL" -gt 0 ]; then
-          HASUP=1
-          UPCNT_SOLUS=$UPCNT_SOLUS_STBL
-        elif [ "$UPCNT_SOLUS_USTBL" -gt 0 ]; then
-          HASUP=1
-          UPCNT_SOLUS=$UPCNT_SOLUS_USTBL
-        fi
-
-        if [ "$UPCNT_FP" -gt 0 ]; then
-          HASUP=1
-          UPMSG_FP="| $MSG_UPD_FLATPAK: $UPCNT_FP"
-        fi
-
-        if [ "$HASUP" -eq 1 ]; then
-          UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP\n"
-        else
-          UPMSG="$MSG_UPD_NONE\n"
-        fi
-          echo "$UPMSG" > "$UP_CACHE_FILE"
+        check_updates
       fi
 
       UPMSG="$(<$UP_CACHE_FILE)"
@@ -150,7 +155,7 @@ if [ "$1" == "-ssh" ]; then
     "$ACT_MAIN_LISTAPKGS" | "$ACT_MAIN_LISTIPKGS" | "$ACT_MAIN_LISTUPKGS" | "$ACT_MAIN_LISTAFPS" | "$ACT_MAIN_LISTIFPS")
       printf "$(<$SS_LANG_PATH/list.txt )" ;;
     "$ACT_MAIN_UPDATESYS")
-      printf "󰏖 $MSG_UPD_AVAIL_UPD: $UPMSG"
+      printf "$MSG_UPD_AVAIL_UPD: $UPMSG\n"
       hr
       printf "$(<$SS_LANG_PATH/update_system.txt )" ;;
     "$ACT_PKG_REINSTALL"  | "$ACT_PKG_REMOVE" | "$ACT_PKG_CHECK" | "$ACT_PKG_UPDATE")
@@ -162,7 +167,7 @@ if [ "$1" == "-ssh" ]; then
     "$ACT_MAIN_INFORMATION")
       printf "$(<$SS_LANG_PATH/information.txt )" ;;
     "$ACT_MAIN_WELCOME")
-      printf "󰏖 $MSG_UPD_AVAIL_UPD: $UPMSG"
+      printf "$MSG_UPD_AVAIL_UPD: $UPMSG\n"
       hr
       if [ "$HAS_FASTFETCH" -eq 1 ]; then
         fastfetch -c /usr/share/solseek/solseek_fastfetch.jsonc 2>/dev/null
@@ -415,9 +420,7 @@ elif [ -n "$1" ]; then
 fi
 
 # Launch with a clean cache
-if [ ! -f "$PA_CACHE_FILE" ] || [ -n "$(find "$PA_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
-  clean_cache "regen"
-fi
+clean_cache "regen"
 clear
 
 while true; do
