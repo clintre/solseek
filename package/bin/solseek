@@ -51,6 +51,19 @@ if command -v "fastfetch" &> /dev/null; then
 fi
 
 check_updates(){
+
+  HASUP=0
+  UPCNT_SOLUS=0
+  UPMSG_FP=""
+  NOTI_LVL="normal"
+
+  # If called from the systemctl service, set to critical
+  if [ "$1" == "system" ]; then
+    NOTI_LVL="critical"
+  fi
+  # Make sure we are getting the latest
+  pkcon refresh &> /dev/null
+
   UPCNT_SOLUS_STBL=`pkcon get-updates --plain | grep -i -c "(Solus)"`
   UPCNT_SOLUS_USTBL=`pkcon get-updates --plain | grep -i -c "(Unstable)"`
 
@@ -59,10 +72,6 @@ check_updates(){
   else
     UPCNT_FP=0
   fi
-
-  HASUP=0
-  UPCNT_SOLUS=0
-  UPMSG_FP=""
 
   if [ "$UPCNT_SOLUS_STBL" -gt 0 ]; then
     HASUP=1
@@ -79,6 +88,7 @@ check_updates(){
 
   if [ "$HASUP" -eq 1 ]; then
     UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
+    notify-send --app-name="Solseek" --urgency="$NOTI_LVL" -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
   else
     UPMSG="$MSG_UPD_NONE"
   fi
@@ -140,6 +150,12 @@ case "$1" in
   exit 0
   ;;
 esac
+# System service update check
+if [ "$1" == "-cu" ]; then
+  check_updates "system"
+  exit 0
+fi
+# Internal calls
 if [ "$1" == "-ssh" ]; then
   case "$2" in
     "$ACT_MAIN_UPDATESYS" | "$ACT_MAIN_WELCOME")
@@ -208,6 +224,9 @@ elif [ "$1" == "-sse" ]; then
       sse_type="inxi" ;;
   "$ACT_INFO_SOLUSSUPPORT" | "$ACT_INFO_SOLUSFORUM" | "$ACT_INFO_SOLSEEK" | "$ACT_INFO_LICENSE")
       echo "$MSG_INFO_OPENWEB"
+      exit 0 ;;
+  "────────────────────")
+      echo " "
       exit 0 ;;
   esac
 
@@ -524,7 +543,7 @@ while true; do
 
   elif [ "$SS_ACTION" = "info" ]; then
 
-    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_INFO_INXI\n$ACT_INFO_SOLUSSUPPORT\n$ACT_INFO_SOLUSFORUM\n$ACT_INFO_SOLSEEK\n$ACT_INFO_LICENSE\n$ACT_GEN_BACK" | \
+    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_INFO_INXI\n────────────────────\n$ACT_INFO_SOLUSSUPPORT\n$ACT_INFO_SOLUSFORUM\n$ACT_INFO_SOLSEEK\n$ACT_INFO_LICENSE\n$ACT_GEN_BACK" | \
     fzf --prompt="" \
         --header="$ACT_MAIN_INFORMATION" \
         --header-first\
