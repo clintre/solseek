@@ -24,7 +24,6 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 ## Planned
   - Additional languages (looking for help on this)
-  - Clean Package Cache
   - Common package repair tools
   - Recipes for common installs on Solus (Nvidia, Distrobox, etc)
 
