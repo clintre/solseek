@@ -53,7 +53,7 @@ sudo eopkg it solseek
     - Single left click to view entry
     - Double left click to execute/select entry
     - <kbd>CTRL</kbd>+left click to select multiple items
-### Config
+### Config (version 0.3.3+)
 If you need or will like to change settings.
 ```bash
 mkdir -p ~/.config/solseek
