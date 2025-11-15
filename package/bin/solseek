@@ -122,7 +122,7 @@ clean_cache(){
           touch "$FI_CACHE_FILE"
           echo "Empty	empty" > "$FI_CACHE_FILE"
         fi
-        flatpak remote-ls --app flathub --columns=name,application > "$FA_CACHE_FILE" &
+        flatpak remote-ls --app --system flathub --columns=name,application > "$FA_CACHE_FILE" &
       fi
       check_updates &
       eopkg li 2>/dev/null | awk 'NR>2 {print $1}' > "$PI_CACHE_FILE" &
