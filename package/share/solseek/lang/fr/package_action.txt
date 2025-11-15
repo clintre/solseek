@@ -1,0 +1,14 @@
+Opérations disponibles sur les paquets
+
+Paquets installés
+
+    - Réinstaller : lance sudo eopkh it --reinstall <paquet>
+    - Mise à jour : lance sudo eopkg up <paquet>
+    - Vérification : lance sudo eopkg check <paquet>
+    - Supprimer : lance sudo eopkg rm <paquet>
+
+
+Paquets disponibles
+
+    - Installation : lance sudo eopkg it <paquet>
+

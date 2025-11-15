@@ -1,0 +1,29 @@
+Mise à jour du système
+
+Vérifie et effectue les mises à jour
+
+N'affichera que les options prises en charge qui sont installées.
+Pris en charge : eopkg, flatpak, snap, distrobox, fwupdmgr.
+
+    - Mise à jour des paquets système
+        - Lance : sudo eopkg up
+
+    - Mise à jour des Flatpaks (si installés)
+        - Lance : flatpak update
+
+    - Mise à jour des Snaps (si installés)
+        - Lance : sudo snap refresh
+
+    - Mise à jour de tous les types de paquets
+        - Lance : eopkg, flatpak, and snap updates (si installés)
+
+    - Mise à jour de Distrobox (si installé)
+        - Lance : distrobox upgrade -a
+
+    - Mise à jour des micrologiciels (firmware) (si installé)
+        - Lance : fwupdmgr refresh --force
+                  fwupdmgr get-updates -y > /dev/null
+                  fwupdmgr update
+
+    - Mise à jour de tout
+        - Comme c'est écrit, en fonction de ce qui est installé

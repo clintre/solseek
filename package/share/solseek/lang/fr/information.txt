@@ -1,0 +1,9 @@
+Outils d'informations sur le système & les paquets
+
+Affiche et exporte les informations relatives au système et aux paquets, notamment ...
+
+    - Historique (eopkg)
+    - Paquets installés (eopkg & flatpak)
+    - Configuration du dépot (eopkg)
+    - Vérification des paquets (eopkg)
+    - Vérification du système (inxi -b)
