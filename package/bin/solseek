@@ -1,12 +1,21 @@
 #!/bin/bash
-SS_VERSION="0.3.2"
+SS_VERSION="0.3.3"
 
-#Create cache directory if it does'nt exist
+#Create cache/config directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
+mkdir -p "$HOME/.config/solseek"
 
 SS_DATA_PATH="/usr/share/solseek"
-# Get Language
-SS_LANG=${LANG:0:2}
+# Defaults
+# SS_LANG=${LANG:0:2} temp disabling as testing languages
+SS_LANG="en"
+SS_FASTFETCH=1
+
+# Check for local config
+if [ -f "$HOME/.config/solseek/config" ]; then
+  . "$HOME/.config/solseek/config"
+fi
+
 SS_LANG_PATH="$SS_DATA_PATH/lang/$SS_LANG"
 
 if [ ! -d "$SS_LANG_PATH" ]; then
@@ -48,6 +57,13 @@ if command -v "fwupdmgr" &> /dev/null; then
 fi
 if command -v "fastfetch" &> /dev/null; then
   HAS_FASTFETCH=1
+  SS_FASTFETCH_CFG="solseek_fastfetch.jsonc"
+  ## Check for config override
+  if [ "$SS_FASTFETCH" -eq 2 ]; then
+    SS_FASTFETCH_CFG="solseek_fastfetch_str.jsonc"
+  elif [ "$SS_FASTFETCH" -eq 0 ]; then
+    HAS_FASTFETCH=0
+  fi
 fi
 
 check_updates(){
@@ -186,7 +202,7 @@ if [ "$1" == "-ssh" ]; then
       printf "$MSG_UPD_AVAIL_UPD: $UPMSG\n"
       hr
       if [ "$HAS_FASTFETCH" -eq 1 ]; then
-        fastfetch -c /usr/share/solseek/solseek_fastfetch.jsonc 2>/dev/null
+        fastfetch -c /usr/share/solseek/"$SS_FASTFETCH_CFG" 2>/dev/null
         hr
       fi
       printf "$(<$SS_LANG_PATH/welcome.txt )" ;;
@@ -351,10 +367,10 @@ elif [ "$1" == "-ssf" ]; then
   else
       pkgvars="${3//$'\n'/ }"
       if [ "$2" == "install" ]; then
-        pkg_mgmt_act="install"
+        pkg_mgmt_act="install --system"
         pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"
       elif [ "$2" == "reinstall" ]; then
-        pkg_mgmt_act="install --reinstall"
+        pkg_mgmt_act="install --reinstall --system"
         pkg_mgmt_title="$ACT_PKG_REINSTALL: $pkgvars"
       elif [ "$2" == "update" ]; then
         pkg_mgmt_act="update"
