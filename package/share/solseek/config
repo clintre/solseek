@@ -1,0 +1,9 @@
+## Config Override Options
+## Lines that start with # are not used
+## Overrides auto language setting
+SS_LANG="en"
+
+## Fastfetch Options - If fastfetch is installed
+## 0 = disabled | 1 = (default) Enabled with icons key type | 2 = Enabled with string key type
+## If not using a nerd font or having issues with the key icons displaying, set to 2
+SS_FASTFETCH=1
