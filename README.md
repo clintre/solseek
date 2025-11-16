@@ -39,6 +39,10 @@ sudo eopkg it solseek
 ```
 
 ## Usage
+### Recommendations
+- Use Nerd Font for overall best experience. Newer fonts like Adwaita Mono will often work as well. Not required. Solus has font-firacode-nerd in the repo which is a nice font or many more are available [here](https://www.nerdfonts.com/).
+- Set default terminal size to at least 125x30 for best experience. Wider is better for the information pane.
+
 ### Launching Solseek
   - Desktop menu entry Solseek
   - Terminal `solseek`
