@@ -7,6 +7,8 @@ MSG_DEP_FZF_INTN="Installation interrompue par l'utilisateur."
 MSG_DEP_FZF_INTI="Entrée invalide. Arrêt."
 
 MSG_GEN_PRESSENTER="Presser [Entrée] pour revenir"
+MSG_GEN_PRESSENTERREB="Presser [Entrée] pour revenir ou [R] pour redémarrer le système"
+MSG_GEB_REBOOTIN="Redémarrage dans"
 MSG_GEN_BACK="Retour au menu principal"
 MSG_GEN_EXIT="Quitter Solseek"
 MSG_GEN_EXPTO="Exporter vers"
