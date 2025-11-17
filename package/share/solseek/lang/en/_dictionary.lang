@@ -7,6 +7,8 @@ MSG_DEP_FZF_INTN="Installation aborted by user."
 MSG_DEP_FZF_INTI="Invalid input. Aborting."
 
 MSG_GEN_PRESSENTER="Press [Enter] to return"
+MSG_GEN_PRESSENTERREB="Press [Enter] to return or [R] to Reboot system"
+MSG_GEB_REBOOTIN="Rebooting in"
 MSG_GEN_BACK="Back to main menu"
 MSG_GEN_EXIT="Exit Solseek"
 MSG_GEN_EXPTO="Exported to"
