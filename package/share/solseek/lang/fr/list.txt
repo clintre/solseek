@@ -16,7 +16,7 @@ Guide
     - Lister tous les Flatpaks : Montre tous les Flatpaks présents sur flathub
     - Lister les Flatpaks installés : Montre seulement les Flatpaks installés
     - Commencer à taper pour rechercher dans la liste
-    - Utiliser les flêches haut/bas sur le clavier ou faire défiler avec la souris/pavé tactile
+    - Utiliser les flèches haut/bas sur le clavier ou faire défiler avec la souris/pavé tactile
     - Pour sélectionner un paquet, appuyer sur [Entrée] ou double-cliquer avec la souris
 
 Notes
