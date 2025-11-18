@@ -1,3 +1,4 @@
+# This file is distributed under the same license as the solseek package.
 MSG_APP_NAME="Solseek"
 MSG_DEP_EOPKG_ERROR="Error: eopkg not found! Aborting"
 MSG_DEP_FZF_ERROR="Error: The required package fzf is not installed!"
