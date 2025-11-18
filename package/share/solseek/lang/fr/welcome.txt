@@ -4,13 +4,13 @@ Les fonctionnalités principales de cette version sont ...
     - Lister les paquets (recherche et gestion des paquets)
     - Gérer les paquets (installation, mise à jour, vérification, suppression)
     - Mettre à jour le système (eopkg, flatpak, snap, distrobox, micrologiciel (firmware))
-    - Afficher et exporter la configuration et les informations du sytème
+    - Afficher et exporter la configuration et les informations du système
     - Wrapper eopkg (ex : sudo solseek up = sudo eopkg up)
 
 * Pour le moment sont supportés eopkg et flatpak
 
-Navigation and controles
-    🡙 Flêches haut/bas / Roulette de la souris pour naviguer dans les listes
+Navigation et contrôles
+    🡙 Flèches haut/bas / Roulette de la souris pour naviguer dans les listes
     ⏎ [ENTRÉE] / Double Click pour sélectionner
     - Shift-Tab / Ctrl-Gauche du bouton de la souris pour effectuer une sélection multiple
     - Ctrl-C / [ÉCHAP] pour revenir à la fenêtre précédente
