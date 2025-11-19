@@ -1,4 +1,0 @@
-Runs: sudo eopkg check against all packages.
-
-A cryptographic checksum is stored for each installed
-file. The check command uses the checksums to verify packages.
