@@ -19,12 +19,12 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - View and export installed packages for eopkg and flatpak (all and/or user installed)
   - View system configurations
 
-## Known Limitations
-  - Currently only in English
+## Known Limitations / Issues
+  - Currently only in English and French
+  - Some minor navigation issues around using fzf for the UX. [example](https://github.com/clintre/solseek/issues/15) (not fzf fault, this is outside of its original design)
 
 ## Planned
   - Additional languages (looking for help on this)
-  - Common package repair tools
   - Recipes for common installs on Solus (Nvidia, Distrobox, etc)
 
 ## Requirements
