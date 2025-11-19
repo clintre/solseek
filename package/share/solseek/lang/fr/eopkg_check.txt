@@ -1,5 +1,0 @@
-Lance : sudo eopkg check pour tous les paquets.
-
-Une somme de contrôle cryptographique est stockée pour chaque fichier
-installé. La commande check utilise les sommes de contrôle pour vérifier les paquets.
-
