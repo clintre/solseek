@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.3.3"
+SS_VERSION="0.4.0"
 
 #Create cache/config directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -35,6 +35,7 @@ PU_CACHE_FILE="$HOME/.cache/solseek/upackages"
 FA_CACHE_FILE="$HOME/.cache/solseek/aflatpaks"
 FI_CACHE_FILE="$HOME/.cache/solseek/iflatpaks"
 UP_CACHE_FILE="$HOME/.cache/solseek/updatemsg"
+UL_CACHE_FILE="$HOME/.cache/solseek/updatelst"
 
 #Supported Update Systems
 HAS_FLATPAK=0
@@ -70,23 +71,26 @@ check_updates(){
 
   HASUP=0
   UPCNT_SOLUS=0
+  UPCNT_FP=0
   UPMSG_FP=""
   NOTI_LVL="normal"
+  NOTI_ID=""
 
   # If called from the systemctl service, set to critical
   if [ "$1" == "system" ]; then
     NOTI_LVL="critical"
+    NOTI_ID="--replace-id=11111"
   fi
+
   # Make sure we are getting the latest
-  pkcon refresh &> /dev/null
+  pkcon refresh force &> /dev/null
 
   UPCNT_SOLUS_STBL=`pkcon get-updates --plain | grep -i -c "(Solus)"`
   UPCNT_SOLUS_USTBL=`pkcon get-updates --plain | grep -i -c "(Unstable)"`
 
+
   if [ "$HAS_FLATPAK" -eq 1 ]; then
     UPCNT_FP=`flatpak remote-ls --updates | wc -l`
-  else
-    UPCNT_FP=0
   fi
 
   if [ "$UPCNT_SOLUS_STBL" -gt 0 ]; then
@@ -104,7 +108,7 @@ check_updates(){
 
   if [ "$HASUP" -eq 1 ]; then
     UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
-    notify-send --app-name="Solseek" --urgency="$NOTI_LVL" -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+    notify-send --app-name="Solseek" --urgency="$NOTI_LVL" "$NOTI_ID" -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
   else
     UPMSG="$MSG_UPD_NONE"
   fi
@@ -185,19 +189,29 @@ if [ "$1" == "-ssh" ]; then
   esac
   case "$2" in
     "$ACT_MAIN_LISTAPKGS" | "$ACT_MAIN_LISTIPKGS" | "$ACT_MAIN_LISTUPKGS" | "$ACT_MAIN_LISTAFPS" | "$ACT_MAIN_LISTIFPS")
-      printf "$(<$SS_LANG_PATH/list.txt )" ;;
+      printf "$(<$SS_LANG_PATH/list.txt )" | fold -s -w 80 2>/dev/null ;;
     "$ACT_MAIN_UPDATESYS")
       printf "$MSG_UPD_AVAIL_UPD: $UPMSG\n"
+      hr
+      printf "Solus:\n"
+      eopkg lu 2>/dev/null
+      if [ "$HAS_FLATPAK" -eq 1 ]; then
+        FP_UPLIST=$(flatpak remote-ls --updates)
+        if [ -n "$FP_UPLIST" ]; then
+          printf "Flatpak:\n"
+          echo "$FP_UPLIST"
+        fi
+      fi
       hr
       printf "$(<$SS_LANG_PATH/update_system.txt )" ;;
     "$ACT_PKG_REINSTALL"  | "$ACT_PKG_REMOVE" | "$ACT_PKG_CHECK" | "$ACT_PKG_UPDATE")
       printf "$MSG_PKG_ISTATMSG\n"
-      printf "$(<$SS_LANG_PATH/package_action.txt )" ;;
+      printf "$(<$SS_LANG_PATH/package_action.txt )" | fold -s -w 60 2>/dev/null ;;
     "$ACT_PKG_INSTALL")
       printf "$MSG_PKG_ASTATMSG\n"
-      printf "$(<$SS_LANG_PATH/package_action.txt )" ;;
+      printf "$(<$SS_LANG_PATH/package_action.txt )" | fold -s -w 60 2>/dev/null ;;
     "$ACT_MAIN_INFORMATION")
-      printf "$(<$SS_LANG_PATH/information.txt )" ;;
+      printf "$(<$SS_LANG_PATH/information.txt )" | fold -s -w 60 2>/dev/null ;;
     "$ACT_MAIN_WELCOME")
       printf "$MSG_UPD_AVAIL_UPD: $UPMSG\n"
       hr
@@ -205,7 +219,7 @@ if [ "$1" == "-ssh" ]; then
         fastfetch -c /usr/share/solseek/"$SS_FASTFETCH_CFG" 2>/dev/null
         hr
       fi
-      printf "$(<$SS_LANG_PATH/welcome.txt )" ;;
+      printf "$(<$SS_LANG_PATH/welcome.txt )" | fold -s -w 60 2>/dev/null ;;
     "$ACT_GEN_BACK")
       echo "$MSG_GEN_BACK" ;;
     "selpkg")
@@ -213,7 +227,7 @@ if [ "$1" == "-ssh" ]; then
       hr
       echo "$3"| tr -s ' ' '\n'
       hr
-      printf "$(<$SS_LANG_PATH/package_action.txt )"
+      printf "$(<$SS_LANG_PATH/package_action.txt )" | fold -s -w 60 2>/dev/null
       ;;
     "$ACT_MAIN_QUIT")
       echo "$MSG_GEN_EXIT" ;;
@@ -222,7 +236,18 @@ if [ "$1" == "-ssh" ]; then
   exit 0
 elif [ "$1" == "-ssi" ]; then
   if [ -n "$2" ]; then
-    eopkg info $2 2>/dev/null
+    eopkg info $2 | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}' | fold -s -w 60 2>/dev/null
+
+  else
+    echo "$MSG_GEN_SEL_ITEM"
+  fi
+  exit 0
+elif [ "$1" == "-ssfi" ]; then
+  if [ -n "$2" ]; then
+    #appstreamcli get --details $2 2>/dev/null
+    appstreamcli get --details $2 | awk '/^[^ ]/ { skip = ($0 ~ /^(Identifier|Internal ID|Icon|Bundle|Default Screenshot URL):/) } !skip' | fold -s -w 60 2>/dev/null
+
+
   else
     echo "$MSG_GEN_SEL_ITEM"
   fi
@@ -263,12 +288,44 @@ elif [ "$1" == "-sse" ]; then
       sse_export_fn="$HOME/eopkg_repos.txt"
     elif [ "$2" = "$ACT_INFO_CHECK" ]; then
       if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "$ACT_INFO_CHECK: eopkg check";
+        hr
         sudo eopkg check
+        hr
         read -p "$MSG_GEN_PRESSENTER..."
       else
         echo $MSG_INFO_RUNPVTOP
         hr
-        printf "$(<$SS_LANG_PATH/eopkg_check.txt )"
+        echo -e "$ACT_INFO_CHECK: eopkg check";
+      fi
+      exit 0
+    elif [ "$2" = "$ACT_INFO_ERMO" ]; then
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "$ACT_INFO_ERMO: eopkg remove-orphans";
+        hr
+        sudo eopkg rmo
+        hr
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        echo -e "$ACT_INFO_ERMO: eopkg remove-orphans";
+      fi
+      exit 0
+    elif [ "$2" = "$ACT_INFO_FPCLEAN" ]; then
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "$ACT_INFO_FPCLEAN: flatpak uninstall --unused";
+        hr
+        flatpak uninstall --unused
+        hr
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        echo -e "$ACT_INFO_FPCLEAN: flatpak uninstall --unused";
       fi
       exit 0
     else
@@ -289,7 +346,7 @@ elif [ "$1" == "-sse" ]; then
     else
       echo "$MSG_INFO_EXPPVTOP"
       hr
-      eopkg $sse_cmd 2>/dev/null
+      eopkg $sse_cmd
     fi
   elif [ "$sse_type" = "flatpak" ]; then
     if [ "$2" = "$ACT_INFO_FPLA" ]; then
@@ -446,10 +503,35 @@ elif [ "$1" == "-u" ]; then
   fi
   hr 3
   echo "$MSG_GEN_PROCCOMP"
-  read -p "$MSG_GEN_PRESSENTER..."
+  ##read -p "$MSG_GEN_PRESSENTER..."
+  read -n 1 -p "$MSG_GEN_PRESSENTERREB: " PUCHOICE
+  case "$PUCHOICE" in
+    # This matches either 'R' or 'r' (case-insensitive)
+    [Rr])
+        echo -e "\n\n$MSG_GEB_REBOOTIN..."
+        echo "3"
+        sleep 1
+        echo "2"
+        sleep 1
+        echo "1"
+        sleep 1
+        reboot
+        ;;
+    *)
+        exit 0
+        ;;
+  esac
+
+
   exit 0
+# If a paramater is passed, no matches above, pass off to eopkg
 elif [ -n "$1" ]; then
-  # If a paramater is passed, no matches above, pass off to eopkg
+  # Capture upgrades so we can do both eopkg and flatpak
+  if [ "$1" = "up" ] || [ "$1" = "upgrade" ]; then
+    solseek -u up_eo=1 up_fp=1
+    exit 0
+  fi
+
   eopkg "$@"
   exit 0
 fi
@@ -457,7 +539,7 @@ fi
 # Launch with a clean cache
 clean_cache "regen"
 clear
-
+# Start Interface
 while true; do
   clear
   # Main
@@ -559,7 +641,7 @@ while true; do
 
   elif [ "$SS_ACTION" = "info" ]; then
 
-    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_INFO_INXI\n────────────────────\n$ACT_INFO_SOLUSSUPPORT\n$ACT_INFO_SOLUSFORUM\n$ACT_INFO_SOLSEEK\n$ACT_INFO_LICENSE\n$ACT_GEN_BACK" | \
+    toolAction=$(printf "$ACT_INFO_EHIST\n$ACT_INFO_EINST\n$ACT_INFO_EUSER\n$ACT_INFO_LREPO\n$ACT_INFO_CHECK\n$ACT_INFO_ERMO\n────────────────────\n$ACT_INFO_FPLA\n$ACT_INFO_FPLU\n$ACT_INFO_FPCLEAN\n────────────────────\n$ACT_INFO_INXI\n────────────────────\n$ACT_INFO_SOLUSSUPPORT\n$ACT_INFO_SOLUSFORUM\n$ACT_INFO_SOLSEEK\n$ACT_INFO_LICENSE\n$ACT_GEN_BACK" | \
     fzf --prompt="" \
         --header="$ACT_MAIN_INFORMATION" \
         --header-first\
@@ -587,6 +669,8 @@ while true; do
       "$ACT_INFO_FPLU") solseek -sse "$toolAction" export ;;
       "$ACT_INFO_INXI") solseek -sse "$toolAction" export ;;
       "$ACT_INFO_CHECK") solseek -sse "$toolAction" run ;;
+      "$ACT_INFO_ERMO") solseek -sse "$toolAction" run ;;
+      "$ACT_INFO_FPCLEAN") solseek -sse "$toolAction" run ;;
       "$ACT_INFO_SOLUSSUPPORT") xdg-open "https://github.com/getsolus/packages";;
       "$ACT_INFO_SOLUSFORUM") xdg-open "https://discuss.getsol.us/" ;;
       "$ACT_INFO_SOLSEEK") xdg-open "https://github.com/clintre/solseek";;
@@ -651,7 +735,7 @@ while true; do
           --min-height=30 \
           --multi \
           --reverse \
-          --preview 'appstreamcli get --details {-1}' \
+          --preview 'solseek -ssfi {-1}' \
           --preview-label="$MSG_GEN_INFO" \
           --preview-window=right:wrap:70%)
 
