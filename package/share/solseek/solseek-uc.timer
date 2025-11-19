@@ -1,0 +1,9 @@
+[Unit]
+Description=Run solseek-uc.service every 60 minutes
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
