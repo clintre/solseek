@@ -21,17 +21,10 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 ## Known Limitations / Issues
   - Currently only in English and French
-  - Some minor navigation issues around using fzf for the UX. [example](https://github.com/clintre/solseek/issues/15) (not fzf fault, this is outside of its original design)
 
 ## Planned
   - Additional languages (looking for help on this)
   - Recipes for common installs on Solus (Nvidia, Distrobox, etc)
-
-## Requirements & Installation
-Moved to [Wiki](https://github.com/clintre/solseek/wiki#getting-started)
-
-## Usage
-Moved to [Wiki](https://github.com/clintre/solseek/wiki)
 
 ## Contributing
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
