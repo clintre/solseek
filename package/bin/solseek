@@ -77,6 +77,9 @@ if command -v "fastfetch" &> /dev/null; then
 fi
 
 check_updates(){
+  
+  rm -f "$UL_CACHE_FILE"
+  rm -f "$UP_CACHE_FILE"
 
   HASUP=0
   UPCNT_SOLUS=0
