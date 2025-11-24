@@ -4,6 +4,11 @@
 SS_LANG="en"
 
 ## Fastfetch Options - If fastfetch is installed
-## 0 = disabled | 1 = (default) Enabled with icons key type | 2 = Enabled with string key type
+## 0 = disabled | 1 = Enabled (default) with icons key type | 2 = Enabled with string key type
 ## If not using a nerd font or having issues with the key icons displaying, set to 2
 SS_FASTFETCH=1
+
+## Auto say yes on package and flatpak actions.
+## Warning this will add the flag -y to updates, installs, and other eopkg and flatpak actions
+## 0 = disabled (default) | 1 = enabled
+SS_ASSUMEYES=0
