@@ -186,7 +186,7 @@ clean_cache(){
         fi
 
       fi
-      check_updates &
+      check_updates system &
       eopkg li 2>/dev/null | awk 'NR>2 {print $1 "|" "\033[32m" "⬤ " $1 "\033[0m"}' > "$PI_CACHE_FILE" &
       eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1 "|" "◯ " $1 }' > "$PA_CACHE_FILE"
     fi
