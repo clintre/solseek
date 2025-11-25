@@ -131,8 +131,6 @@ check_updates(){
     if [ "$UPCNT_FP" -gt 0 ]; then
       echo "Flatpak:" >> "$UL_CACHE_FILE"
       flatpak remote-ls --updates --columns=name,version  >> "$UL_CACHE_FILE"
-      echo "\n" >> "$UL_CACHE_FILE"
-      hr >> "$UL_CACHE_FILE"
     fi
   else
     UPMSG="$MSG_UPD_NONE"
@@ -235,9 +233,10 @@ if [ "$1" == "-ssh" ]; then
       hr
       if [ -f "$UL_CACHE_FILE" ]; then
         printf "$(<$UL_CACHE_FILE)"
-        hr
+      else
+        printf "$(<$SS_LANG_PATH/update_system.txt )"
       fi
-      printf "$(<$SS_LANG_PATH/update_system.txt )" ;;
+      ;;
     "AMP_RINST"  | "AMP_REM" | "AMP_SCHK" | "AMP_UPDT")
       printf "$MSG_PKG_ISTATMSG\n"
       printf "$(<$SS_LANG_PATH/package_action.txt )" | fold -s -w 60 2>/dev/null ;;
