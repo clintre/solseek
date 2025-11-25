@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.5.1"
+SS_VERSION="0.5.2"
 
 #Create cache/config directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -120,7 +120,9 @@ check_updates(){
 
   if [ "$HASUP" -eq 1 ]; then
     UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
-    notify-send --app-name="Solseek" --urgency="$NOTI_LVL" "$NOTI_ID" -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+    if [ "$1" == "system" ]; then
+      notify-send --app-name="Solseek" --urgency="$NOTI_LVL" "$NOTI_ID" -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+    fi
     rm -f "$UL_CACHE_FILE"
     touch "$UL_CACHE_FILE"
     echo "Solus:" >> "$UL_CACHE_FILE"
