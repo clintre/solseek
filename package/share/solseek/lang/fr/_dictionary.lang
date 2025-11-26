@@ -6,6 +6,7 @@ MSG_GEN_PRESSENTERREB="Presser [Entrée] pour revenir ou [R] pour redémarrer le
 MSG_GEB_REBOOTIN="Redémarrage dans"
 MSG_GEN_BACK="Retour au menu principal"
 MSG_GEN_EXIT="Quitter Solseek"
+MSG_GEN_RUN="Exécuter"
 MSG_GEN_EXPTO="Exporter vers"
 MSG_GEN_INVPARAM="Paramètre Invalide"
 MSG_GEN_PROCCOMP="Processus Terminé"
