@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.5.2"
+SS_VERSION="0.5.5"
 
 #Create cache/config directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -46,6 +46,16 @@ FI_CACHE_FILE="$HOME/.cache/solseek/iflatpaks"
 UP_CACHE_FILE="$HOME/.cache/solseek/updatemsg"
 UL_CACHE_FILE="$HOME/.cache/solseek/updatelst"
 
+
+## Base Styling
+CSS_BOLDBRIGHT="\033[1m"
+CSS_YELLOW="\033[33m"
+CSS_CYAN="\033[36m"
+CSS_BLUE="\033[34m"
+CSS_GREEN="\033[32m"
+CSS_RED="\033[31m"
+CSS_RESET="\033[0m"
+
 #Supported Update Systems
 HAS_FLATPAK=0
 HAS_SNAP=0
@@ -77,7 +87,7 @@ if command -v "fastfetch" &> /dev/null; then
 fi
 
 check_updates(){
-  
+
   rm -f "$UL_CACHE_FILE"
   rm -f "$UP_CACHE_FILE"
 
@@ -269,13 +279,20 @@ if [ "$1" == "-ssh" ]; then
   exit 0
 elif [ "$1" == "-ssi" ]; then
   if [ -n "$2" ]; then
+
+    if grep -q "$2" "$PI_CACHE_FILE"; then
+      pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
+    else
+      pkg_status="${CSS_YELLOW}$MSG_GEN_AVAILABLE${CSS_RESET}"
+    fi
+
     if [ -n "$3" ]; then
       selpkg_clean=$(echo "${@:3}" | grep -o '[^ ]*|' | tr -d '|')
-      echo -e "$MSG_PKG_SELECTED: $selpkg_clean" | fold -s -w 80 2>/dev/null
+      echo -e "${CSS_BOLDBRIGHT}$MSG_PKG_SELECTED:${CSS_RESET} $selpkg_clean" | fold -s -w 80 2>/dev/null
       hr
-      echo -e "\033[1m> $2 \033[0m\n"
     fi
-    eopkg info $2 | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}' | fold -s -w 60 2>/dev/null
+    echo -e "> $pkg_status\n"
+    eopkg info "$2" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}' | fold -s -w 60 2>/dev/null
 
   else
     echo "$MSG_GEN_SEL_ITEM"
@@ -283,7 +300,19 @@ elif [ "$1" == "-ssi" ]; then
   exit 0
 elif [ "$1" == "-ssfi" ]; then
   if [ -n "$2" ]; then
-    appstreamcli get --details $2 | awk '/^[^ ]/ { skip = ($0 ~ /^(Identifier|Internal ID|Icon|Bundle|Default Screenshot URL):/) } !skip' | fold -s -w 60 2>/dev/null
+    if [ -n "$3" ]; then
+      selpkg_clean=$(echo "${@:3}" | grep -o '[^ ]*|' | tr -d '|')
+      echo -e "${CSS_BOLDBRIGHT}$MSG_PKG_SELECTED:${CSS_RESET}: $selpkg_clean" | fold -s -w 80 2>/dev/null
+      hr
+    fi
+    if grep -q "$2" "$FI_CACHE_FILE"; then
+      pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
+    else
+      pkg_status="${CSS_YELLOW}$MSG_GEN_AVAILABLE${CSS_RESET}"
+    fi
+    echo -e "> $pkg_status\n"
+
+    appstreamcli get --details "$2" | awk '/^[^ ]/ { skip = ($0 ~ /^(Identifier|Internal ID|Icon|Bundle|Default Screenshot URL):/) } !skip' | fold -s -w 60 2>/dev/null
 
   else
     echo "$MSG_GEN_SEL_ITEM"
@@ -296,7 +325,7 @@ elif [ "$1" == "-sse" ]; then
   sse_type="eopkg"
 
   case "$2" in
-  "AMT_FPLA" | "AMT_FPLU")
+  "AMT_FPLA" | "AMT_FPLU" | "AMT_FPCLEAN" | "AMT_FCHECK" | "AMT_FREPO")
       sse_type="flatpak" ;;
   "AMT_INXI")
       sse_type="inxi" ;;
@@ -326,7 +355,7 @@ elif [ "$1" == "-sse" ]; then
     elif [ "$2" = "AMT_ECHECK" ]; then
       if [ "$3" == "run" ]; then
         hr 3
-        echo -e "$ACT_INFO_CHECK: eopkg check";
+        echo -e "$MSG_GEN_RUN: eopkg check";
         hr
         sudo eopkg check
         hr
@@ -334,7 +363,7 @@ elif [ "$1" == "-sse" ]; then
       else
         echo $MSG_INFO_RUNPVTOP
         hr
-        echo -e "$ACT_INFO_CHECK: eopkg check";
+        echo -e "$MSG_GEN_RUN: eopkg check";
       fi
       exit 0
     elif [ "$2" = "AMT_ERMO" ]; then
@@ -349,20 +378,6 @@ elif [ "$1" == "-sse" ]; then
         echo $MSG_INFO_RUNPVTOP
         hr
         echo -e "$ACT_INFO_ERMO: eopkg remove-orphans";
-      fi
-      exit 0
-    elif [ "$2" = "AMT_FPCLEAN" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "$ACT_INFO_FPCLEAN: flatpak uninstall --unused";
-        hr
-        flatpak uninstall --unused
-        hr
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "$ACT_INFO_FPCLEAN: flatpak uninstall --unused";
       fi
       exit 0
     else
@@ -386,13 +401,45 @@ elif [ "$1" == "-sse" ]; then
       eopkg $sse_cmd
     fi
   elif [ "$sse_type" = "flatpak" ]; then
+    if [ "$2" = "AMT_FPCLEAN" ]; then
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "$ACT_INFO_CHECK: flatpak uninstall --unused";
+        hr
+        flatpak uninstall --unused
+        hr
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        echo -e "$ACT_INFO_CHECK: flatpak uninstall --unused";
+      fi
+      exit 0
+    elif [ "$2" = "AMT_FCHECK" ]; then
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "$MSG_GEN_RUN: flatpak repair";
+        hr
+        flatpak repair
+        hr
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        echo -e "$MSG_GEN_RUN: flatpak repair";
+      fi
+      exit 0
+    fi
     if [ "$2" = "AMT_FPLA" ]; then
-      sse_cmd="list"
+      sse_cmd="list --columns=name,version"
       sse_export_fn="$HOME/flatpak_all_installed.txt"
       sse_sudo=1
     elif [ "$2" = "AMT_FPLU" ]; then
-      sse_cmd="list --app"
+      sse_cmd="list --app --columns=name,version"
       sse_export_fn="$HOME/flatpak_user_installed.txt"
+    elif [ "$2" = "AMT_FREPO" ]; then
+      sse_cmd="remotes --show-disabled --columns=name,url,options"
+      sse_export_fn="$HOME/flatpak_remotes.txt"
     fi
     if [ "$3" == "export" ]; then
       flatpak $sse_cmd > $sse_export_fn
@@ -403,7 +450,7 @@ elif [ "$1" == "-sse" ]; then
     else
       echo "$MSG_INFO_EXPPVTOP"
       hr
-      printf "$(flatpak $sse_cmd --columns=name,version 2>/dev/null)"
+      printf "$(flatpak $sse_cmd 2>/dev/null)"
     fi
   elif [ "$sse_type" = "inxi" ]; then
     sse_export_fn="$HOME/inxi_output.txt"
@@ -585,13 +632,6 @@ elif [ -n "$1" ]; then
   exit 0
 fi
 
-#echo -e "\033[1m> $2 \033[0m\n"
-## Base Styling
-CSS_BOLDBRIGHT="\033[1m"
-CSS_GREEN="\033[32m"
-CSS_RED="\033[31m"
-CSS_RESET="\033[0m"
-
 # Include and setup Menus
 . "/usr/share/solseek/menus"
 
@@ -696,12 +736,14 @@ if [ "$ISSA" -eq 1 ]; then
       "AMT_EINST") solseek -sse "$toolAction" export ;;
       "AMT_EUSER") solseek -sse "$toolAction" export ;;
       "AMT_LREPO") solseek -sse "$toolAction" export ;;
-      "AMT_FPLA") solseek -sse "$toolAction" export ;;
-      "AMT_FPLU") solseek -sse "$toolAction" export ;;
-      "AMT_INXI") solseek -sse "$toolAction" export ;;
       "AMT_ECHECK") solseek -sse "$toolAction" run ;;
       "AMT_ERMO") solseek -sse "$toolAction" run ;;
+      "AMT_FPLA") solseek -sse "$toolAction" export ;;
+      "AMT_FPLU") solseek -sse "$toolAction" export ;;
+      "AMT_FREPO") solseek -sse "$toolAction" export ;;
+      "AMT_FCHECK") solseek -sse "$toolAction" run ;;
       "AMT_FPCLEAN") solseek -sse "$toolAction" run ;;
+      "AMT_INXI") solseek -sse "$toolAction" export ;;
       "AMT_WSOLUSSPRT") xdg-open "https://github.com/getsolus/packages";;
       "AMT_WSOLUSFRM") xdg-open "https://discuss.getsol.us/" ;;
       "AMT_WSOLSEEKWIKI") xdg-open "https://github.com/clintre/solseek/wiki";;
@@ -725,7 +767,7 @@ if [ "$ISSA" -eq 1 ]; then
         pkg_list_type="$ACT_MAIN_LISTAPKGS"
       fi
 
-      pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$ACT_UPD_FLATPAK - $pkg_list_type" --preview 'solseek -ssfi {1}')
+      pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$ACT_UPD_FLATPAK - $pkg_list_type" --preview 'solseek -ssfi {1} {+}')
 
       #pkg=${pkg%|*}
       # Return to main menu
