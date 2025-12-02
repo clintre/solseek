@@ -1,5 +1,6 @@
 ## Config Override Options
 ## Lines that start with # are not used
+
 ## Overrides auto language setting
 SS_LANG="en"
 
@@ -12,3 +13,9 @@ SS_FASTFETCH=1
 ## Warning this will add the flag -y to updates, installs, and other eopkg and flatpak actions
 ## 0 = disabled (default) | 1 = enabled
 SS_ASSUMEYES=0
+
+## Use local eopkg-index.xml file for package listing instead of online
+## Warning: This is currently experimental
+## 0 = disabled (default) | 1 = enabled
+## Note: If enabled and the eopkg-index.xml it will fallback to online
+SS_EOPKG_LCACHE=0
