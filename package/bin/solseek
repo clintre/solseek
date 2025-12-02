@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.5.5"
+SS_VERSION="0.6.0"
 
 #Create cache/config directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -11,6 +11,8 @@ SS_DATA_PATH="/usr/share/solseek"
 SS_LANG="en"
 SS_FASTFETCH=1
 SS_ASSUMEYES=0
+SS_EOPKG_LCACHE=0
+SS_SOLUS_REPO=$(eopkg -N list-repo | awk '/\[active\]/ {print $1}')
 
 # Check for local config
 if [ -f "$HOME/.config/solseek/config" ]; then
@@ -33,6 +35,7 @@ if [ ! -f "$SS_LANG_PATH/_dictionary.lang" ]; then
 else
   . "$SS_LANG_PATH/_dictionary.lang"
 fi
+
 # Sub Action switch
 ISSA=0
 
@@ -45,6 +48,7 @@ FA_CACHE_FILE="$HOME/.cache/solseek/aflatpaks"
 FI_CACHE_FILE="$HOME/.cache/solseek/iflatpaks"
 UP_CACHE_FILE="$HOME/.cache/solseek/updatemsg"
 UL_CACHE_FILE="$HOME/.cache/solseek/updatelst"
+UP_LOCK_FILE="$HOME/.cache/solseek/update_lock"
 
 
 ## Base Styling
@@ -85,129 +89,9 @@ if command -v "fastfetch" &> /dev/null; then
     HAS_FASTFETCH=0
   fi
 fi
+# Functions
+. "/usr/share/solseek/functions"
 
-check_updates(){
-
-  rm -f "$UL_CACHE_FILE"
-  rm -f "$UP_CACHE_FILE"
-
-  HASUP=0
-  UPCNT_SOLUS=0
-  UPCNT_FP=0
-  UPMSG_FP=""
-  NOTI_LVL="normal"
-  NOTI_ID=""
-
-  # If called from the systemctl service, set to critical
-  if [ "$1" == "system" ]; then
-    NOTI_LVL="critical"
-    NOTI_ID="--replace-id=11111"
-  fi
-
-  # Make sure we are getting the latest
-  pkcon refresh force &> /dev/null
-
-  UPCNT_SOLUS_STBL=`pkcon get-updates --plain | grep -i -c "(Solus)"`
-  UPCNT_SOLUS_USTBL=`pkcon get-updates --plain | grep -i -c "(Unstable)"`
-
-
-  if [ "$HAS_FLATPAK" -eq 1 ]; then
-    UPCNT_FP=`flatpak remote-ls --updates | wc -l`
-  fi
-
-  if [ "$UPCNT_SOLUS_STBL" -gt 0 ]; then
-    HASUP=1
-    UPCNT_SOLUS=$UPCNT_SOLUS_STBL
-  elif [ "$UPCNT_SOLUS_USTBL" -gt 0 ]; then
-    HASUP=1
-    UPCNT_SOLUS=$UPCNT_SOLUS_USTBL
-  fi
-
-  if [ "$UPCNT_FP" -gt 0 ]; then
-    HASUP=1
-    UPMSG_FP="| $MSG_UPD_FLATPAK: $UPCNT_FP"
-  fi
-
-  if [ "$HASUP" -eq 1 ]; then
-    UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
-    if [ "$1" == "system" ]; then
-      notify-send --app-name="Solseek" --urgency="$NOTI_LVL" "$NOTI_ID" -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
-    fi
-    rm -f "$UL_CACHE_FILE"
-    touch "$UL_CACHE_FILE"
-    echo "Solus:" >> "$UL_CACHE_FILE"
-    eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' >> "$UL_CACHE_FILE"
-    echo "\n" >> "$UL_CACHE_FILE"
-    if [ "$UPCNT_FP" -gt 0 ]; then
-      echo "Flatpak:" >> "$UL_CACHE_FILE"
-      flatpak remote-ls --updates --columns=name,version  >> "$UL_CACHE_FILE"
-    fi
-  else
-    UPMSG="$MSG_UPD_NONE"
-  fi
-    echo "$UPMSG" > "$UP_CACHE_FILE"
-}
-
-clean_cache(){
-    rm -f "$PI_CACHE_FILE"
-    rm -f "$PA_CACHE_FILE"
-    rm -f "$FI_CACHE_FILE"
-    rm -f "$FA_CACHE_FILE"
-    if [ "$1" == "regen" ]; then
-      echo "$MSG_GEN_CACHE"
-      if [ "$HAS_FLATPAK" -eq 1 ]; then
-
-        flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE" &
-
-        flatpak remote-ls --system flathub --columns=application,name | \
-        awk '!seen[$1]++' | \
-        grep -v 'org\.freedesktop\.Platform\.GL32\.nvidia\|org\.freedesktop\.Platform\.GL\.nvidia' | \
-        sed -E 's/\t(.*)/|◯ \1/' | \
-        sort -t '|' -k 2 > "$FA_CACHE_FILE"
-
-        # If the user has no flatpaks installed, lets create an empty entry for FZF
-        if [ ! -s "$FI_CACHE_FILE" ]; then
-          touch "$FI_CACHE_FILE"
-          echo "Empty|Empty" > "$FI_CACHE_FILE"
-          #If it does lets merge the installed entries with available as FP has no command for this
-          else
-          FP_TEMP_FILE=$(mktemp)
-
-          awk -F'|' '
-
-          FNR==NR {
-              # Store the entire line using the first field (Package ID) as the key
-              installed[$1] = $0
-              next
-          }
-
-          $1 in installed {
-              # Print the stored replacement line and skip to the next record
-              print installed[$1]
-              next
-          }
-
-          { print }
-          ' "$FI_CACHE_FILE" "$FA_CACHE_FILE" > "$FP_TEMP_FILE" && mv "$FP_TEMP_FILE" "$FA_CACHE_FILE"
-
-          rm -f "$FP_TEMP_FILE"
-        fi
-
-      fi
-      check_updates system &
-      eopkg li 2>/dev/null | awk 'NR>2 {print $1 "|" "\033[32m" "⬤ " $1 "\033[0m"}' > "$PI_CACHE_FILE" &
-      eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1 "|" "◯ " $1 }' > "$PA_CACHE_FILE"
-    fi
-}
-hr(){
-  line="─"
-  if [ "$1" = "2" ]; then
-    line="═"
-  elif [ "$1" = "3" ]; then
-    line="━"
-  fi
-  printf "%.0s$line" $(seq 1 "$(tput cols)"); echo
-}
 # Help and calls
 case "$1" in
   "-h" | "--help" )
@@ -228,22 +112,18 @@ fi
 if [ "$1" == "-ssh" ]; then
   case "$2" in
     "AMM_UPSYS" | "AMM_WELC")
-
-      if [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+      if [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
         check_updates
       fi
-
-      UPMSG="$(<$UP_CACHE_FILE)"
   esac
   case "$2" in
     "AMM_LST_PA" | "AMM_LST_PI" | "AMM_LST_PU" | "AMM_LST_FA" | "AMM_LST_FI")
       printf "$(<$SS_LANG_PATH/list.txt )" | fold -s -w 80 2>/dev/null ;;
     "AMM_UPSYS")
-      printf "$MSG_UPD_AVAIL_UPD: $UPMSG\n"
-      hr
-      if [ -f "$UL_CACHE_FILE" ]; then
-        printf "$(<$UL_CACHE_FILE)"
-      else
+      SS_HASUP_LIST=0
+      upd_msg list
+
+      if [ "$SS_HASUP_LIST" -eq 0 ]; then
         printf "$(<$SS_LANG_PATH/update_system.txt )"
       fi
       ;;
@@ -256,8 +136,7 @@ if [ "$1" == "-ssh" ]; then
     "AMM_TOOLS")
       printf "$(<$SS_LANG_PATH/information.txt )" | fold -s -w 60 2>/dev/null ;;
     "AMM_WELC")
-      printf "$MSG_UPD_AVAIL_UPD: $UPMSG\n"
-      hr
+      upd_msg
       if [ "$HAS_FASTFETCH" -eq 1 ]; then
         fastfetch -c /usr/share/solseek/"$SS_FASTFETCH_CFG" 2>/dev/null
         hr
@@ -363,7 +242,8 @@ elif [ "$1" == "-sse" ]; then
       else
         echo $MSG_INFO_RUNPVTOP
         hr
-        echo -e "$MSG_GEN_RUN: eopkg check";
+        echo -e "$MSG_GEN_RUN: eopkg check\n";
+        ss_format_help eopkg check
       fi
       exit 0
     elif [ "$2" = "AMT_ERMO" ]; then
@@ -377,7 +257,38 @@ elif [ "$1" == "-sse" ]; then
       else
         echo $MSG_INFO_RUNPVTOP
         hr
-        echo -e "$ACT_INFO_ERMO: eopkg remove-orphans";
+        echo -e "$ACT_INFO_ERMO: eopkg remove-orphans\n";
+        ss_format_help eopkg remove-orphans
+      fi
+      exit 0
+    elif [ "$2" = "AMT_EDC" ]; then
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "$ACT_INFO_EDC eopkg delete-cache";
+        hr
+        sudo eopkg dc
+        hr
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        echo -e "$ACT_INFO_EDC eopkg delete-cache\n";
+        ss_format_help eopkg delete-cache
+      fi
+      exit 0
+    elif [ "$2" = "AMT_EUR" ]; then
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "$ACT_INFO_EUR eopkg update-repo";
+        hr
+        sudo eopkg ur
+        hr
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        echo -e "$ACT_INFO_EUR eopkg update-repo\n";
+        ss_format_help eopkg update-repo
       fi
       exit 0
     else
@@ -412,7 +323,8 @@ elif [ "$1" == "-sse" ]; then
       else
         echo $MSG_INFO_RUNPVTOP
         hr
-        echo -e "$ACT_INFO_CHECK: flatpak uninstall --unused";
+        echo -e "$ACT_INFO_CHECK: flatpak uninstall --unused\n";
+        ss_format_help flatpak uninstall --unused
       fi
       exit 0
     elif [ "$2" = "AMT_FCHECK" ]; then
@@ -426,7 +338,8 @@ elif [ "$1" == "-sse" ]; then
       else
         echo $MSG_INFO_RUNPVTOP
         hr
-        echo -e "$MSG_GEN_RUN: flatpak repair";
+        echo -e "$MSG_GEN_RUN: flatpak repair\n";
+        ss_format_help flatpak repair --unused
       fi
       exit 0
     fi
@@ -593,7 +506,7 @@ elif [ "$1" == "-u" ]; then
     sudo fwupdmgr update
   fi
   if [ "$ccache" -eq 1 ]; then
-    clean_cache "regen"
+    clean_cache "regen" "update"
   fi
   hr 3
   echo "$MSG_GEN_PROCCOMP"
@@ -659,9 +572,11 @@ fi
 # General fzf wrapper with defaults
 sa_fzf() {
   fzf --ansi\
+      --color='pointer:cyan' \
       --delimiter='|' \
       --with-nth=2 \
       --nth=1 \
+      --pointer='>' \
       --no-input\
       --disabled\
       --style="full"\
@@ -681,9 +596,12 @@ sa_fzf() {
 # Package list fzf wrapper with defaults
 pkg_fzf() {
   fzf --ansi\
+      --color='pointer:cyan,marker:green' \
       --delimiter='|' \
       --with-nth=2 \
       --nth=1 \
+      --marker='✓' \
+      --pointer='>' \
       --style="full"\
       --border\
       --border-label="$MSG_APP_NAME - v$SS_VERSION"\
@@ -738,6 +656,8 @@ if [ "$ISSA" -eq 1 ]; then
       "AMT_LREPO") solseek -sse "$toolAction" export ;;
       "AMT_ECHECK") solseek -sse "$toolAction" run ;;
       "AMT_ERMO") solseek -sse "$toolAction" run ;;
+      "AMT_EDC") solseek -sse "$toolAction" run ;;
+      "AMT_EUR") solseek -sse "$toolAction" run ;;
       "AMT_FPLA") solseek -sse "$toolAction" export ;;
       "AMT_FPLU") solseek -sse "$toolAction" export ;;
       "AMT_FREPO") solseek -sse "$toolAction" export ;;
@@ -810,7 +730,8 @@ if [ "$ISSA" -eq 1 ]; then
         app_list=$(< "$PI_CACHE_FILE")
         pkg_list_type="$ACT_MAIN_LISTIPKGS"
       else
-        app_list=$(cat "$PI_CACHE_FILE" "$PA_CACHE_FILE" | sort)
+        app_list=$(< "$PA_CACHE_FILE")
+        #app_list=$(cat "$PI_CACHE_FILE" "$PA_CACHE_FILE" | sort)
         pkg_list_type="$ACT_MAIN_LISTAPKGS"
       fi
       pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$MSG_PKG_HEADER - $pkg_list_type" --preview 'solseek -ssi {1} {+}')
@@ -852,9 +773,8 @@ if [ "$ISSA" -eq 1 ]; then
 fi
 
 # End Sub action area
-
 # Launch main menu with a clean cache
-clean_cache "regen"
+clean_cache "regen" "update"
 clear
 # Start Interface
 while true; do
