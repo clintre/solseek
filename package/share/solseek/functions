@@ -1,0 +1,204 @@
+hr(){
+  line="─"
+  if [ "$1" = "2" ]; then
+    line="═"
+  elif [ "$1" = "3" ]; then
+    line="━"
+  fi
+  printf "%.0s$line" $(seq 1 "$(tput cols)"); echo
+}
+
+upd_msg(){
+    TTL_UPDCNT=0
+    SOLUS_UPCNT=0
+    FLATPAK_UPCNT=0
+    UPCNT_FP=0
+    UPMSG="$MSG_UPD_AVAIL_UPD $MSG_UPD_NONE"
+
+    if [ ! -f "$UP_LOCK_FILE" ] && [ -f "$UP_CACHE_FILE" ]; then
+        . "$UP_CACHE_FILE"
+    fi
+
+
+    if [ "$TTL_UPDCNT" -gt 0 ]; then
+        UPMSG_FP=""
+        if [ "$FLATPAK_UPCNT" -gt 0 ]; then
+            UPMSG_FP=" | $MSG_UPD_FLATPAK: $FLATPAK_UPCNT"
+        fi
+
+        UPMSG="$MSG_UPD_AVAIL_UPD $MSG_UPD_SYSTEM: $SOLUS_UPCNT $UPMSG_FP"
+    fi
+
+    echo -e "$UPMSG"
+    hr
+
+    if [ "$1" == "list" ] && [ "$TTL_UPDCNT" -gt 0 ]; then
+        SS_HASUP_LIST=1
+        echo -e "$MSG_UPD_DISCO\n\nSolus:"
+        if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
+          echo -e "\n${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}"
+        fi
+        eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}'
+        echo -e "\n"
+        if [ "$FLATPAK_UPCNT" -gt 0 ]; then
+        echo "Flatpak:"
+        flatpak remote-ls --updates --columns=name,version
+        fi
+    fi
+}
+
+
+
+check_updates(){
+    echo "#Lock file for update checks" > "$UP_LOCK_FILE"
+    if [ "$1" == "system" ] || [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
+
+        echo "#Update Count Cache File" > "$UP_CACHE_FILE"
+
+        HASUP=0
+        UPCNT_SOLUS=0
+        UPCNT_FP=0
+        UPMSG_FP=""
+        NOTI_LVL="normal"
+        NOTI_ID=""
+
+        # Make sure we are getting the latest
+        pkcon refresh force &> /dev/null
+        UPCNT_SOLUS=`pkcon get-updates --plain | grep -E -c "\(Solus\)|\(Unstable\)"`
+        if [ "$HAS_FLATPAK" -eq 1 ]; then
+            UPCNT_FP=`flatpak remote-ls --updates | wc -l`
+            UPMSG_FP=" | $MSG_UPD_FLATPAK: $UPCNT_FP"
+        else
+            UPCNT_FP=0
+        fi
+
+        UPCNT_TTL=$((UPCNT_SOLUS + UPCNT_FP))
+
+        echo "TTL_UPDCNT=$UPCNT_TTL" >> "$UP_CACHE_FILE"
+        echo "SOLUS_UPCNT=$UPCNT_SOLUS" >> "$UP_CACHE_FILE"
+        echo "FLATPAK_UPCNT=$UPCNT_FP" >> "$UP_CACHE_FILE"
+
+
+        if [ "$UPCNT_TTL" -gt 0 ] && [ "$1" == "system" ]; then
+            UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
+
+            notify-send --app-name="Solseek" --urgency="critical" --replace-id=11111 -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+        fi
+    fi
+    rm -f "$UP_LOCK_FILE"
+}
+
+fp_cache(){
+  if [ "$HAS_FLATPAK" -eq 1 ]; then
+
+    flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE"
+
+    flatpak remote-ls --system flathub --columns=application,name | \
+    awk '!seen[$1]++' | \
+    grep -v 'org\.freedesktop\.Platform\.GL32\.nvidia\|org\.freedesktop\.Platform\.GL\.nvidia' | \
+    sed -E 's/\t(.*)/|◯ \1/' | \
+    sort -t '|' -k 2 > "$FA_CACHE_FILE"
+
+    # If the user has no flatpaks installed, lets create an empty entry for FZF
+    if [ ! -s "$FI_CACHE_FILE" ]; then
+      touch "$FI_CACHE_FILE"
+      echo "Empty|Empty" > "$FI_CACHE_FILE"
+      #If it does lets merge the installed entries with available as FP has no command for this
+      else
+      TMP_PGK_FILE=$(mktemp)
+
+      awk -F'|' '
+
+      FNR==NR {
+          # Store the entire line using the first field (Package ID) as the key
+          installed[$1] = $0
+          next
+      }
+
+      $1 in installed {
+          # Print the stored replacement line and skip to the next record
+          print installed[$1]
+          next
+      }
+
+      { print }
+      ' "$FI_CACHE_FILE" "$FA_CACHE_FILE" > "$TMP_PGK_FILE" && mv "$TMP_PGK_FILE" "$FA_CACHE_FILE"
+
+      rm -f "$TMP_PGK_FILE"
+    fi
+
+  fi
+
+}
+
+eopkg_cache(){
+  TMP_PGK_FILE=$(mktemp)
+  # Setup active Solus eopkg repo if using local cache. If the file is missing revert to online
+  if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
+    if [ ! -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" ]; then
+      SS_EOPKG_LCACHE=0
+      echo -e "$MSG_GEN_LCMISSING.\n"
+    fi
+  fi
+
+  eopkg li 2>/dev/null | awk 'NR>2 {print $1 "|" "\033[32m" "⬤ " $1 "\033[0m"}' > "$PI_CACHE_FILE"
+
+  if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
+    awk -F'[<>]' '/<Package>/ {in_pkg=1} in_pkg && $2=="Name" && length($3)>0 {
+    val=$3;
+    gsub(/[[:cntrl:]]/, "", val);       # Remove invisible control chars (like \r)
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "", val); # Trim leading/trailing whitespace
+    if (length(val) > 0) print val "|" "◯ " val;
+    in_pkg=0
+}' "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" | sort -u > "$PA_CACHE_FILE"
+
+    awk -F'|' 'FNR==NR {seen[$1]; next} !($1 in seen)' "$PI_CACHE_FILE" $PA_CACHE_FILE > "$TMP_PGK_FILE"
+
+
+  else
+    eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1 "|" "◯ " $1 }' > "$TMP_PGK_FILE"
+  fi
+
+  cat "$PI_CACHE_FILE" "$TMP_PGK_FILE" | sort > "$PA_CACHE_FILE"
+
+  rm -f "$TMP_PGK_FILE"
+}
+
+clean_cache(){
+    rm -f "$PI_CACHE_FILE"
+    rm -f "$PA_CACHE_FILE"
+    rm -f "$FI_CACHE_FILE"
+    rm -f "$FA_CACHE_FILE"
+
+    if [ "$2" == "update" ]; then
+        rm -f "$UP_CACHE_FILE"
+    fi
+    if [ "$1" == "regen" ]; then
+      echo "$MSG_GEN_CACHE"
+
+      check_updates system &
+      fp_cache &
+      eopkg_cache
+    fi
+}
+
+ss_format_help(){
+
+
+
+    "$1" --help "${@:2}" | awk '
+      # 1. Check if current line looks like a flag (indented with spaces, starts with -)
+      /^ +-/ {
+          # 2. Check if the previous line (buffer) looks like a header (ends with :)
+          if (buffer ~ /:$/) {
+              exit # Stop immediately without printing the buffer
+          }
+      }
+      # 3. Print the buffered line (delayed by one step)
+      NR > 1 { print buffer }
+      # 4. Store current line in buffer for the next pass
+      { buffer = $0 }
+  '
+
+
+}
