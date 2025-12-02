@@ -21,6 +21,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 ## Known Limitations / Issues
   - Currently only in English and French
+  - Limited Snap support. Only updates, no list or searching. Full Snap support is not planned at this time.
 
 ## Planned
   - Additional languages (looking for help on this)
