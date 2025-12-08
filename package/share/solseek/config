@@ -19,3 +19,14 @@ SS_ASSUMEYES=0
 ## 0 = disabled (default) | 1 = enabled
 ## Note: If enabled and the eopkg-index.xml it will fallback to online
 SS_EOPKG_LCACHE=0
+
+## Set Theme
+## Changes color set of Solseek
+## Current options are "base" and "solus" (default)
+## Check the Wiki for new options in the future
+SS_THEME="solus"
+
+## Default terminal based editor for config files
+## Must be installed
+## Default "nano"
+SS_EDITOR="nano"
