@@ -1,0 +1,163 @@
+# This file is distributed under the same license as the solseek package.
+MSG_APP_NAME="Solseek"
+
+MSG_GEN_PRESSENTER="Presser [Entrée] pour revenir"
+MSG_GEN_PRESSENTERREB="Presser [Entrée] pour revenir ou [R] pour redémarrer le système"
+MSG_GEB_REBOOTIN="Redémarrage dans"
+MSG_GEN_BACK="Retour au menu principal"
+MSG_GEN_EXIT="Quitter Solseek"
+MSG_GEN_RUN="Exécuter"
+MSG_GEN_EXPTO="Exporter vers"
+MSG_GEN_INVPARAM="Paramètre Invalide"
+MSG_GEN_PROCCOMP="Processus Terminé"
+MSG_GEN_HELP="Aide"
+MSG_GEN_SEL="Options des paquets"
+MSG_GEN_INSTALLED="Installé"
+MSG_GEN_AVAILABLE="Disponible"
+MSG_GEN_INFO="Information"
+MSG_GEN_SEL_ITEM="Selectionner un élément"
+MSG_GEN_CACHE="Création du cache"
+MSG_GEN_FCACHE="Création du flatpak cache"
+MSG_GEN_PCACHE="Création du eopkg cache"
+MSG_GEN_LCMISSING="eopkg-index.xml local manquant. Utilisation de la source en ligne"
+MSG_GEN_CLTITLE="Historique des modifications pour la"
+
+MSG_FTR_NAVI="Nav"
+MSG_FTR_SEL="Selectionner"
+MSG_FTR_BACK="[ÉCHAP] Retour"
+MSG_FTR_MS="Multi: Shift+Tab / Ctrl+Souris"
+
+MSG_INFO_EXPPVTOP="Presser [ENTRÉE] pour exporter"
+MSG_INFO_RUNPVTOP="Presser [ENTRÉE] pour lancer"
+MSG_INFO_EDITPVTOP="Presser [ENTRÉE] pour Modifier"
+MSG_INFO_SSEXITNOTICE="Quitter Solseek avant que les modifications ne prennent effet!"
+
+MSG_PKG_ISTATMSG="Statut actuel du paquet : INSTALLÉ"
+MSG_PKG_ASTATMSG="Statut actuel du paquet : DISPONIBLE"
+MSG_PKG_TTLSTART="Démarrage"
+MSG_PKG_HEADER="Paquets"
+MSG_PKG_PROMPT="Rechercher"
+MSG_PKG_FPSEL="Options des Flatpaks"
+MSG_PKG_SELECTED="Sélectionnés"
+
+MSG_INFO_OPENWEB="Ouvrir le site web dans le navigateur par défaut"
+
+MSG_UPD_NONE="Aucune"
+MSG_UPD_SYSTEM="Système"
+MSG_UPD_FLATPAK="Flatpak"
+MSG_UPD_AVAIL_UPD="Mises à jour disponibles"
+MSG_UPD_TTLSTART="Démarrer la mise à jour du système"
+MSG_UPD_DISCO="Organisation de la matrice de mise à jour"
+MSG_UPD_WARN="Attention : Le dépôt instable est actif!\nConsultez solus-packaging sur Matrix avant de mettre à jour!"
+
+ACT_GEN_BACK="Retour"
+ACT_MAIN_LISTAPKGS="Tout"
+ACT_MAIN_LISTIPKGS="Installés"
+ACT_MAIN_SECPKGLST="Liste Paquets"
+ACT_MAIN_SECFLPLST="Liste Flatpaks"
+ACT_MAIN_UPDATESYS="Mise à jour"
+ACT_MAIN_INFORMATION="Outils"
+ACT_MAIN_WELCOME="Bienvenue"
+ACT_MAIN_QUIT="Quitter"
+
+ACT_INFO_EHIST="Historique"
+ACT_INFO_EINST="Installés - Tous"
+ACT_INFO_EUSER="Installés - Utilisateur"
+ACT_INFO_CHECK="Lance une vérification"
+ACT_INFO_LREPO="Configuration du dépot"
+ACT_INFO_ERMO="Supprimer les orphelins"
+ACT_INFO_EDC="Supprimer le cache"
+ACT_INFO_EUR="Actualiser le dépôt"
+ACT_INFO_INXI="INXI Infos système"
+ACT_INFO_SOLUSSUPPORT="Support Solus"
+ACT_INFO_SOLUSFORUM="Forum Solus"
+ACT_INFO_SOLSEEK="Support Solseek"
+ACT_INFO_LICENSE="Licence"
+ACT_INFO_ROLLBACK="Retour arrière"
+ACT_INFO_HROLLBACK="Historique Retour arrière"
+ACT_INFO_SYSTEM="SYSTÈME"
+ACT_INFO_SSCFG="Configuration"
+
+ACT_UPD_EOPKG="Paquets système"
+ACT_UPD_FLATPAK="Flatpaks"
+ACT_UPD_SNAP="Snaps"
+ACT_UPD_DISTROBOX="Distrobox"
+ACT_UPD_FIRMWARE="Firmware"
+ACT_UPD_EVERYTHING="Everything"
+ACT_UPD_ALL="Tous types de paquets"
+
+ACT_PKG_INSTALL="Installation"
+ACT_PKG_REINSTALL="Reinstallation"
+ACT_PKG_REMOVE="Supprimer"
+ACT_PKG_UPDATE="Mise à jour"
+ACT_PKG_CHECK="Vérification"
+ACT_PKG_REPAIR="Réparation"
+
+## Panel Content/Help Guides
+MSG_PNL_GUIDE_TITLE="Navigation et contrôles"
+MSG_PNL_GUIDE_BODY="🡙 Flèches haut/bas / Roulette de la souris pour naviguer dans les listes
+⏎ [ENTRÉE] / Double Click pour sélectionner
+- Tab / Ctrl-Gauche du bouton de la souris pour effectuer une sélection multiple
+- Ctrl-C / [ÉCHAP] pour revenir à la fenêtre précédente"
+
+MSG_PNL_PKGACT_TITLE="Opérations disponibles sur les paquets"
+MSG_PNL_PKGACT_BODY="Paquets installés
+- Réinstaller
+- Mise à jour
+- Vérifier (eopkg check)
+- Réparer (flatpak)
+- Supprimer
+
+Paquets disponibles
+- Installation"
+
+MSG_PNL_RB_TITLE="EOPKG Retour Arrière"
+MSG_PNL_RB_BODY="Accéder au Menu EOPKG Historique Retour arrière"
+MSG_PNL_RB_HELP="Choisissez l'opération n° avec un numéro inférieur à la/aux mise(s) à jour que vous souhaitez annuler dans le menu de gauche.
+Exemple : Si vous voulez annuler l'opération 100, utilisez 99 comme numéro.
+Vous aurez la possibilité de confirmer."
+
+MSG_PNL_LIST_TITLE="Lister (paquets / flatpak)"
+MSG_PNL_LIST_BODY="- Tout : affiche à la fois les installés et les disponibles
+- Installé : uniquement les installés
+- Rechercher
+- Gérer (installer, mettre à jour, vérifier, supprimer)
+- Informations"
+
+
+MSG_PNL_UPD_TITLE="Mise à jour"
+MSG_PNL_UPD_BODY="- Mises à jour disponibles
+- Vérifier
+- Effectuer les mises à jour"
+
+
+MSG_PNL_TOOL_TITLE="Outils"
+MSG_PNL_TOOL_BODY="- Afficher/Exporter (historique, installés, paramètres, inxi)
+- Package Tools Outils de paquet (vérifier, nettoyer, réparer)
+- Solseek Configuration"
+
+MSG_PNL_SSCFG_TITLE="Configuration Solseek"
+MSG_PNL_SSCFG_BODY="uvre le fichier de configuration pour le modifier"
+
+MSG_PNL_ABOUT_TITLE="À propos"
+MSG_PNL_ABOUT_BODY="Version : $SS_VERSION
+Licence: GPL 3.0
+
+Wiki
+$SS_WEB_WIKI
+
+Support
+$SS_WEB_MAIN
+
+Changelog
+$SS_WEB_CLOG
+
+Solus Forum
+$SS_WEB_SOLUS_FORUM
+
+Solus Support
+$SS_WEB_SOLUS_SUPPORT
+
+* CTRL+Souris pour ouvrir les liens
+"
+
