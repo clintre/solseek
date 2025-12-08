@@ -1,0 +1,144 @@
+# Defaults
+# SS_LANG=${LANG:0:2} temp disabling as testing languages
+. "$SS_DATA_PATH/core/defaults"
+
+# Check for local config
+if [ -f "$HOME/.config/solseek/config" ]; then
+  . "$HOME/.config/solseek/config"
+  SS_LOCAL_CFG=1
+fi
+
+if [ "$SS_ASSUMEYES" -eq 1 ]; then
+  SS_ASSUMEYES="-y"
+else
+  SS_ASSUMEYES=""
+fi
+
+# Include the default lang file as fallback
+. "$SS_DATA_PATH/lang/en.lang"
+
+# If alternate language is set, check to see if it exists
+if [ "$SS_LANG" != "en" ] && [ -f "$SS_DATA_PATH/lang/$SS_LANG.lang" ]; then
+  . "$SS_DATA_PATH/lang/$SS_LANG.lang"
+fi
+
+# Load theme
+if [ -f "$SS_DATA_PATH/themes/$SS_THEME.theme" ]; then
+  . "$SS_DATA_PATH/themes/$SS_THEME.theme"
+else
+  . "$SS_DATA_PATH/themes/solus.theme"
+fi
+
+# Sub Action switch
+ISSA=0
+
+# Cache settings
+# Cache expires time in minutes - will move to config file later to override this if set
+SS_CACHE_EXPIRES=20
+IDX_CACHE_FILE="$SS_CACHE_PATH/eopkgindex"
+AS_CACHE_FILE="$SS_CACHE_PATH/appstream"
+PA_CACHE_FILE="$SS_CACHE_PATH/apackages"
+PI_CACHE_FILE="$SS_CACHE_PATH/ipackages"
+FA_CACHE_FILE="$SS_CACHE_PATH/aflatpaks"
+FI_CACHE_FILE="$SS_CACHE_PATH/iflatpaks"
+UP_CACHE_FILE="$SS_CACHE_PATH/updatemsg"
+UL_CACHE_FILE="$SS_CACHE_PATH/updatelst"
+UP_LOCK_FILE="$SS_CACHE_PATH/update_lock"
+
+
+#Supported Update Systems
+HAS_FLATPAK=0
+HAS_SNAP=0
+HAS_DISTROBOX=0
+HAS_FIRMWARE=0
+HAS_FASTFETCH=0
+
+if command -v "flatpak" &> /dev/null; then
+  HAS_FLATPAK=1
+fi
+if command -v "snap" &> /dev/null; then
+  HAS_SNAP=1
+fi
+if command -v "distrobox" &> /dev/null; then
+  HAS_DISTROBOX=1
+fi
+if command -v "fwupdmgr" &> /dev/null; then
+  HAS_FIRMWARE=1
+fi
+if command -v "fastfetch" &> /dev/null; then
+  HAS_FASTFETCH=1
+  SS_FASTFETCH_CFG="solseek_fastfetch.jsonc"
+  ## Check for config override
+  if [ "$SS_FASTFETCH" -eq 2 ]; then
+    SS_FASTFETCH_CFG="solseek_fastfetch_str.jsonc"
+  elif [ "$SS_FASTFETCH" -eq 0 ]; then
+    HAS_FASTFETCH=0
+  fi
+fi
+
+# Determine eopkg repo setup.
+# Need to determine names of active repos, if there is local, and if unstable is active
+EOPKG_VARS=$(eopkg -N list-repo | awk '
+    BEGIN {
+        # Variables to hold found repo names
+        found_unstable = ""
+        found_stable = ""
+        found_local = 0
+    }
+
+    # Match lines that define a Repo Name and its Status (e.g., "Solus [active]")
+    /^[^ ]/ {
+        if ($0 ~ /\[active\]/) {
+            # Capture the repo name (first field)
+            current_name = $1
+            is_active = 1
+        } else {
+            is_active = 0
+        }
+    }
+
+    # Match lines that define the URL (indented lines)
+    /^[ \t]/ {
+        if (is_active) {
+            url = $1
+
+            # Check for Unstable in the URL path
+            if (url ~ /\/unstable\//) {
+                found_unstable = current_name
+                print "SS_SOLUS_RCNT+=1"
+            }
+            # Check for Stable (Shannon or Polaris) in the URL path
+            else if (url ~ /\/(shannon|polaris)\//) {
+                found_stable = current_name
+                print "SS_SOLUS_RCNT+=1"
+            }
+            # Check for Local repos (File scheme)
+            else if (url ~ /^file:/) {
+                found_local = 1
+            }
+        }
+    }
+
+    END {
+        # Priority Logic: Unstable takes precedence over Stable for the REPO variable
+        if (found_unstable != "") {
+            print "SS_SOLUS_REPO=\"" found_unstable "\""
+            print "SS_SOLUS_US=1"
+        } else if (found_stable != "") {
+            print "SS_SOLUS_REPO=\"" found_stable "\""
+        }
+
+        # Set the Local Repo flag if found
+        if (found_local) {
+            print "SS_SOLUS_LR=1"
+        }
+    }
+')
+
+# Apply the variables found
+eval "$EOPKG_VARS"
+
+# Check if local eopkg index file exists
+if [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" ]; then
+    SS_EOPKG_FINDEX=1
+fi
