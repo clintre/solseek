@@ -1,7 +1,0 @@
-Utilisation : solseek
-
-Utilisation alternative comme wrapper eopkg : solseek [commandes et options eopkg]
-
-Options:
- --version                    : montre la version du programme et quitte
- -h [--help]                  : montre ce message d'aide et quitte
