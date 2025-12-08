@@ -311,7 +311,8 @@ as_fzf() {
       --nth=1 \
       --marker='✓ ' \
       --pointer='>' \
-      --style="full"\
+      --style="full" \
+      --list-label=" (F) flatpak (P) eopkg " \
       --border\
       --border-label=" $MSG_APP_NAME - v$SS_VERSION "\
       --footer-border \
