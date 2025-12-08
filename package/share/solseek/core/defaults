@@ -1,0 +1,32 @@
+SS_LANG="en"
+SS_THEME="solus"
+SS_FASTFETCH=1
+SS_ASSUMEYES=0
+SS_EOPKG_LCACHE=0
+SS_EOPKG_FINDEX=0
+SS_EOPKG_FIDATE=""
+SS_SOLUS_REPO="Solus"
+SS_SOLUS_LR=0
+SS_SOLUS_US=0
+declare -i SS_SOLUS_RCNT=0
+
+SS_LOCAL_CFG=0
+SS_EDITOR="nano"
+
+## Base Styling
+CSS_BOLDBRIGHT="\033[1m"
+CSS_YELLOW="\033[33m"
+CSS_CYAN="\033[36m"
+CSS_BLUE="\033[34m"
+CSS_GREEN="\033[32m"
+CSS_RED="\033[31m"
+CSS_RESET="\033[0m"
+
+
+## Solseek Links / Info
+SS_WEB_WIKI="https://github.com/clintre/solseek/wiki"
+SS_WEB_MAIN="https://github.com/clintre/solseek"
+SS_WEB_CLOG="https://github.com/clintre/solseek/releases"
+SS_WEB_LIC="https://github.com/clintre/solseek?tab=GPL-3.0-1-ov-file"
+SS_WEB_SOLUS_SUPPORT="https://github.com/getsolus/packages/issues"
+SS_WEB_SOLUS_FORUM="https://discuss.getsol.us/"

@@ -1,0 +1,120 @@
+
+## eopkg history rollback
+SS_ROLLBACK_LIMIT=200
+SS_HISTORY_LIMIT=2000
+eopkg_rollback_menu(){
+    eopkg history -l "$SS_ROLLBACK_LIMIT" | sed -nE 's/^(.*#([0-9]+)):.*/\2|\1/p'
+}
+eopkg_history_data(){
+    LLIMIT="$SS_HISTORY_LIMIT"
+    if [ "$1" == "rollback" ]; then
+        LLIMIT="$SS_ROLLBACK_LIMIT"
+    fi
+    eopkg history -l "$LLIMIT"
+}
+
+appstream_write_entry() {
+    local type="${current_entry[type]}"
+    local id="${current_entry[id]}"
+    local name="${current_entry[name]}"
+    local summary="${current_entry[summary]}"
+    local pkg="${current_entry[pkg_name]}"
+
+    statPre="◯"
+    statEnd=""
+    if [ -n "$summary" ]; then
+        summary="- $summary"
+    fi
+
+    # Only write if we have a valid Name and Type
+    if [[ -n "$name" && -n "$type" ]]; then
+        if [[ "$type" == "flatpak" ]]; then
+            # Format: flatpak:Identifier|Name - Summary
+            if grep -Fq "$id" "$FI_CACHE_FILE"; then
+                statPre="\033[32m⬤"
+                statEnd="\033[0m"
+            fi
+            echo "flatpak:$id|$statPre $name (F) $summary $statEnd" >> "$AS_CACHE_FILE"
+        elif [[ "$type" == "package" && -n "$pkg" ]]; then
+            # Format: eopkg:Package|Name - Summary
+            if grep -q "$pkg" "$PI_CACHE_FILE"; then
+                statPre="\033[32m⬤"
+                statEnd="\033[0m"
+            fi
+            echo "eopkg:$pkg|$statPre $name (P) $summary $statEnd" >> "$AS_CACHE_FILE"
+        fi
+    fi
+
+    # Reset variables for the next block
+    current_entry[type]=""
+    current_entry[id]=""
+    current_entry[name]=""
+    current_entry[summary]=""
+    current_entry[pkg_name]=""
+}
+
+
+
+
+appstream_get_list(){
+    TMP_PGK_FILE=$(mktemp)
+    TMP_RAW_FILE=$(mktemp)
+    # Clear existing cache file
+    > "$AS_CACHE_FILE"
+
+    appstreamcli list-categories "$1" --no-color > "$TMP_PGK_FILE"
+
+    INPUT_SOURCE="$TMP_PGK_FILE"
+
+    declare -A current_entry
+
+    # Initialize variables
+    current_entry[type]=""
+    current_entry[id]=""
+    current_entry[name]=""
+    current_entry[summary]=""
+    current_entry[pkg_name]=""
+
+    fpName=""
+
+    while IFS= read -r line; do
+        # Check for the separator "---" to process the block
+        if [[ "$line" == "---" ]]; then
+            appstream_write_entry
+            continue
+        fi
+
+        # Extract Identifier (and clean [desktop-application])
+        if [[ "$line" == Identifier:* ]]; then
+            raw_id="${line#Identifier: }"
+            # Remove ' [desktop-application]' and whitespace
+            clean_id=$(echo "$raw_id" | sed 's/ \[desktop-application\]//g' | xargs)
+            current_entry[id]="$clean_id"
+        fi
+
+        # Extract Name
+        if [[ "$line" == Name:* ]]; then
+            current_entry[name]="${line#Name: }$fpName"
+        fi
+
+        # Extract Summary
+        if [[ "$line" == Summary:* ]]; then
+            current_entry[summary]="${line#Summary: }"
+        fi
+
+        # Check for Bundle (indicating Flatpak)
+        if [[ "$line" == Bundle:*flatpak* ]]; then
+            current_entry[type]="flatpak"
+        fi
+
+        # Check for Package (indicating eopkg/native)
+        if [[ "$line" == Package:* ]]; then
+            current_entry[type]="package"
+            current_entry[pkg_name]="${line#Package: }"
+        fi
+
+    done < "$INPUT_SOURCE"
+    rm -f "$TMP_PGK_FILE"
+    rm -f "$TMP_RAW_FILE"
+}
+
