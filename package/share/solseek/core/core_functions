@@ -40,12 +40,12 @@ upd_msg(){
           if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
             echo -e "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n"
           fi
-          eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}'
+          eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' | fold -s -w 70
         fi
 
         if [ "$FLATPAK_UPCNT" -gt 0 ]; then
         echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}"
-        flatpak remote-ls --updates --columns=name,version
+        flatpak remote-ls --updates --columns=name,version | fold -s -w 7
         fi
     fi
 }
@@ -384,6 +384,45 @@ get_changelog(){
   fi
 }
 
+mstyle(){
+  OUT=""
+
+  if echo "$@" | grep -q "rst"; then
+    OUT="$CSS_RESET"
+  else
+    if echo "$@" | grep -q "1sp"; then
+      OUT="$CSS_NBSP"
+    elif echo "$@" | grep -q "2sp"; then
+      OUT="$CSS_NBSP$CSS_NBSP"
+    fi
+
+    if echo "$@" | grep -q "bbr"; then
+      OUT+="$CSS_BOLDBRIGHT"
+    elif echo "$@" | grep -q "yb"; then
+      OUT+="$CSS_YELLOWB"
+    elif echo "$@" | grep -q "cb"; then
+      OUT+="$CSS_CYANB"
+    elif echo "$@" | grep -q "bb"; then
+      OUT+="$CSS_BLUEB"
+    elif echo "$@" | grep -q "gb"; then
+      OUT+="$CSS_GREENB"
+    elif echo "$@" | grep -q "rb"; then
+      OUT+="$CSS_REDB"
+    elif echo "$@" | grep -q "y"; then
+      OUT+="$CSS_YELLOW"
+    elif echo "$@" | grep -q "c"; then
+      OUT+="$CSS_CYAN"
+    elif echo "$@" | grep -q "b"; then
+      OUT+="$CSS_BLUE"
+    elif echo "$@" | grep -q "g"; then
+      OUT+="$CSS_GREEN"
+    elif echo "$@" | grep -q "r"; then
+      OUT+="$CSS_RED"
+    fi
+  fi
+  echo "$OUT"
+}
+
 ss_info_pane(){
 
 PANELTXT=""
@@ -429,6 +468,14 @@ $MSG_PNL_LIST_BODY
 esac
 
 case "$1" in
+"welcome" | "deskapps")
+PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_DESKAPPS_TITLE ${CSS_RESET}
+$MSG_PNL_DESKAPPS_BODY
+
+";;
+esac
+
+case "$1" in
 "welcome" | "update")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_UPD_TITLE ${CSS_RESET}
 $MSG_PNL_UPD_BODY
@@ -444,6 +491,6 @@ $MSG_PNL_TOOL_BODY
 ";;
 esac
 
-echo -e "$PANELTXT" | fold -s -w 60 2>/dev/null
+echo -e "$PANELTXT" | fold -s -w 70 2>/dev/null
 
 }
