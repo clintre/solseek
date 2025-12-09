@@ -19,8 +19,22 @@ MSG_GEN_SEL_ITEM="Selectionner un élément"
 MSG_GEN_CACHE="Création du cache"
 MSG_GEN_FCACHE="Création du flatpak cache"
 MSG_GEN_PCACHE="Création du eopkg cache"
+MSG_GEN_LOADCATALOG="Chargement du catalogue d'applications"
 MSG_GEN_LCMISSING="eopkg-index.xml local manquant. Utilisation de la source en ligne"
 MSG_GEN_CLTITLE="Historique des modifications pour la"
+
+MSG_GEN_DESKAPPS="Applis de bureau"
+MSG_GEN_AUDIOVIDEO="Audio/Vidéo"
+MSG_GEN_DEVELOPMENT="Développement"
+MSG_GEN_EDUCATION="Éducation"
+MSG_GEN_GAME="Jeu"
+MSG_GEN_GRAPHICS="Graphisme"
+MSG_GEN_NETWORK="Réseau"
+MSG_GEN_OFFICE="Bureautique"
+MSG_GEN_SCIENCE="Science"
+MSG_GEN_SETTINGS="Paramètres"
+MSG_GEN_SYSTEM="Système"
+MSG_GEN_UTILITY="Utilitaire"
 
 MSG_FTR_NAVI="Nav"
 MSG_FTR_SEL="Selectionner"
@@ -30,6 +44,7 @@ MSG_FTR_MS="Multi: Shift+Tab / Ctrl+Souris"
 MSG_INFO_EXPPVTOP="Presser [ENTRÉE] pour exporter"
 MSG_INFO_RUNPVTOP="Presser [ENTRÉE] pour lancer"
 MSG_INFO_EDITPVTOP="Presser [ENTRÉE] pour Modifier"
+MSG_INFO_ACCESSPVTOP="Presser [ENTRÉE] pour Accéder"
 MSG_INFO_SSEXITNOTICE="Quitter Solseek avant que les modifications ne prennent effet!"
 
 MSG_PKG_ISTATMSG="Statut actuel du paquet : INSTALLÉ"
@@ -124,6 +139,10 @@ MSG_PNL_LIST_BODY="- Tout : affiche à la fois les installés et les disponibles
 - Gérer (installer, mettre à jour, vérifier, supprimer)
 - Informations"
 
+MSG_PNL_DESKAPPS_TITLE="Applis de bureau"
+MSG_PNL_DESKAPPS_BODY="-Recherche Avancée
+- Gérer (installer, mettre à jour, vérifier, supprimer)
+- Informations"
 
 MSG_PNL_UPD_TITLE="Mise à jour"
 MSG_PNL_UPD_BODY="- Mises à jour disponibles
