@@ -1,9 +1,10 @@
 
 ## eopkg history rollback
-SS_ROLLBACK_LIMIT=200
+SS_ROLLBACK_LIMIT=20
 SS_HISTORY_LIMIT=2000
+
 eopkg_rollback_menu(){
-    eopkg history -l "$SS_ROLLBACK_LIMIT" | sed -nE 's/^(.*#([0-9]+)):.*/\2|\1/p'
+    LC_ALL=C eopkg history -l "$SS_ROLLBACK_LIMIT" | sed -nE 's/^(.*#([0-9]+)):.*/\2|\1/p'
 }
 eopkg_history_data(){
     LLIMIT="$SS_HISTORY_LIMIT"
@@ -53,16 +54,13 @@ appstream_write_entry() {
     current_entry[pkg_name]=""
 }
 
-
-
-
 appstream_get_list(){
     TMP_PGK_FILE=$(mktemp)
-    TMP_RAW_FILE=$(mktemp)
     # Clear existing cache file
     > "$AS_CACHE_FILE"
 
-    appstreamcli list-categories "$1" --no-color > "$TMP_PGK_FILE"
+    echo -e "$MSG_GEN_LOADCATALOG";
+    LC_ALL=C appstreamcli list-categories "$1" --no-color > "$TMP_PGK_FILE"
 
     INPUT_SOURCE="$TMP_PGK_FILE"
 
@@ -114,7 +112,8 @@ appstream_get_list(){
         fi
 
     done < "$INPUT_SOURCE"
+
+    clear
     rm -f "$TMP_PGK_FILE"
-    rm -f "$TMP_RAW_FILE"
 }
 
