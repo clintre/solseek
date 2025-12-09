@@ -1,30 +1,30 @@
 
 MENU_MAIN=$(cat <<EOF
 AMM_WELC|$ACT_MAIN_WELCOME
-AMM_LST_PA|📦 $ACT_MAIN_SECPKGLST
-AMM_LST_PA|- $ACT_MAIN_LISTAPKGS
-AMM_LST_PI|- $ACT_MAIN_LISTIPKGS
-AMM_LST_FA|📦 $ACT_MAIN_SECFLPLST
-AMM_LST_FA|- $ACT_MAIN_LISTAPKGS
-AMM_LST_FI|- $ACT_MAIN_LISTIPKGS
-A_BLANK|📦 Desktop Apps
-AMM_DCAT:AudioVideo|- Audio Video
-AMM_DCAT:Development|- Development
-AMM_DCAT:Education|- Education
-AMM_DCAT:Game|- Game
-AMM_DCAT:Graphics|- Graphics
-AMM_DCAT:Network|- Network
-AMM_DCAT:Office|- Office
-AMM_DCAT:Science|- Science
-AMM_DCAT:Settings|- Settings
-AMM_DCAT:System|- System
-AMM_DCAT:Utility|- Utility
-A_BLANK|⚙️ System
-AMM_UPSYS|- $ACT_MAIN_UPDATESYS
-AMM_TOOLS|- $ACT_MAIN_INFORMATION
+AMM_LST_PA|📦$(mstyle "1sp" "bbr")$ACT_MAIN_SECPKGLST$(mstyle "rst")
+AMM_LST_PA|$(mstyle "1sp")- $ACT_MAIN_LISTAPKGS
+AMM_LST_PI|$(mstyle "1sp")- $ACT_MAIN_LISTIPKGS
+AMM_LST_FA|📦$(mstyle "1sp" "bbr")$ACT_MAIN_SECFLPLST$(mstyle "rst")
+AMM_LST_FA|$(mstyle "1sp")- $ACT_MAIN_LISTAPKGS
+AMM_LST_FI|$(mstyle "1sp")- $ACT_MAIN_LISTIPKGS
+A_BLANK|📦$(mstyle "1sp" "bbr")$MSG_GEN_DESKAPPS$(mstyle "rst")
+AMM_DCAT:AudioVideo|$(mstyle "1sp")- $MSG_GEN_AUDIOVIDEO
+AMM_DCAT:Development|$(mstyle "1sp")- $MSG_GEN_DEVELOPMENT
+AMM_DCAT:Education|$(mstyle "1sp")- $MSG_GEN_EDUCATION
+AMM_DCAT:Game|$(mstyle "1sp")- $MSG_GEN_GAME
+AMM_DCAT:Graphics|$(mstyle "1sp")- $MSG_GEN_GRAPHICS
+AMM_DCAT:Network|$(mstyle "1sp")- $MSG_GEN_NETWORK
+AMM_DCAT:Office|$(mstyle "1sp")- $MSG_GEN_OFFICE
+AMM_DCAT:Science|$(mstyle "1sp")- $MSG_GEN_SCIENCE
+AMM_DCAT:Settings|$(mstyle "1sp")- $MSG_GEN_SETTINGS
+AMM_DCAT:System|$(mstyle "1sp")- $MSG_GEN_SYSTEM
+AMM_DCAT:Utility|$(mstyle "1sp")- $MSG_GEN_UTILITY
+A_BLANK|⚙️$(mstyle "1sp" "bbr")$MSG_GEN_SYSTEM$(mstyle "rst")
+AMM_UPSYS|$(mstyle "1sp")- $ACT_MAIN_UPDATESYS
+AMM_TOOLS|$(mstyle "1sp")- $ACT_MAIN_INFORMATION
 A_BLANK|────────────────────
-AMM_ABOUT|About
-AMM_QUIT|$ACT_MAIN_QUIT
+AMM_ABOUT|$(mstyle "bbr")?$(mstyle "rst") About
+AMM_QUIT|$(mstyle "rb")X$(mstyle "rst") $(mstyle "r")$ACT_MAIN_QUIT $(mstyle "rst")
 EOF
 )
 
@@ -44,7 +44,7 @@ EOF
 
 MENU_TOOLS=$(cat <<EOF
 A_BACK|< $ACT_GEN_BACK
-A_BLANK|EOPKG
+A_BLANK|$(mstyle "bbr")EOPKG$(mstyle "rst")
 AMT_EHIST|- $ACT_INFO_EHIST
 AMT_ERBCK|- $ACT_INFO_ROLLBACK
 AMT_EINST|- $ACT_INFO_EINST
@@ -54,15 +54,15 @@ AMT_ECHECK|- $ACT_INFO_CHECK
 AMT_ERMO|- $ACT_INFO_ERMO
 AMT_EDC|- $ACT_INFO_EDC
 AMT_EUR|- $ACT_INFO_EUR
-A_BLANK|FLATPAK
+A_BLANK|$(mstyle "bbr")FLATPAK$(mstyle "rst")
 AMT_FPLA|- $ACT_INFO_EINST
 AMT_FPLU|- $ACT_INFO_EUSER
 AMT_FREPO|- $ACT_INFO_LREPO
 AMT_FCHECK|- $ACT_INFO_CHECK
 AMT_FPCLEAN|- $ACT_INFO_ERMO
-A_BLANK|$ACT_INFO_SYSTEM
+A_BLANK|$(mstyle "bbr")$ACT_INFO_SYSTEM$(mstyle "rst")
 AMT_INXI|- $ACT_INFO_INXI
-A_BLANK|SOLSEEK
+A_BLANK|$(mstyle "bbr")SOLSEEK$(mstyle "rst")
 AMT_SSCFG|- $ACT_INFO_SSCFG
 EOF
 )
@@ -79,7 +79,7 @@ AMP_UPDT|$ACT_PKG_UPDATE
 AMP_RINST|$ACT_PKG_REINSTALL
 AMP_FPREP|$ACT_PKG_REPAIR
 AMP_SCHK|$ACT_PKG_CHECK
-AMP_REM|${CSS_RED}$ACT_PKG_REMOVE${CSS_RESET}
+AMP_REM|${CSS_REDB}$ACT_PKG_REMOVE${CSS_RESET}
 EOF
 )
 
