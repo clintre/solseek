@@ -19,8 +19,22 @@ MSG_GEN_SEL_ITEM="Select Item"
 MSG_GEN_CACHE="Generating cache"
 MSG_GEN_FCACHE="Generating flatpak cache"
 MSG_GEN_PCACHE="Generating eopkg cache"
+MSG_GEN_LOADCATALOG="Loading Application Catalog"
 MSG_GEN_LCMISSING="Local eopkg-index.xml missing. Using online source"
 MSG_GEN_CLTITLE="Changlog for"
+
+MSG_GEN_DESKAPPS="Desktop Apps"
+MSG_GEN_AUDIOVIDEO="Audio/Video"
+MSG_GEN_DEVELOPMENT="Development"
+MSG_GEN_EDUCATION="Education"
+MSG_GEN_GAME="Game"
+MSG_GEN_GRAPHICS="Graphics"
+MSG_GEN_NETWORK="Network"
+MSG_GEN_OFFICE="Office"
+MSG_GEN_SCIENCE="Science"
+MSG_GEN_SETTINGS="Settings"
+MSG_GEN_SYSTEM="System"
+MSG_GEN_UTILITY="Utility"
 
 MSG_FTR_NAVI="Nav"
 MSG_FTR_SEL="Select"
@@ -30,6 +44,7 @@ MSG_FTR_MS="Multi: Tab / Ctrl+Mouse"
 MSG_INFO_EXPPVTOP="Press [ENTER] to Export"
 MSG_INFO_RUNPVTOP="Press [ENTER] to Run"
 MSG_INFO_EDITPVTOP="Press [ENTER] to Edit"
+MSG_INFO_ACCESSPVTOP="Press [ENTER] to Access"
 MSG_INFO_SSEXITNOTICE="Exit Solseek any before changes take effect!"
 
 MSG_PKG_ISTATMSG="Current Package Status: INSTALLED"
@@ -124,6 +139,10 @@ MSG_PNL_LIST_BODY="- All: Shows both installed and available
 - Manage (install,update,check,remove)
 - Information"
 
+MSG_PNL_DESKAPPS_TITLE="Desktop Apps"
+MSG_PNL_DESKAPPS_BODY="- Advanced Search
+- Manage (install,update,check,remove)
+- Information"
 
 MSG_PNL_UPD_TITLE="Updates"
 MSG_PNL_UPD_BODY="- Available Updates
