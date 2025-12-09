@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.7.0"
+SS_VERSION="0.7.1"
 
 #Create cache/config directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"
@@ -41,15 +41,24 @@ if [ "$1" == "-cu" ]; then
 fi
 # Internal calls
 if [ "$1" == "-ssh" ]; then
-  case "$2" in
+
+  if [[ "$2" == *":"* ]]; then
+      IFS=':' read -r PNLKEY PNLSUB <<< "$2"
+  else
+    PNLKEY="$2"
+  fi
+
+  case "$PNLKEY" in
     "AMM_UPSYS" | "AMM_WELC")
       if [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
         check_updates
       fi
   esac
-  case "$2" in
+  case "$PNLKEY" in
     "AMM_LST_PA" | "AMM_LST_PI" | "AMM_LST_PU" | "AMM_LST_FA" | "AMM_LST_FI")
       ss_info_pane "list";;
+    "AMM_DCAT")
+      ss_info_pane "deskapps";;
     "AMM_UPSYS")
       SS_HASUP_LIST=0
       upd_msg list
@@ -67,7 +76,7 @@ if [ "$1" == "-ssh" ]; then
     "AMT_ERBCK")
       ss_info_pane "rollbacklist"
       hr
-      eopkg history -l 200 2>/dev/null
+      eopkg history -l 20 2>/dev/null
 
       ;;
     "AMM_TOOLS")
@@ -80,7 +89,6 @@ if [ "$1" == "-ssh" ]; then
         fastfetch -c /usr/share/solseek/"$SS_FASTFETCH_CFG" 2>/dev/null
         hr
       fi
-      #echo -e "$(<$SS_LANG_PATH/welcome.txt )" | fold -s -w 60 2>/dev/null ;;
       ss_info_pane "welcome" ;;
     "A_BACK")
       echo "$MSG_GEN_BACK" ;;
@@ -111,7 +119,7 @@ elif [ "$1" == "-ssi" ]; then
       hr
     fi
     echo -e "> $pkg_status\n"
-    eopkg info "$2" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}' | fold -s -w 60 2>/dev/null
+    eopkg info "$2" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}' | fold -s -w 70 2>/dev/null
 
   else
     echo "$MSG_GEN_SEL_ITEM"
@@ -131,7 +139,7 @@ elif [ "$1" == "-ssfi" ]; then
     fi
     echo -e "> $pkg_status\n"
 
-    appstreamcli get --details "$2" | awk '/^[^ ]/ { skip = ($0 ~ /^(Identifier|Internal ID|Icon|Bundle|Default Screenshot URL):/) } !skip' | fold -s -w 60 2>/dev/null
+    appstreamcli get --details "$2" | awk '/^[^ ]/ { skip = ($0 ~ /^(Identifier|Internal ID|Icon|Bundle|Default Screenshot URL):/) } !skip' | fold -s -w 70 2>/dev/null
 
   else
     echo "$MSG_GEN_SEL_ITEM"
@@ -223,6 +231,8 @@ elif [ "$1" == "-sse" ]; then
       fi
       exit 0
     elif [ "$2" == "AMT_ERBCK" ]; then
+      echo $MSG_INFO_ACCESSPVTOP
+      hr
       ss_info_pane "rollback"
       exit 0
     elif [ "$2" = "AMT_ERMO" ]; then
@@ -282,7 +292,7 @@ elif [ "$1" == "-sse" ]; then
       hr 3
       echo -e "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
       hr
-      if (( sse_sudo == 1 )); then
+      if [ "$sse_sudo" -eq 1 ]; then
         sudo eopkg "$sse_cmd" > $sse_export_fn
       else
         eopkg $sse_cmd > $sse_export_fn
@@ -293,7 +303,7 @@ elif [ "$1" == "-sse" ]; then
       hr
       eopkg $sse_cmd
     fi
-  elif [ "$sse_type" = "flatpak" ]; then
+  elif [ "$sse_type" == "flatpak" ]; then
     if [ "$2" = "AMT_FPCLEAN" ]; then
       if [ "$3" == "run" ]; then
         hr 3
@@ -309,7 +319,7 @@ elif [ "$1" == "-sse" ]; then
         ss_format_help flatpak uninstall --unused
       fi
       exit 0
-    elif [ "$2" = "AMT_FCHECK" ]; then
+    elif [ "$2" == "AMT_FCHECK" ]; then
       if [ "$3" == "run" ]; then
         hr 3
         echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN: flatpak repair${CSS_RESET}";
@@ -347,7 +357,7 @@ elif [ "$1" == "-sse" ]; then
       hr
       printf "$(flatpak $sse_cmd 2>/dev/null)"
     fi
-  elif [ "$sse_type" = "inxi" ]; then
+  elif [ "$sse_type" == "inxi" ]; then
     sse_export_fn="$HOME/inxi_output.txt"
     if [ "$3" == "export" ]; then
       inxi -b > $sse_export_fn
@@ -435,7 +445,8 @@ elif [ "$1" == "-ssf" ]; then
         fp_cache "force"
       fi
       hr 3
-      echo "$MSG_GEN_PROCCOMP"
+      echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
+      hr
       read -p "$MSG_GEN_PRESSENTER..."
   fi
   exit 0
@@ -445,7 +456,8 @@ elif [ "$1" == "-ssu" ]; then
     hr
     check_updates "system" "force"
     hr 3
-    echo "$MSG_GEN_PROCCOMP"
+    echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
+    hr
     read -p "$MSG_GEN_PRESSENTER..."
     exit 0
   fi
@@ -470,33 +482,33 @@ elif [ "$1" == "-ssu" ]; then
   ccache_updates=0
   hr 3
   echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
-  if (( up_eo == 1 )); then
+  if [ "$up_eo" -eq 1 ]; then
     ccache_eopkg=1
     ccache_updates=1
     hr
-    echo -e "\e[1;34m█ EOPKG\e[0m\n"
+    echo -e "${CSS_CYANB}█ EOPKG ${CSS_RESET}\n"
     sudo eopkg up $SS_ASSUMEYES
   fi
-  if (( up_fp == 1 && HAS_FLATPAK == 1 )); then
+  if [ "$up_fp" -eq 1 ] && [ "$HAS_FLATPAK" -eq 1 ]; then
     ccache_flatpak=1
     ccache_updates=1
     hr
-    echo -e "\e[1;34m█ FLATPAK\e[0m\n"
+    echo -e "${CSS_BLUEB}█ FLATPAK ${CSS_RESET}\n"
     flatpak update -y
   fi
-  if (( up_sn == 1 && HAS_SNAP == 1 )); then
+  if [ "$up_sn" -eq 1 ] && [ "$HAS_SNAP" -eq 1 ]; then
     hr
-    echo -e "\e[1;34m█ SNAP\e[0m\n"
+    echo -e "${CSS_REDB}█ SNAP ${CSS_RESET}\n"
     sudo snap refresh
   fi
-  if (( up_db == 1 && HAS_DISTROBOX == 1 )); then
+  if [ "$up_db" -eq 1 ] && [ "$HAS_DISTROBOX" -eq 1 ]; then
     hr
-    echo -e "\e[1;34m█ DISTROBOX\e[0m\n"
+    echo -e "${CSS_YELLOWB}█ DISTROBOX ${CSS_RESET}\n"
     distrobox upgrade -a
   fi
-  if (( up_fw == 1 && HAS_FIRMWARE == 1 )); then
+  if [ "$up_fw" -eq 1 ] && [ "$HAS_FIRMWARE" -eq 1 ]; then
     hr
-    echo -e "\e[1;34m█ FIRMWARE\e[0m\n"
+    echo -e "${CSS_YELLOWB}█ FIRMWARE ${CSS_RESET}\n"
     sudo fwupdmgr refresh --force
     sudo fwupdmgr get-updates -y > /dev/null
     sudo fwupdmgr update
@@ -512,19 +524,18 @@ elif [ "$1" == "-ssu" ]; then
     fp_cache "force"
   fi
   hr 3
-  echo "$MSG_GEN_PROCCOMP"
-  ##read -p "$MSG_GEN_PRESSENTER..."
+  echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
+  hr
   read -n 1 -p "$MSG_GEN_PRESSENTERREB: " PUCHOICE
   case "$PUCHOICE" in
     # This matches either 'R' or 'r' (case-insensitive)
     [Rr])
-        echo -e "\n\n$MSG_GEB_REBOOTIN..."
-        echo "3"
-        sleep 1
-        echo "2"
-        sleep 1
-        echo "1"
-        sleep 1
+        echo -e "\n\n${CSS_BOLDBRIGHT}█ $MSG_GEB_REBOOTIN... ${CSS_RESET}"
+        RBCNT=3
+        for (( i=$RBCNT; i>0; i-- )); do
+            echo -ne "${CSS_BOLDBRIGHT}█ $i ${CSS_RESET}\r"
+            sleep 1
+        done
         reboot
         ;;
     *)
