@@ -7,6 +7,8 @@
 
 Solseek is a simple terminal user interface that allows you to browse, search, and manage packages for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
 
+⚠️ **Please note that until version 1.x this will be fast changing**
+
 <p align="center">Click image below to see a short demo video</p>
 
 [![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://youtu.be/F6o0ESX7RF0)
