@@ -1,4 +1,4 @@
-<img src="/demo/solseek-logo.png" align="left" width="64"/>
+<img src="https://raw.githubusercontent.com/clintre/solseek/main/demo/solseek-logo.png" align="left" width="64"/>
 
 # Solseek
 ## A TUI Package Manager for Solus
