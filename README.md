@@ -28,6 +28,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 ## Planned
   - Additional languages (looking for help on this)
   - Recipes for common installs on Solus (Nvidia, Distrobox, etc)
+  - moss support (AerynOS & future Solus)
 
 ## Contributing
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
