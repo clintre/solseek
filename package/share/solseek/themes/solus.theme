@@ -1,1 +1,2 @@
-SS_FZF_COLORS="pointer:75,marker:green,border:75,footer-fg:75,header-fg:75,label:75,current-bg:236,label:15,footer-label:75,header-label:75,spinner:75,preview-scrollbar:white,scrollbar:white"
+SS_COLOR_BASE=75
+SS_FZF_COLORS="pointer:$SS_COLOR_BASE,marker:green,border:$SS_COLOR_BASE,footer-fg:$SS_COLOR_BASE,header-fg:$SS_COLOR_BASE,label:$SS_COLOR_BASE,current-bg:236,label:15,footer-label:$SS_COLOR_BASE,header-label:$SS_COLOR_BASE,spinner:$SS_COLOR_BASE,preview-scrollbar:white,scrollbar:white"
