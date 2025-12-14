@@ -1,30 +1,66 @@
 
 MENU_MAIN=$(cat <<EOF
+AMM_WELC|🏠$(mst "1sp" "bbr")$ACT_MAIN_WELCOME$(mst "rst")
+AMM_UPSYS|🔄$(mst "1sp" "bbr")$ACT_MAIN_UPDATESYS$(mst "rst")
+A_BLANK|$(menu_bar)
+AMM_HLP_INST|💻$(mst "1sp" "bbr")$ACT_MAIN_INSTALLED$(mst "rst")
+AMM_LST_PII|$(mst "1sp")- $ACT_MAIN_PACKAGES
+AMM_LST_FII|$(mst "1sp")- $ACT_MAIN_FLATPAKS
+AMM_HLP_SRCH|🔍$(mst "1sp" "bbr")$ACT_MAIN_SEARCH$(mst "rst")
+AMM_LST_PAS|$(mst "1sp")- $ACT_MAIN_PACKAGES
+AMM_LST_FAS|$(mst "1sp")- $ACT_MAIN_FLATPAKS
+AMM_DASUB|$(mst "1sp")- $MSG_GEN_DESKAPPS
+A_BLANK|$(menu_bar)
+AMM_TOOLS|🧰$(mst "1sp" "bbr")$ACT_MAIN_INFORMATION$(mst "rst")
+AMM_ABOUT|📃$(mst "1sp" "bbr")$ACT_MAIN_ABOUT$(mst "rst")
+AMM_QUIT|❌$(mst "1sp" "rb")$ACT_MAIN_QUIT $(mst "rst")
+EOF
+)
+
+MENU_MAIN2=$(cat <<EOF
 AMM_WELC|$ACT_MAIN_WELCOME
-AMM_LST_PA|📦$(mstyle "1sp" "bbr")$ACT_MAIN_SECPKGLST$(mstyle "rst")
-AMM_LST_PA|$(mstyle "1sp")- $ACT_MAIN_LISTAPKGS
-AMM_LST_PI|$(mstyle "1sp")- $ACT_MAIN_LISTIPKGS
-AMM_LST_FA|📦$(mstyle "1sp" "bbr")$ACT_MAIN_SECFLPLST$(mstyle "rst")
-AMM_LST_FA|$(mstyle "1sp")- $ACT_MAIN_LISTAPKGS
-AMM_LST_FI|$(mstyle "1sp")- $ACT_MAIN_LISTIPKGS
-A_BLANK|📦$(mstyle "1sp" "bbr")$MSG_GEN_DESKAPPS$(mstyle "rst")
-AMM_DCAT:AudioVideo|$(mstyle "1sp")- $MSG_GEN_AUDIOVIDEO
-AMM_DCAT:Development|$(mstyle "1sp")- $MSG_GEN_DEVELOPMENT
-AMM_DCAT:Education|$(mstyle "1sp")- $MSG_GEN_EDUCATION
-AMM_DCAT:Game|$(mstyle "1sp")- $MSG_GEN_GAME
-AMM_DCAT:Graphics|$(mstyle "1sp")- $MSG_GEN_GRAPHICS
-AMM_DCAT:Network|$(mstyle "1sp")- $MSG_GEN_NETWORK
-AMM_DCAT:Office|$(mstyle "1sp")- $MSG_GEN_OFFICE
-AMM_DCAT:Science|$(mstyle "1sp")- $MSG_GEN_SCIENCE
-AMM_DCAT:Settings|$(mstyle "1sp")- $MSG_GEN_SETTINGS
-AMM_DCAT:System|$(mstyle "1sp")- $MSG_GEN_SYSTEM
-AMM_DCAT:Utility|$(mstyle "1sp")- $MSG_GEN_UTILITY
-A_BLANK|⚙️$(mstyle "1sp" "bbr")$MSG_GEN_SYSTEM$(mstyle "rst")
-AMM_UPSYS|$(mstyle "1sp")- $ACT_MAIN_UPDATESYS
-AMM_TOOLS|$(mstyle "1sp")- $ACT_MAIN_INFORMATION
-A_BLANK|────────────────────
-AMM_ABOUT|$(mstyle "bbr")?$(mstyle "rst") About
-AMM_QUIT|$(mstyle "rb")X$(mstyle "rst") $(mstyle "r")$ACT_MAIN_QUIT $(mstyle "rst")
+AMM_LST_PA|📦$(mst "1sp" "bbr")$ACT_MAIN_SECPKGLST$(mst "rst")
+AMM_LST_PA|$(mst "1sp")- $ACT_MAIN_LISTAPKGS
+AMM_LST_PI|$(mst "1sp")- $ACT_MAIN_LISTIPKGS
+AMM_LST_FA|📦$(mst "1sp" "bbr")$ACT_MAIN_SECFLPLST$(mst "rst")
+AMM_LST_FA|$(mst "1sp")- $ACT_MAIN_LISTAPKGS
+AMM_LST_FI|$(mst "1sp")- $ACT_MAIN_LISTIPKGS
+A_BLANK|📦$(mst "1sp" "bbr")$MSG_GEN_DESKAPPS$(mst "rst")
+AMM_DCAT:AudioVideo|$(mst "1sp")- $MSG_GEN_AUDIOVIDEO
+AMM_DCAT:Development|$(mst "1sp")- $MSG_GEN_DEVELOPMENT
+AMM_DCAT:Education|$(mst "1sp")- $MSG_GEN_EDUCATION
+AMM_DCAT:Game|$(mst "1sp")- $MSG_GEN_GAME
+AMM_DCAT:Graphics|$(mst "1sp")- $MSG_GEN_GRAPHICS
+AMM_DCAT:Network|$(mst "1sp")- $MSG_GEN_NETWORK
+AMM_DCAT:Office|$(mst "1sp")- $MSG_GEN_OFFICE
+AMM_DCAT:Science|$(mst "1sp")- $MSG_GEN_SCIENCE
+AMM_DCAT:Settings|$(mst "1sp")- $MSG_GEN_SETTINGS
+AMM_DCAT:System|$(mst "1sp")- $MSG_GEN_SYSTEM
+AMM_DCAT:WebBrowser|$(mst "1sp")- $MSG_GEN_WBROWSER
+AMM_DCAT:Utility|$(mst "1sp")- $MSG_GEN_UTILITY
+A_BLANK|💻$(mst "1sp" "bbr")$MSG_GEN_SYSTEM$(mst "rst")
+AMM_UPSYS|$(mst "1sp")- $ACT_MAIN_UPDATESYS
+AMM_TOOLS|$(mst "1sp")- $ACT_MAIN_INFORMATION
+A_BLANK|$(menu_bar)
+AMM_ABOUT|📃$(mst "1sp" "bbr")$ACT_MAIN_ABOUT$(mst "rst")
+AMM_QUIT|❌$(mst "1sp" "rb")$ACT_MAIN_QUIT $(mst "rst")
+EOF
+)
+
+MENU_DAS=$(cat <<EOF
+A_BACK|< $ACT_GEN_BACK
+AMM_DCAT:AudioVideo|$(mst "1sp")$MSG_GEN_AUDIOVIDEO
+AMM_DCAT:Development|$(mst "1sp")$MSG_GEN_DEVELOPMENT
+AMM_DCAT:Education|$(mst "1sp")$MSG_GEN_EDUCATION
+AMM_DCAT:Game|$(mst "1sp")$MSG_GEN_GAME
+AMM_DCAT:Graphics|$(mst "1sp")$MSG_GEN_GRAPHICS
+AMM_DCAT:Network|$(mst "1sp")$MSG_GEN_NETWORK
+AMM_DCAT:Office|$(mst "1sp")$MSG_GEN_OFFICE
+AMM_DCAT:Science|$(mst "1sp")$MSG_GEN_SCIENCE
+AMM_DCAT:Settings|$(mst "1sp")$MSG_GEN_SETTINGS
+AMM_DCAT:System|$(mst "1sp")$MSG_GEN_SYSTEM
+AMM_DCAT:WebBrowser|$(mst "1sp")$MSG_GEN_WBROWSER
+AMM_DCAT:Utility|$(mst "1sp")$MSG_GEN_UTILITY
 EOF
 )
 
@@ -37,14 +73,14 @@ AMU_ALL|$ACT_UPD_ALL
 AMU_DBOX|$ACT_UPD_DISTROBOX
 AMU_FMW|$ACT_UPD_FIRMWARE
 AMU_ETHING|$ACT_UPD_EVERYTHING
-A_BLANK|────────────────────
-AMU_CHECK|Check for Updates
+A_BLANK|$(menu_bar)
+AMU_CHECK|$ACT_UPD_CHECK
 EOF
 )
 
 MENU_TOOLS=$(cat <<EOF
 A_BACK|< $ACT_GEN_BACK
-A_BLANK|$(mstyle "bbr")EOPKG$(mstyle "rst")
+A_BLANK|$(mst "bbr")EOPKG$(mst "rst")
 AMT_EHIST|- $ACT_INFO_EHIST
 AMT_ERBCK|- $ACT_INFO_ROLLBACK
 AMT_EINST|- $ACT_INFO_EINST
@@ -54,16 +90,17 @@ AMT_ECHECK|- $ACT_INFO_CHECK
 AMT_ERMO|- $ACT_INFO_ERMO
 AMT_EDC|- $ACT_INFO_EDC
 AMT_EUR|- $ACT_INFO_EUR
-A_BLANK|$(mstyle "bbr")FLATPAK$(mstyle "rst")
+A_BLANK|$(mst "bbr")FLATPAK$(mst "rst")
 AMT_FPLA|- $ACT_INFO_EINST
 AMT_FPLU|- $ACT_INFO_EUSER
 AMT_FREPO|- $ACT_INFO_LREPO
 AMT_FCHECK|- $ACT_INFO_CHECK
 AMT_FPCLEAN|- $ACT_INFO_ERMO
-A_BLANK|$(mstyle "bbr")$ACT_INFO_SYSTEM$(mstyle "rst")
+A_BLANK|$(mst "bbr")$ACT_INFO_SYSTEM$(mst "rst")
 AMT_INXI|- $ACT_INFO_INXI
-A_BLANK|$(mstyle "bbr")SOLSEEK$(mstyle "rst")
+A_BLANK|$(mst "bbr")SOLSEEK$(mst "rst")
 AMT_SSCFG|- $ACT_INFO_SSCFG
+AMT_SSTMR|- $ACT_INFO_UPCHKSVC
 EOF
 )
 

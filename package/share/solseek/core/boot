@@ -1,6 +1,28 @@
+# System package manager
+if command -v "eopkg" &> /dev/null; then
+  SS_PKG_MGR="eopkg"
+elif command -v "moss" &> /dev/null; then
+  SS_PKG_MGR="moss"
+else
+  echo "Error: No supported package manager detected!"
+  exit 1
+fi
+
+#Create cache/config directory if it does'nt exist
+mkdir -p "$HOME/.cache/solseek"
+mkdir -p "$HOME/.config/solseek"
+
 # Defaults
-# SS_LANG=${LANG:0:2} temp disabling as testing languages
+SS_LANG=${LANG:0:2}
 . "$SS_DATA_PATH/core/defaults"
+
+# Check if systemd timer files are installed.
+# Note this does not enable them, just makes sure they are there if needed.
+if [ ! -f "$HOME/.config/systemd/user/solseek-uc.service" ] || [ ! -f "$HOME/.config/systemd/user/solseek-uc.timer" ]; then
+  mkdir -p "$HOME/.config/systemd/user"
+  cp -f /usr/share/solseek/solseek-uc.service $HOME/.config/systemd/user/
+  cp -f /usr/share/solseek/solseek-uc.timer $HOME/.config/systemd/user/
+fi
 
 # Check for local config
 if [ -f "$HOME/.config/solseek/config" ]; then
@@ -15,11 +37,11 @@ else
 fi
 
 # Include the default lang file as fallback
-. "$SS_DATA_PATH/lang/en.lang"
+. "$SS_DATA_PATH/lang/en.ini"
 
 # If alternate language is set, check to see if it exists
-if [ "$SS_LANG" != "en" ] && [ -f "$SS_DATA_PATH/lang/$SS_LANG.lang" ]; then
-  . "$SS_DATA_PATH/lang/$SS_LANG.lang"
+if [ "$SS_LANG" != "en" ] && [ -f "$SS_DATA_PATH/lang/$SS_LANG.ini" ]; then
+  . "$SS_DATA_PATH/lang/$SS_LANG.ini"
 fi
 
 # Load theme
@@ -44,7 +66,6 @@ FI_CACHE_FILE="$SS_CACHE_PATH/iflatpaks"
 UP_CACHE_FILE="$SS_CACHE_PATH/updatemsg"
 UL_CACHE_FILE="$SS_CACHE_PATH/updatelst"
 UP_LOCK_FILE="$SS_CACHE_PATH/update_lock"
-
 
 #Supported Update Systems
 HAS_FLATPAK=0
@@ -142,3 +163,8 @@ eval "$EOPKG_VARS"
 if [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" ]; then
     SS_EOPKG_FINDEX=1
 fi
+
+
+# Include Function Scripts
+. "$SS_DATA_PATH/core/core_functions"
+. "$SS_DATA_PATH/core/pkg_functions"
