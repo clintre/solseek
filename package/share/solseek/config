@@ -2,23 +2,16 @@
 ## Lines that start with # are not used
 
 ## Overrides auto language setting
-SS_LANG="en"
+## SS_LANG="en"
 
 ## Fastfetch Options - If fastfetch is installed
 ## 0 = disabled | 1 = Enabled (default) with icons key type | 2 = Enabled with string key type
 ## If not using a nerd font or having issues with the key icons displaying, set to 2
 SS_FASTFETCH=1
 
-## Auto say yes on package and flatpak actions.
-## Warning this will add the flag -y to updates, installs, and other eopkg and flatpak actions
-## 0 = disabled (default) | 1 = enabled
-SS_ASSUMEYES=0
-
-## Use local eopkg-index.xml file for package listing instead of online
-## Warning: This is currently experimental
-## 0 = disabled (default) | 1 = enabled
-## Note: If enabled and the eopkg-index.xml it will fallback to online
-SS_EOPKG_LCACHE=0
+## Set Menu Style
+## 1 = Compact Menu (default) | 2 = Expanded Menu
+SS_MAINMENU=1
 
 ## Set Theme
 ## Changes color set of Solseek
@@ -30,3 +23,23 @@ SS_THEME="solus"
 ## Must be installed
 ## Default "nano"
 SS_EDITOR="nano"
+
+## Auto say yes on package and flatpak actions.
+## Warning this will add the flag -y to updates, installs, and other eopkg and flatpak actions
+## 0 = disabled (default) | 1 = enabled
+SS_ASSUMEYES=0
+
+## Disable Solseek check for updates on launch and in the background if the service is enabled.
+## 0 = update checking enabled (default) | 1 = disabled
+SS_DISABLE_UPCHK=0
+
+## Auto say yes on package and flatpak actions.
+## Note: Only is Update Checks are enabled
+## 0 = disabled | 1 = enabled (default) | 2 = service checks only
+SS_NOTIFCATIONS=1
+
+## Use local eopkg-index.xml file for package listing instead of online
+## Warning: This is currently experimental
+## 0 = disabled (default) | 1 = enabled
+## Note: If enabled and the eopkg-index.xml it will fallback to online
+SS_EOPKG_LCACHE=0
