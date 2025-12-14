@@ -1,19 +1,10 @@
 #!/bin/bash
-SS_VERSION="0.7.1"
-
-#Create cache/config directory if it does'nt exist
-mkdir -p "$HOME/.cache/solseek"
-mkdir -p "$HOME/.config/solseek"
+SS_VERSION="0.8.0"
 
 SS_DATA_PATH="/usr/share/solseek"
-SS_CACHE_PATH="$HOME/.cache/solseek"
 
 # Boot / ENV
 . "$SS_DATA_PATH/core/boot"
-
-# Functions
-. "$SS_DATA_PATH/core/core_functions"
-. "$SS_DATA_PATH/core/pkg_functions"
 
 # Help and calls
 case "$1" in
@@ -36,6 +27,9 @@ case "$1" in
 esac
 # System service update check
 if [ "$1" == "-cu" ]; then
+  if [ "$SS_NOTIFCATIONS" -eq 2 ]; then
+    SS_NOTIFCATIONS=1
+  fi
   check_updates "system"
   exit 0
 fi
@@ -55,14 +49,15 @@ if [ "$1" == "-ssh" ]; then
       fi
   esac
   case "$PNLKEY" in
-    "AMM_LST_PA" | "AMM_LST_PI" | "AMM_LST_PU" | "AMM_LST_FA" | "AMM_LST_FI")
-      ss_info_pane "list";;
-    "AMM_DCAT")
-      ss_info_pane "deskapps";;
+    "AMM_HLP_INST" | "AMM_LST_PII" | "AMM_LST_FII")
+      ss_info_pane "installed";;
+    "AMM_HLP_SRCH" | "AMM_LST_PAS" | "AMM_LST_FAS" | "AMM_DASUB" | "AMM_DCAT" | "AMM_LST_PA" | "AMM_LST_PI" | "AMM_LST_PU" | "AMM_LST_FA" | "AMM_LST_FI")
+      ss_info_pane "search";;
     "AMM_UPSYS")
       SS_HASUP_LIST=0
-      upd_msg list
-
+      if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
+        upd_msg list
+      fi
       if [ "$SS_HASUP_LIST" -eq 0 ]; then
         ss_info_pane "update"
       fi
@@ -76,7 +71,7 @@ if [ "$1" == "-ssh" ]; then
     "AMT_ERBCK")
       ss_info_pane "rollbacklist"
       hr
-      eopkg history -l 20 2>/dev/null
+      eopkg history -l "$SS_ROLLBACK_LIMIT" 2>/dev/null
 
       ;;
     "AMM_TOOLS")
@@ -84,12 +79,18 @@ if [ "$1" == "-ssh" ]; then
     "AMM_ABOUT")
       ss_info_pane "about" ;;
     "AMM_WELC")
-      upd_msg
+      if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
+        upd_msg
+      fi
+      hrclr=201
       if [ "$HAS_FASTFETCH" -eq 1 ]; then
         fastfetch -c /usr/share/solseek/"$SS_FASTFETCH_CFG" 2>/dev/null
         hr
       fi
-      ss_info_pane "welcome" ;;
+      ss_info_pane "welcome"
+      hr
+      ss_life
+      ;;
     "A_BACK")
       echo "$MSG_GEN_BACK" ;;
     "SELPKG")
@@ -156,7 +157,7 @@ elif [ "$1" == "-sse" ]; then
       sse_type="flatpak" ;;
   "AMT_INXI")
       sse_type="inxi" ;;
-  "AMT_SSCFG")
+  "AMT_SSCFG" | "AMT_SSTMR")
       sse_type="solseek" ;;
   "A_BLANK")
       echo " "
@@ -170,17 +171,64 @@ elif [ "$1" == "-sse" ]; then
         if [ "$SS_LOCAL_CFG" -eq 0 ]; then
           cp "$SS_DATA_PATH/config" "$HOME/.config/solseek/"
         fi
-        "$SS_EDITOR" "$HOME/.config/solseek/config"
-        hr 3
-        echo -e "You will need to completely exit out of Solseek before changes take effect!"
-        hr
+        if command -v "$SS_EDITOR" &> /dev/null; then
+          "$SS_EDITOR" "$HOME/.config/solseek/config"
+        else
+          echo -e "$(mst "rb")█ "$SS_EDITOR" not found. Using nano.$(mst "rst")"
+          nano "$HOME/.config/solseek/config"
+        fi
+        hr "danger" 3
+        echo -e "$MSG_GEN_PCONFIG!"
+        hr "danger"
         read -p "$MSG_GEN_PRESSENTER..."
       else
         echo $MSG_INFO_EDITPVTOP
         hr
         ss_info_pane "sscfg"
       fi
+    elif [ "$2" = "AMT_SSTMR" ]; then
+      TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
+      TMR_CHG_ACTION="enable"
+      TMR_CHG_TXT="ACTIVE"
+      TMR_STATUS_DISP="${CSS_REDB}Inactive${CSS_RESET}"
+      if [ "$TMR_STATUS" == "active" ]; then
+        TMR_CHG_ACTION="disable"
+        TMR_CHG_TXT="INACTIVE"
+        TMR_STATUS_DISP="${CSS_GREENB}Active${CSS_RESET}"
+      fi
 
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "${CSS_BOLDBRIGHT}⚙️ Manage Update Check Service${CSS_RESET} | Current Status: $TMR_STATUS_DISP"
+        hr
+        read -n 1 -p "$MSG_GEN_UPCHKQ1 ${TMR_CHG_TXT^^} $MSG_GEN_UPCHKQ2:" PUCHOICE
+        case "$PUCHOICE" in
+          # This matches either 'R' or 'r' (case-insensitive)
+          [Yy])
+              echo -e "\n\n"
+              systemctl --user daemon-reload
+              systemctl --user "$TMR_CHG_ACTION" --now solseek-uc.timer
+              systemctl --user "$TMR_CHG_ACTION" solseek-uc.service
+              TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
+              echo -e "\n"
+              hr 3
+              echo -e "$MSG_GEN_NEWSTATUS: ${TMR_STATUS^^}"
+              hr
+              read -p "$MSG_GEN_PRESSENTER..."
+              exit 0
+              ;;
+          *)
+              exit 0
+              ;;
+        esac
+
+        read -p "$MSG_GEN_PRESSENTER..."
+      else
+        echo $MSG_INFO_EDITPVTOP
+        hr
+        ss_info_pane "sstmr"
+        echo -e "$TMR_STATUS_DISP"
+      fi
     fi
 
     exit 0
@@ -444,20 +492,20 @@ elif [ "$1" == "-ssf" ]; then
       if [ "$ccache" -eq 1 ]; then
         fp_cache "force"
       fi
-      hr 3
+      hr "success" 3
       echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
-      hr
+      hr "success"
       read -p "$MSG_GEN_PRESSENTER..."
   fi
   exit 0
 elif [ "$1" == "-ssu" ]; then
   if [ "$2" == 'check' ]; then
-    echo -e "${CSS_BOLDBRIGHT}📦 Checking for Updates${CSS_RESET}"
+    echo -e "${CSS_BOLDBRIGHT}📦 $MSG_GEN_CHECKUPDS${CSS_RESET}"
     hr
     check_updates "system" "force"
-    hr 3
+    hr "success" 3
     echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
-    hr
+    hr "success"
     read -p "$MSG_GEN_PRESSENTER..."
     exit 0
   fi
@@ -480,7 +528,7 @@ elif [ "$1" == "-ssu" ]; then
   ccache_eopkg=0
   ccache_flatpak=0
   ccache_updates=0
-  hr 3
+  hr "danger" 3
   echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
   if [ "$up_eo" -eq 1 ]; then
     ccache_eopkg=1
@@ -523,9 +571,9 @@ elif [ "$1" == "-ssu" ]; then
   if [ "$ccache_flatpak" -eq 1 ]; then
     fp_cache "force"
   fi
-  hr 3
+  hr "success" 3
   echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
-  hr
+  hr "success"
   read -n 1 -p "$MSG_GEN_PRESSENTERREB: " PUCHOICE
   case "$PUCHOICE" in
     # This matches either 'R' or 'r' (case-insensitive)
@@ -559,6 +607,11 @@ elif [ "$1" == "-cc" ]; then
   rm -f $UL_CACHE_FILE
   rm -f $UP_LOCK_FILE
 
+# This is abstration of the eopkg command to allow for moss inclusion in the future
+# Allows for full eopkg calls
+elif [ "$1" == "eopkg" ]; then
+  eopkg "${@:2}"
+  exit 0
 # If a paramater is passed, no matches above, pass off to eopkg
 elif [ -n "$1" ]; then
   # Capture upgrades so we can do both eopkg and flatpak
@@ -576,6 +629,11 @@ fi
 
 # Include and setup Menus
 . "/usr/share/solseek/core/menus"
+#SS_MAINMENU=2
+## Check for menu style setting
+if [ "$SS_MAINMENU" -eq 2 ]; then
+  MENU_MAIN="$MENU_MAIN2"
+fi
 
 ## Remove features from menu for systems not installed
 if [ "$HAS_FLATPAK" -eq 0 ]; then
@@ -606,6 +664,12 @@ if [ "$ISSA" -eq 1 ]; then
   clear
   # Updates Sub Action
   if [ "$2" == "upsys" ]; then
+
+    ## Remove update check if updates are disabled
+    if [ "$SS_DISABLE_UPCHK" -eq 1 ]; then
+      MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_CHECK|')
+      MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^A_BLANK|')
+    fi
 
     upmode=$(printf "%b" "$MENU_UPDATE" | sa_fzf --prompt="" --header="$ACT_MAIN_UPDATESYS" --preview 'solseek -ssh AMM_UPSYS')
 
@@ -645,6 +709,7 @@ if [ "$ISSA" -eq 1 ]; then
       "AMT_FPCLEAN") solseek -sse "$toolAction" run ;;
       "AMT_INXI") solseek -sse "$toolAction" export ;;
       "AMT_SSCFG") solseek -sse "$toolAction" run;;
+      "AMT_SSTMR") solseek -sse "$toolAction" run;;
       *) continue ;;
     esac
   # EOPKG Rollback Menu
@@ -661,10 +726,26 @@ if [ "$ISSA" -eq 1 ]; then
       "A_BACK" | "") exit 0 ;;
       *) solseek -sse rollback "$toolAction" ;;
     esac
+  # Appstream Catalog Category Menu
+  elif [ "$2" == "lasm" ]; then
+
+    mode=$(printf "%b" "$MENU_DAS" | sa_fzf --prompt="" --header="Desktop App Categories" --preview 'solseek -ssh "deskapps"')
+    mode=${mode%|*}
+
+    # For Appstream we have extra parsing
+    if [[ "$mode" == *:* ]]; then
+      IFS=':' read -r mode ascat <<< "$mode"
+    fi
+
+    case "$mode" in
+      "AMM_DCAT") solseek subact las "$ascat" ;;
+      "A_BACK" | "") exit 0 ;;
+    esac
+
   # Appstream Catalog
   elif [ "$2" == "las" ]; then
     appstream_get_list "$3"
-    app_list=$(< "$AS_CACHE_FILE")
+    app_list=$(cat "$AS_CACHE_FILE" | sort -t ']' -k 2)
     pkg=$(printf "%b" "$app_list" | as_fzf --prompt="$MSG_PKG_PROMPT: " --header="Desktop - $3")
 
     [ -z "$pkg" ] && exit 0
@@ -789,6 +870,7 @@ if [ "$ISSA" -eq 1 ]; then
         MENU_PKG="$MENU_IPKG"
       fi
 
+      # 1. Check if current line looks like a flag (indented with spaces, starts with -)
 
       package="${package//$'\n'/ }"
       # PACKAGE ACTION
@@ -829,10 +911,11 @@ while true; do
 
   case "$mode" in
     "AMM_QUIT" | "") exit 0 ;;
-    "AMM_LST_PI") solseek subact li ;;
-    "AMM_LST_PA") solseek subact la ;;
-    "AMM_LST_FA") solseek subact laf ;;
-    "AMM_LST_FI") solseek subact lif ;;
+    "AMM_LST_PI" | "AMM_LST_PII") solseek subact li ;;
+    "AMM_LST_PA" | "AMM_LST_PAS") solseek subact la ;;
+    "AMM_LST_FA" | "AMM_LST_FAS") solseek subact laf ;;
+    "AMM_LST_FI" | "AMM_LST_FII") solseek subact lif ;;
+    "AMM_DASUB") solseek subact lasm ;;
     "AMM_DCAT") solseek subact las "$ascat" ;;
     "AMM_UPSYS") solseek subact upsys ;;
     "AMM_TOOLS") solseek subact tools ;;
