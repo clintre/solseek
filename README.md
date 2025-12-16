@@ -9,9 +9,9 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 ⚠️ **Please note that until version 1.x this will be fast changing**
 
-<p align="center">Click image below to see a short demo video</p>
+📽️ [Click here](https://youtu.be/MT7w6rZLmt0) or image below to see a short demo video.
 
-[![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://youtu.be/F6o0ESX7RF0)
+[![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://youtu.be/MT7w6rZLmt0)
 
 ## Features
   - Select and install multiple packages at once
@@ -22,7 +22,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - View system configurations
 
 ## Known Limitations / Issues
-  - Currently only in English and French
+  - Currently only in English, French, and Polish
   - Limited Snap support. Only updates, no list or searching. Full Snap support is not planned at this time.
 
 ## Planned
@@ -32,7 +32,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 ## Contributing
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
-- [Correcting Language Files](https://github.com/clintre/solseek/discussions/13)
+- [Adding or Correction Language Files](https://github.com/clintre/solseek/discussions/13)
 - Adding language file guide coming, but if you are familiar with Github, copy the en directory and contents and translate.
 
 ## Credits
