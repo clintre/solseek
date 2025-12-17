@@ -56,7 +56,7 @@ check_updates(){
           UPCNT_FP=0
           UPMSG_FP=""
           NOTI_LVL="normal"
-          NOTI_ID=""
+          NOTI_ID=$(shuf -i 9000-11000 -n 1)
 
           # Make sure we are getting the latest
           pkcon refresh force &> /dev/null
@@ -72,6 +72,7 @@ check_updates(){
 
           if [ "$UPCNT_SOLUS" -gt 0 ]; then
             NOTI_LVL="critical"
+            NOTI_ID=11111
           fi
 
           echo "TTL_UPDCNT=$UPCNT_TTL" >> "$UP_CACHE_FILE"
@@ -81,8 +82,7 @@ check_updates(){
 
           if [ "$UPCNT_TTL" -gt 0 ] && [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
               UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
-
-              notify-send --app-name="Solseek" --urgency="$NOTI_LVL" --replace-id=11111 -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+              notify-send --app-name="Solseek" --urgency="$NOTI_LVL" --replace-id=$NOTI_ID -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
           fi
       fi
       rm -f "$UP_LOCK_FILE"
@@ -222,6 +222,7 @@ clean_cache(){
     fi
     if echo "$@" | grep -q "regen";  then
       echo "$MSG_GEN_CACHE"
+      rm -f "$UP_LOCK_FILE"
       check_updates "system" &
       fp_cache "force" &
       eopkg_cache
@@ -260,14 +261,14 @@ appstream_write_entry() {
                 statPre="\033[32m⬤"
                 statEnd="\033[0m"
             fi
-            echo "flatpak:$id|$statPre [F] $name $summary $statEnd" >> "$AS_CACHE_FILE"
+            echo "flatpak:$id|$statPre [F] $name $summary $statEnd" >> "$AS_TMP_CACHE"
         elif [[ "$type" == "package" && -n "$pkg" ]]; then
             # Format: eopkg:Package|Name - Summary
             if grep -q "$pkg" "$PI_CACHE_FILE"; then
                 statPre="\033[32m⬤"
                 statEnd="\033[0m"
             fi
-            echo "eopkg:$pkg|$statPre [P] $name $summary $statEnd" >> "$AS_CACHE_FILE"
+            echo "eopkg:$pkg|$statPre [P] $name $summary $statEnd" >> "$AS_TMP_CACHE"
         fi
     fi
 
@@ -280,12 +281,18 @@ appstream_write_entry() {
 }
 
 appstream_get_list(){
-    TMP_PGK_FILE=$(mktemp)
+
     # Clear existing cache file
-    > "$AS_CACHE_FILE"
+    > "$AS_TMP_CACHE"
+    TMP_PGK_FILE=$(mktemp)
 
     echo -e "$MSG_GEN_LOADCATALOG";
-    LC_ALL=C appstreamcli list-categories "$1" --no-color > "$TMP_PGK_FILE"
+    if [ "$1" == "All" ]; then
+      LC_ALL=C appstreamcli search . --no-color > "$TMP_PGK_FILE"
+    else
+      LC_ALL=C appstreamcli list-categories "$1" --no-color > "$TMP_PGK_FILE"
+    fi
+
 
     INPUT_SOURCE="$TMP_PGK_FILE"
 
