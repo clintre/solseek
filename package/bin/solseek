@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.8.0"
+SS_VERSION="0.8.1"
 
 SS_DATA_PATH="/usr/share/solseek"
 
@@ -729,7 +729,7 @@ if [ "$ISSA" -eq 1 ]; then
   # Appstream Catalog Category Menu
   elif [ "$2" == "lasm" ]; then
 
-    mode=$(printf "%b" "$MENU_DAS" | sa_fzf --prompt="" --header="Desktop App Categories" --preview 'solseek -ssh "deskapps"')
+    mode=$(printf "%b" "$MENU_DAS" | sa_fzf --prompt="" --header="Desktop App Categories" --preview 'solseek -ssh AMM_DASUB')
     mode=${mode%|*}
 
     # For Appstream we have extra parsing
@@ -744,8 +744,11 @@ if [ "$ISSA" -eq 1 ]; then
 
   # Appstream Catalog
   elif [ "$2" == "las" ]; then
+
+    AS_TMP_CACHE="$AS_CACHE_FILE"
     appstream_get_list "$3"
-    app_list=$(cat "$AS_CACHE_FILE" | sort -t ']' -k 2)
+
+    app_list=$(cat "$AS_TMP_CACHE" | sort -t ']' -k 2)
     pkg=$(printf "%b" "$app_list" | as_fzf --prompt="$MSG_PKG_PROMPT: " --header="Desktop - $3")
 
     [ -z "$pkg" ] && exit 0
