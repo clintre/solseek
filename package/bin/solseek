@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.8.1"
+SS_VERSION="0.9.0"
 
 SS_DATA_PATH="/usr/share/solseek"
 
@@ -84,12 +84,15 @@ if [ "$1" == "-ssh" ]; then
       fi
       hrclr=201
       if [ "$HAS_FASTFETCH" -eq 1 ]; then
-        fastfetch -c /usr/share/solseek/"$SS_FASTFETCH_CFG" 2>/dev/null
-        hr
+        fastfetch -c "$SS_FASTFETCH_CFG" --pipe false 2>/dev/null
+      else
+        ss_fetch 2>/dev/null
       fi
+      hr
       ss_info_pane "welcome"
       hr
       ss_life
+      echo -e "$MSG_GEN_PKGMGRS: $INST_PKG_MGRS"
       ;;
     "A_BACK")
       echo "$MSG_GEN_BACK" ;;
@@ -157,7 +160,7 @@ elif [ "$1" == "-sse" ]; then
       sse_type="flatpak" ;;
   "AMT_INXI")
       sse_type="inxi" ;;
-  "AMT_SSCFG" | "AMT_SSTMR")
+  "AMT_SSCFG" | "AMT_SSTMR" | "AMT_RBFW")
       sse_type="solseek" ;;
   "A_BLANK")
       echo " "
@@ -199,7 +202,7 @@ elif [ "$1" == "-sse" ]; then
 
       if [ "$3" == "run" ]; then
         hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙️ Manage Update Check Service${CSS_RESET} | Current Status: $TMR_STATUS_DISP"
+        echo -e "${CSS_BOLDBRIGHT}⚙️ ${MSG_INFO_MNGUPCHKSRV}${CSS_RESET} | ${MSG_GEN_CURSTATUS}: $TMR_STATUS_DISP"
         hr
         read -n 1 -p "$MSG_GEN_UPCHKQ1 ${TMR_CHG_TXT^^} $MSG_GEN_UPCHKQ2:" PUCHOICE
         case "$PUCHOICE" in
@@ -228,6 +231,26 @@ elif [ "$1" == "-sse" ]; then
         hr
         ss_info_pane "sstmr"
         echo -e "$TMR_STATUS_DISP"
+      fi
+    elif [ "$2" = "AMT_RBFW" ]; then
+      if [ "$3" == "run" ]; then
+        hr 3
+        echo -e "${CSS_BOLDBRIGHT}⚙ ${ACT_INFO_RBFW}${CSS_RESET}";
+        hr
+        read -n 1 -p "${ACT_INFO_RBFW}? (N/y):" PUCHOICE
+        case "$PUCHOICE" in
+          [Yy])
+              systemctl reboot --firmware-setup
+              exit 0
+              ;;
+          *)
+              exit 0
+              ;;
+        esac
+      else
+        echo $MSG_INFO_RUNPVTOP
+        hr
+        echo -e "${ACT_INFO_RBFW}";
       fi
     fi
 
@@ -499,6 +522,7 @@ elif [ "$1" == "-ssf" ]; then
   fi
   exit 0
 elif [ "$1" == "-ssu" ]; then
+  clear
   if [ "$2" == 'check' ]; then
     echo -e "${CSS_BOLDBRIGHT}📦 $MSG_GEN_CHECKUPDS${CSS_RESET}"
     hr
@@ -516,6 +540,7 @@ elif [ "$1" == "-ssu" ]; then
   up_sn=0
   up_db=0
   up_fw=0
+  up_cu=0
   up_chk=0
 
   for arg in "$@"; do
@@ -562,6 +587,12 @@ elif [ "$1" == "-ssu" ]; then
     sudo fwupdmgr update
   fi
 
+  if [ "$up_cu" -eq 1 ] && [ "$HAS_CUSTOM" -eq 1 ]; then
+    hr
+    echo -e "${CSS_REDB}█ $MSG_UPD_CUSTOM ${CSS_RESET}\n"
+    sh "$SS_CUST_UPDATE"
+  fi
+
   if [ "$ccache_updates" -eq 1 ]; then
     check_updates "system" &
   fi
@@ -591,6 +622,25 @@ elif [ "$1" == "-ssu" ]; then
         ;;
   esac
   exit 0
+elif [ "$1" == "applist" ]; then
+  if [ "$2" == "pkga" ]; then
+      eopkg_cache
+      cat $PA_CACHE_FILE 2>/dev/null
+  elif [ "$2" == "pkgi" ]; then
+      eopkg_cache
+      cat $PI_CACHE_FILE 2>/dev/null
+  elif [ "$2" == "fpa" ]; then
+      fp_cache
+      cat $FA_CACHE_FILE 2>/dev/null
+  elif [ "$2" == "fpi" ]; then
+      fp_cache
+      cat $FI_CACHE_FILE 2>/dev/null
+  elif [ "$2" == "as" ]; then
+      AS_TMP_CACHE="$AS_CACHE_FILE"
+      appstream_get_list "$3"
+      cat "$AS_TMP_CACHE" | sort -t ']' -k 2
+  fi
+  exit 0
 elif [ "$1" == "subact" ]; then
   # We just set the sub action avoid running the fz logic up here
   ISSA=1
@@ -617,9 +667,9 @@ elif [ -n "$1" ]; then
   # Capture upgrades so we can do both eopkg and flatpak
   if [ "$1" = "up" ] || [ "$1" = "upgrade" ]; then
     if [ "$2" == "-e" ]; then
-        solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1
+        solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1
     fi
-    solseek -ssu up_eo=1 up_fp=1
+    solseek -ssu up_eo=1 up_fp=1 up_sn=1
     exit 0
   fi
 
@@ -648,6 +698,9 @@ if [ "$HAS_FLATPAK" -eq 0 ]; then
 fi
 if [ "$HAS_SNAP" -eq 0 ]; then
   MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_SNAP|')
+fi
+if [ "$HAS_CUSTOM" -eq 0 ]; then
+  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_CUST|')
 fi
 if [ "$HAS_DISTROBOX" -eq 0 ]; then
   MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_DBOX|')
@@ -682,7 +735,8 @@ if [ "$ISSA" -eq 1 ]; then
       "AMU_ALL") solseek -ssu up_eo=1 up_fp=1 up_sn=1;;
       "AMU_DBOX") solseek -ssu up_db=1;;
       "AMU_FMW") solseek -ssu up_fw=1;;
-      "AMU_ETHING") solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1;;
+      "AMU_CUST") solseek -ssu up_cu=1;;
+      "AMU_ETHING") solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1;;
       "AMU_CHECK") solseek -ssu check;;
       *) continue ;;
     esac
@@ -710,6 +764,7 @@ if [ "$ISSA" -eq 1 ]; then
       "AMT_INXI") solseek -sse "$toolAction" export ;;
       "AMT_SSCFG") solseek -sse "$toolAction" run;;
       "AMT_SSTMR") solseek -sse "$toolAction" run;;
+      "AMT_RBFW") solseek -sse "$toolAction" run;;
       *) continue ;;
     esac
   # EOPKG Rollback Menu
@@ -745,10 +800,12 @@ if [ "$ISSA" -eq 1 ]; then
   # Appstream Catalog
   elif [ "$2" == "las" ]; then
 
-    AS_TMP_CACHE="$AS_CACHE_FILE"
-    appstream_get_list "$3"
+    #AS_TMP_CACHE="$AS_CACHE_FILE"
+    #appstream_get_list "$3"
+    #app_list=$(cat "$AS_TMP_CACHE" | sort -t ']' -k 2)
+    echo -e "$MSG_GEN_LOADCATALOG"
+    app_list=$(solseek "applist" "as" "$3")
 
-    app_list=$(cat "$AS_TMP_CACHE" | sort -t ']' -k 2)
     pkg=$(printf "%b" "$app_list" | as_fzf --prompt="$MSG_PKG_PROMPT: " --header="Desktop - $3")
 
     [ -z "$pkg" ] && exit 0
@@ -804,10 +861,12 @@ if [ "$ISSA" -eq 1 ]; then
       fp_cache
 
       if [ "$2" = "lif" ]; then
-        app_list=$(< "$FI_CACHE_FILE")
+        #app_list=$(< "$FI_CACHE_FILE")
+        app_list=$(solseek "applist" "fpi")
         pkg_list_type="$ACT_MAIN_LISTIPKGS"
       else
-        app_list=$(< "$FA_CACHE_FILE")
+        #app_list=$(< "$FA_CACHE_FILE")
+        app_list=$(solseek "applist" "fpa")
         pkg_list_type="$ACT_MAIN_LISTAPKGS"
       fi
 
@@ -847,15 +906,17 @@ if [ "$ISSA" -eq 1 ]; then
 
     # PACKAGE LIST
       eopkg_cache
-
       if [ "$2" = "li" ]; then
-        app_list=$(< "$PI_CACHE_FILE")
+        #app_list=$(< "$PI_CACHE_FILE")
+        app_list=$(solseek "applist" "pkgi")
         pkg_list_type="$ACT_MAIN_LISTIPKGS"
       else
-        app_list=$(< "$PA_CACHE_FILE")
-        #app_list=$(cat "$PI_CACHE_FILE" "$PA_CACHE_FILE" | sort)
+        #exit 0
+        #app_list=$(< "$PA_CACHE_FILE")
+        app_list=$(solseek "applist" "pkga")
         pkg_list_type="$ACT_MAIN_LISTAPKGS"
       fi
+
       pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$MSG_PKG_HEADER - $pkg_list_type" --preview 'solseek -ssi {1} {+}')
       #solseek -ssi {1} {+}
 
