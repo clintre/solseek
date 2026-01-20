@@ -5,9 +5,20 @@
 ## SS_LANG="en"
 
 ## Fastfetch Options - If fastfetch is installed
-## 0 = disabled | 1 = Enabled (default) with icons key type | 2 = Enabled with string key type
+## 0 = disabled / uses built-in fetch
+## 1 = color icon key
+## 2 = color text key
+## 3 = color icon and key
+## 4 = icon key
+## 5 = text key
+## 6 = icon and key
 ## If not using a nerd font or having issues with the key icons displaying, set to 2
 SS_FASTFETCH=1
+
+## Fastfetch Custom Config
+## Use your own config file. Please note that logos do not properly render
+## Will override Fastfetch Options. If config not found, fallsback to built-in fetch
+#SS_FASTFETCH_CONF="/path/to/your/fastfetch_config.jsonc"
 
 ## Set Menu Style
 ## 1 = Compact Menu (default) | 2 = Expanded Menu
@@ -43,3 +54,9 @@ SS_NOTIFCATIONS=1
 ## 0 = disabled (default) | 1 = enabled
 ## Note: If enabled and the eopkg-index.xml it will fallback to online
 SS_EOPKG_LCACHE=0
+
+## Custom Update Script
+## Allows user to use a custom bash script for updating other tools, like brew and AppImages
+## Must be a properly formatted bash script
+## If set, Custom will be an option in the Solseek Update Menu
+# /path/to/customscript.sh
