@@ -24,19 +24,22 @@ upd_msg(){
 
     if [ "$1" == "list" ] && [ "$TTL_UPDCNT" -gt 0 ]; then
         SS_HASUP_LIST=1
-        echo -e "$MSG_UPD_DISCO\n\n"
-        if [ "$SOLUS_UPCNT" -gt 0 ]; then
-          echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}"
-          if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
-            echo -e "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n"
-          fi
-          eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' | fold -s -w 70
-        fi
 
-        if [ "$FLATPAK_UPCNT" -gt 0 ]; then
-        echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}"
-        flatpak remote-ls --updates --columns=name,version | fold -s -w 70
-        fi
+        UPLIST=$(<"$UL_CACHE_FILE")
+        echo -e "$UPLIST" | fold -s -w 70
+        #echo -e "$MSG_UPD_DISCO\n\n"
+        #if [ "$SOLUS_UPCNT" -gt 0 ]; then
+        #  echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}"
+        #  if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
+        #    echo -e "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n"
+        #  fi
+        #  eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' | fold -s -w 70
+        #fi
+
+        #if [ "$FLATPAK_UPCNT" -gt 0 ]; then
+        # echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}"
+        # flatpak remote-ls --updates --columns=name,version | fold -s -w 70
+        #fi
     fi
 }
 
@@ -47,6 +50,12 @@ check_updates(){
 
           if [ "$2" == "force" ]; then
             echo -e "Checking..."
+          fi
+          PREV_UPCNT_TTL=0;
+
+          if [ -f "$UP_CACHE_FILE" ]; then
+            . "$UP_CACHE_FILE"
+            PREV_UPCNT_TTL="$PREV_UPCNT_TTL"
           fi
 
           echo "#Update Count Cache File" > "$UP_CACHE_FILE"
@@ -79,11 +88,30 @@ check_updates(){
           echo "SOLUS_UPCNT=$UPCNT_SOLUS" >> "$UP_CACHE_FILE"
           echo "FLATPAK_UPCNT=$UPCNT_FP" >> "$UP_CACHE_FILE"
 
+          if [ "$UPCNT_TTL" -gt 0 ]; then
+            if [ "$UPCNT_TTL" -ne "$PREV_UPCNT_TTL" ] || [ ! -f "$UL_CACHE_FILE" ]; then
+              echo "$MSG_UPD_DISCO\n\n" > "$UL_CACHE_FILE"
+              if [ "$UPCNT_SOLUS" -gt 0 ]; then
+                echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}" >> "$UL_CACHE_FILE"
+                if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
+                  echo "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n" >> "$UL_CACHE_FILE"
+                fi
+                eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' >> "$UL_CACHE_FILE"
+              fi
 
-          if [ "$UPCNT_TTL" -gt 0 ] && [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
+              if [ "$UPCNT_FP" -gt 0 ]; then
+                echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}" >> "$UL_CACHE_FILE"
+                flatpak remote-ls --updates --columns=name,version >> "$UL_CACHE_FILE"
+              fi
+
+
+            fi
+            if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
               UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
               notify-send --app-name="Solseek" --urgency="$NOTI_LVL" --replace-id=$NOTI_ID -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+            fi
           fi
+
       fi
       rm -f "$UP_LOCK_FILE"
     fi
@@ -93,6 +121,7 @@ check_updates(){
 fp_cache(){
   if [ "$HAS_FLATPAK" -eq 1 ]; then
     DOUPDATE=0
+    rm -f "$UL_CACHE_FILE"
 
     if [ "$1" == "force" ] || [ ! -f "$FI_CACHE_FILE" ] || [ -n "$(find "$FI_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
         DOUPDATE=1
@@ -151,6 +180,7 @@ eopkg_build_index(){
 
 eopkg_cache(){
   DOUPDATE=0
+  rm -f "$UL_CACHE_FILE"
   LATESTHF=$(ls -t /var/lib/eopkg/history/*.xml 2>/dev/null | head -n 1)
 
   if [ "$1" == "force" ]; then
@@ -219,6 +249,7 @@ clean_cache(){
 
     if echo "$@" | grep -q "update"; then
         rm -f "$UP_CACHE_FILE"
+        rm -f "$UL_CACHE_FILE"
     fi
     if echo "$@" | grep -q "regen";  then
       echo "$MSG_GEN_CACHE"
@@ -286,7 +317,7 @@ appstream_get_list(){
     > "$AS_TMP_CACHE"
     TMP_PGK_FILE=$(mktemp)
 
-    echo -e "$MSG_GEN_LOADCATALOG";
+    #echo -e "$MSG_GEN_LOADCATALOG";
     if [ "$1" == "All" ]; then
       LC_ALL=C appstreamcli search . --no-color > "$TMP_PGK_FILE"
     else

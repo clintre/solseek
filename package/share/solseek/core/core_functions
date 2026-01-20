@@ -259,21 +259,97 @@ $fpRepos
 echo "$OUT"
 }
 
+ss_fetch(){
+
+  echo -e "${CSS_CYANB}Kernel     ${CSS_RESET} $(uname -r)"
+
+  # Load Average
+  read -r l1 l2 l3 _ < /proc/loadavg
+  echo -e "${CSS_CYANB}Load       ${CSS_RESET} $l1, $l2, $l3"
+
+  # Memory
+  mem_total_kb=$(grep "MemTotal" /proc/meminfo | awk '{print $2}')
+  mem_avail_kb=$(grep "MemAvailable" /proc/meminfo | awk '{print $2}')
+  mem_used_kb=$((mem_total_kb - mem_avail_kb))
+
+  # Calculate in awk for float precision (matches fastfetch's %.2f GiB)
+  memInfo=$(awk -v used="$mem_used_kb" -v total="$mem_total_kb" 'BEGIN {
+      u_gib = used / 1024 / 1024
+      t_gib = total / 1024 / 1024
+      pct = (used / total) * 100
+      printf "%.2f GiB / %.2f GiB (%.0f%%)", u_gib, t_gib, pct
+  }')
+  echo -e "${CSS_CYANB}Memory     ${CSS_RESET} $memInfo"
+
+  # Disk (Root /)
+  diskInfo=$(df -B1 -T / | tail -n 1 | awk '{
+      type=$2
+      total=$3
+      used=$4
+
+      # Calculate percentage
+      pct=(used/total)*100
+
+      # Auto-scale units for Used (GiB usually)
+      u_val = used / 1073741824
+      u_unit = "GiB"
+
+      # Auto-scale units for Total
+      if (total >= 1099511627776) {
+          t_val = total / 1099511627776
+          t_unit = "TiB"
+      } else {
+          t_val = total / 1073741824
+          t_unit = "GiB"
+      }
+
+      printf "%.2f %s / %.2f %s (%.0f%%) - %s\n", u_val, u_unit, t_val, t_unit, pct, type
+  }')
+
+  echo -e "${CSS_CYANB}Disk       ${CSS_RESET} $diskInfo"
+
+  # Packages
+  pkgs_output=""
+
+  # Check for eopkg
+  if command -v eopkg &> /dev/null; then
+    if [ -f "$PI_CACHE_FILE" ]; then
+        count=$(wc -l < "$PI_CACHE_FILE")
+    else
+        count=$(eopkg li | wc -l)
+    fi
+    pkgs_output="${pkgs_output}${count} (eopkg)"
+  fi
+
+  # Check for Flatpak
+  if command -v flatpak &> /dev/null; then
+    if [ -f "$PI_CACHE_FILE" ]; then
+        count=$(wc -l < "$FI_CACHE_FILE")
+    else
+        count=$(flatpak list --app | wc -l)
+    fi
+      pkgs_output="${pkgs_output}, ${count} (flatpak)"
+  fi
+  pkgs_output=${pkgs_output%, }
+
+  echo -e "${CSS_GREENB}Packages   ${CSS_RESET} $pkgs_output"
+}
+
 get_changelog(){
 
-  if command -v curl >/dev/null 2>&1; then
-    CLVER=${SS_VERSION//./}
-    CLFILE="$SS_CACHE_PATH/changelog$CLVER"
-    if [ ! -f "$CLFILE" ]; then
-      rm -f "$SS_CACHE_PATH"/changelog*
-      curl -s https://api.github.com/repos/clintre/solseek/releases/latest | awk -F'"' '/"body":/{print $4; exit}' > "$CLFILE"
-    fi
-    CLTXT=$(< "$CLFILE")
-    if [ -n "$CLTXT" ]; then
-      echo -e "$MSG_GEN_CLTITLE v$SS_VERSION\n\n$CLTXT"
+	if command -v curl >/dev/null 2>&1; then
+		CLVER=${SS_VERSION//./}
+		CLFILE="$SS_CACHE_PATH/changelog$CLVER"
+		if [ ! -f "$CLFILE" ]; then
+			rm -f "$SS_CACHE_PATH"/changelog*
+			curl -s https://api.github.com/repos/clintre/solseek/releases/latest | awk -F'"' '/"body":/{print $4; exit}' > "$CLFILE"
+		fi
+		CLTXT=$(< "$CLFILE")
+		if [ -n "$CLTXT" ]; then
+			echo -e "$MSG_GEN_CLTITLE v$SS_VERSION\n\n$CLTXT"
 
-    fi
-  fi
+		fi
+	fi
 }
 
 ss_info_pane(){

@@ -68,17 +68,29 @@ UL_CACHE_FILE="$SS_CACHE_PATH/updatelst"
 UP_LOCK_FILE="$SS_CACHE_PATH/update_lock"
 
 #Supported Update Systems
+CORE_PKG_TYPE=""
+INST_PKG_MGRS=""
 HAS_FLATPAK=0
 HAS_SNAP=0
 HAS_DISTROBOX=0
 HAS_FIRMWARE=0
 HAS_FASTFETCH=0
+HAS_CUSTOM=0
 
+if command -v "eopkg" &> /dev/null; then
+  CORE_PKG_TYPE="eopkg"
+  INST_PKG_MGRS="eopkg"
+elif command -v "moss" &> /dev/null; then
+  CORE_PKG_TYPE="moss"
+  INST_PKG_MGRS="moss"
+fi
 if command -v "flatpak" &> /dev/null; then
   HAS_FLATPAK=1
+  INST_PKG_MGRS="$INST_PKG_MGRS, flatpak"
 fi
 if command -v "snap" &> /dev/null; then
   HAS_SNAP=1
+  INST_PKG_MGRS="$INST_PKG_MGRS, snap"
 fi
 if command -v "distrobox" &> /dev/null; then
   HAS_DISTROBOX=1
@@ -86,12 +98,21 @@ fi
 if command -v "fwupdmgr" &> /dev/null; then
   HAS_FIRMWARE=1
 fi
+if [ -n "$SS_CUST_UPDATE" ] && [ -f "$SS_CUST_UPDATE" ]; then
+  HAS_CUSTOM=1
+fi
+
+
 if command -v "fastfetch" &> /dev/null; then
-  HAS_FASTFETCH=1
-  SS_FASTFETCH_CFG="solseek_fastfetch.jsonc"
-  ## Check for config override
-  if [ "$SS_FASTFETCH" -eq 2 ]; then
-    SS_FASTFETCH_CFG="solseek_fastfetch_str.jsonc"
+  SS_FASTFETCH_CFG="/usr/share/solseek/solseek_fastfetch_$SS_FASTFETCH.jsonc"
+
+  # Check if user has a custom ff config
+  if [ -n "$SS_FASTFETCH_CONF" ] && [ -f "$SS_FASTFETCH_CONF" ]; then
+    SS_FASTFETCH_CFG="$SS_FASTFETCH_CONF"
+  fi
+
+  if [ "$SS_FASTFETCH" -gt 0 ] && [ -f "$SS_FASTFETCH_CFG" ]; then
+    HAS_FASTFETCH=1
   elif [ "$SS_FASTFETCH" -eq 0 ]; then
     HAS_FASTFETCH=0
   fi
