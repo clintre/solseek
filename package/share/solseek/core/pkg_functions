@@ -172,6 +172,21 @@ fp_cache(){
 
 }
 
+
+get_pkg_info(){
+  if [ "$SS_PKG_MGR" == "eopkg" ]; then
+    eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
+  else
+    ## this will need refinement
+    moss search "$1"
+  fi
+}
+
+get_appstream_details(){
+  appstreamcli get --details "$1" | awk '/^[^ ]/ { skip = ($0 ~ /^(Identifier|Internal ID|Icon|Bundle|Default Screenshot URL):/) } !skip'
+}
+
+
 eopkg_build_index(){
   echo "$MSG_GEN_PCACHE"
   eopkg la -N 2>/dev/null | awk 'NR>2 {print $1}' > "$IDX_CACHE_FILE"
@@ -246,7 +261,6 @@ eopkg_cache(){
 }
 
 clean_cache(){
-
     if echo "$@" | grep -q "update"; then
         rm -f "$UP_CACHE_FILE"
         rm -f "$UL_CACHE_FILE"
@@ -259,6 +273,8 @@ clean_cache(){
       eopkg_cache
     fi
 }
+
+
 eopkg_rollback_menu(){
     LC_ALL=C eopkg history -l "$SS_ROLLBACK_LIMIT" | sed -nE 's/^(.*#([0-9]+)):.*/\2|\1/p'
 }
