@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.9.0"
+SS_VERSION="0.10.0"
 
 SS_DATA_PATH="/usr/share/solseek"
 
@@ -11,8 +11,12 @@ case "$1" in
   "-h" | "--help" | "help" )
   echo -e "$MSG_HELP"
   if [ "$1" == "help" ]; then
-  echo -e "\nAdditional EOPKG Help\n"
-  eopkg help
+    echo -e "\nAdditional ${SS_PKG_MGR} Help\n"
+    if [ "$SS_PKG_MGR" == "eopkg" ]; then
+      eopkg help
+    else
+      moss --help
+    fi
   fi
   exit 0
   ;;
@@ -90,6 +94,7 @@ if [ "$1" == "-ssh" ]; then
       fi
       hr
       ss_info_pane "welcome"
+      echo -e "📘 WIKI: https://solseek.org/wiki"
       hr
       ss_life
       echo -e "$MSG_GEN_PKGMGRS: $INST_PKG_MGRS"
@@ -123,7 +128,7 @@ elif [ "$1" == "-ssi" ]; then
       hr
     fi
     echo -e "> $pkg_status\n"
-    eopkg info "$2" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}' | fold -s -w 70 2>/dev/null
+    get_pkg_info "$2" | fold -s -w 70 2>/dev/null
 
   else
     echo "$MSG_GEN_SEL_ITEM"
@@ -143,7 +148,7 @@ elif [ "$1" == "-ssfi" ]; then
     fi
     echo -e "> $pkg_status\n"
 
-    appstreamcli get --details "$2" | awk '/^[^ ]/ { skip = ($0 ~ /^(Identifier|Internal ID|Icon|Bundle|Default Screenshot URL):/) } !skip' | fold -s -w 70 2>/dev/null
+    get_appstream_details "$2" | fold -s -w 70 2>/dev/null
 
   else
     echo "$MSG_GEN_SEL_ITEM"
@@ -156,7 +161,7 @@ elif [ "$1" == "-sse" ]; then
   sse_type="eopkg"
 
   case "$2" in
-  "AMT_FPLA" | "AMT_FPLU" | "AMT_FPCLEAN" | "AMT_FCHECK" | "AMT_FREPO")
+  "AMT_FPLA" | "AMT_FPLU" | "AMT_FPCLEAN" | "AMT_FCHECK" | "AMT_FREPO" | "AMT_FHIST")
       sse_type="flatpak" ;;
   "AMT_INXI")
       sse_type="inxi" ;;
@@ -206,7 +211,6 @@ elif [ "$1" == "-sse" ]; then
         hr
         read -n 1 -p "$MSG_GEN_UPCHKQ1 ${TMR_CHG_TXT^^} $MSG_GEN_UPCHKQ2:" PUCHOICE
         case "$PUCHOICE" in
-          # This matches either 'R' or 'r' (case-insensitive)
           [Yy])
               echo -e "\n\n"
               systemctl --user daemon-reload
@@ -416,6 +420,9 @@ elif [ "$1" == "-sse" ]; then
     elif [ "$2" = "AMT_FREPO" ]; then
       sse_cmd="remotes --show-disabled --columns=name,url,options"
       sse_export_fn="$HOME/flatpak_remotes.txt"
+    elif [ "$2" = "AMT_FHIST" ]; then
+      sse_cmd="history --reverse"
+      sse_export_fn="$HOME/flatpak_history.txt"
     fi
     if [ "$3" == "export" ]; then
       flatpak $sse_cmd > $sse_export_fn
@@ -594,14 +601,16 @@ elif [ "$1" == "-ssu" ]; then
   fi
 
   if [ "$ccache_updates" -eq 1 ]; then
+    hr
     check_updates "system" &
+    if [ "$ccache_eopkg" -eq 1 ]; then
+      eopkg_cache "force"
+    fi
+    if [ "$ccache_flatpak" -eq 1 ]; then
+      fp_cache "force"
+    fi
   fi
-  if [ "$ccache_eopkg" -eq 1 ]; then
-    eopkg_cache "force"
-  fi
-  if [ "$ccache_flatpak" -eq 1 ]; then
-    fp_cache "force"
-  fi
+
   hr "success" 3
   echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
   hr "success"
@@ -657,29 +666,28 @@ elif [ "$1" == "-cc" ]; then
   rm -f $UL_CACHE_FILE
   rm -f $UP_LOCK_FILE
 
-# This is abstration of the eopkg command to allow for moss inclusion in the future
+# This is abstraction of the eopkg/moss command to allow for moss inclusion in the future
 # Allows for full eopkg calls
 elif [ "$1" == "eopkg" ]; then
   eopkg "${@:2}"
   exit 0
-# If a paramater is passed, no matches above, pass off to eopkg
+# If a paramater is passed, no matches above, pass off to eopkg/moss
 elif [ -n "$1" ]; then
-  # Capture upgrades so we can do both eopkg and flatpak
+  # Capture upgrades so we can do both eopkg/moss and flatpak
   if [ "$1" = "up" ] || [ "$1" = "upgrade" ]; then
     if [ "$2" == "-e" ]; then
         solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1
+    else
+        solseek -ssu up_eo=1 up_fp=1 up_sn=1
     fi
-    solseek -ssu up_eo=1 up_fp=1 up_sn=1
     exit 0
   fi
-
-  eopkg "$@"
+  ${SS_PKG_MGR} "$@"
   exit 0
 fi
 
 # Include and setup Menus
 . "/usr/share/solseek/core/menus"
-#SS_MAINMENU=2
 ## Check for menu style setting
 if [ "$SS_MAINMENU" -eq 2 ]; then
   MENU_MAIN="$MENU_MAIN2"
@@ -748,6 +756,7 @@ if [ "$ISSA" -eq 1 ]; then
     case "$toolAction" in
       "A_BACK" | "") exit 0 ;;
       "AMT_EHIST") solseek -sse "$toolAction" export ;;
+      "AMT_FHIST") solseek -sse "$toolAction" export ;;
       "AMT_ERBCK") solseek subact rollback ;;
       "AMT_EINST") solseek -sse "$toolAction" export ;;
       "AMT_EUSER") solseek -sse "$toolAction" export ;;
@@ -799,10 +808,6 @@ if [ "$ISSA" -eq 1 ]; then
 
   # Appstream Catalog
   elif [ "$2" == "las" ]; then
-
-    #AS_TMP_CACHE="$AS_CACHE_FILE"
-    #appstream_get_list "$3"
-    #app_list=$(cat "$AS_TMP_CACHE" | sort -t ']' -k 2)
     echo -e "$MSG_GEN_LOADCATALOG"
     app_list=$(solseek "applist" "as" "$3")
 
@@ -861,18 +866,15 @@ if [ "$ISSA" -eq 1 ]; then
       fp_cache
 
       if [ "$2" = "lif" ]; then
-        #app_list=$(< "$FI_CACHE_FILE")
         app_list=$(solseek "applist" "fpi")
         pkg_list_type="$ACT_MAIN_LISTIPKGS"
       else
-        #app_list=$(< "$FA_CACHE_FILE")
         app_list=$(solseek "applist" "fpa")
         pkg_list_type="$ACT_MAIN_LISTAPKGS"
       fi
 
       pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$ACT_UPD_FLATPAK - $pkg_list_type" --preview 'solseek -ssfi {1} {+}')
 
-      #pkg=${pkg%|*}
       # Return to main menu
       [ -z "$pkg" ] && exit 0
       if [[ "$pkg" == Empty* ]]; then
@@ -907,18 +909,14 @@ if [ "$ISSA" -eq 1 ]; then
     # PACKAGE LIST
       eopkg_cache
       if [ "$2" = "li" ]; then
-        #app_list=$(< "$PI_CACHE_FILE")
         app_list=$(solseek "applist" "pkgi")
         pkg_list_type="$ACT_MAIN_LISTIPKGS"
       else
-        #exit 0
-        #app_list=$(< "$PA_CACHE_FILE")
         app_list=$(solseek "applist" "pkga")
         pkg_list_type="$ACT_MAIN_LISTAPKGS"
       fi
 
       pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$MSG_PKG_HEADER - $pkg_list_type" --preview 'solseek -ssi {1} {+}')
-      #solseek -ssi {1} {+}
 
       # Return to main menu
       [ -z "$pkg" ] && exit 0
@@ -933,8 +931,6 @@ if [ "$ISSA" -eq 1 ]; then
         pkg_status="$MSG_GEN_AVAILABLE"
         MENU_PKG="$MENU_IPKG"
       fi
-
-      # 1. Check if current line looks like a flag (indented with spaces, starts with -)
 
       package="${package//$'\n'/ }"
       # PACKAGE ACTION
