@@ -37,6 +37,10 @@ The biggest need right now is the language files. If you are not as familiar wit
 - [Adding or Correction Language Files](https://github.com/clintre/solseek/discussions/13)
 - Adding language file guide coming, but if you are familiar with Github, copy the en directory and contents and translate.
 
+## For Fun
+Yeah never going to have a huge star history, this is just for fun.
+[![Star History Chart](https://app.repohistory.com/api/svg?repo=clintre/solseek&type=Date&background=0D1117&color=62C3F8)](https://app.repohistory.com/star-history)
+
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
 There was no need to write some system to extract the data as the Solus team has done a wonderful job already with eopkg and it allows me to simply wrap this tool around the strengths of it.
