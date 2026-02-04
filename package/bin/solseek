@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.10.0"
+SS_VERSION="0.10.1"
 
 SS_DATA_PATH="/usr/share/solseek"
 
@@ -8,26 +8,26 @@ SS_DATA_PATH="/usr/share/solseek"
 
 # Help and calls
 case "$1" in
-  "-h" | "--help" | "help" )
-  echo -e "$MSG_HELP"
-  if [ "$1" == "help" ]; then
-    echo -e "\nAdditional ${SS_PKG_MGR} Help\n"
-    if [ "$SS_PKG_MGR" == "eopkg" ]; then
-      eopkg help
-    else
-      moss --help
+    "-h" | "--help" | "help" )
+    echo -e "$MSG_HELP"
+    if [ "$1" == "help" ]; then
+        echo -e "\nAdditional ${SS_PKG_MGR} Help\n"
+        if [ "$SS_PKG_MGR" == "eopkg" ]; then
+        eopkg help
+        else
+        moss --help
+        fi
     fi
-  fi
-  exit 0
-  ;;
-  "--version")
-  echo "solseek $SS_VERSION"
-  exit 0
-  ;;
-  "--debug")
-  ss_debug
-  exit 0
-  ;;
+    exit 0
+    ;;
+    "--version")
+    echo "solseek $SS_VERSION"
+    exit 0
+    ;;
+    "--debug")
+    ss_debug
+    exit 0
+    ;;
 esac
 # System service update check
 if [ "$1" == "-cu" ]; then
@@ -94,7 +94,6 @@ if [ "$1" == "-ssh" ]; then
       fi
       hr
       ss_info_pane "welcome"
-      echo -e "📘 WIKI: https://solseek.org/wiki"
       hr
       ss_life
       echo -e "$MSG_GEN_PKGMGRS: $INST_PKG_MGRS"
@@ -586,18 +585,18 @@ elif [ "$1" == "-ssu" ]; then
     echo -e "${CSS_YELLOWB}█ DISTROBOX ${CSS_RESET}\n"
     distrobox upgrade -a
   fi
+  if [ "$up_cu" -eq 1 ] && [ "$HAS_CUSTOM" -eq 1 ]; then
+    hr
+    echo -e "${CSS_REDB}█ $MSG_UPD_CUSTOM ${CSS_RESET}\n"
+    sh "$SS_CUST_UPDATE"
+  fi
+
   if [ "$up_fw" -eq 1 ] && [ "$HAS_FIRMWARE" -eq 1 ]; then
     hr
     echo -e "${CSS_YELLOWB}█ FIRMWARE ${CSS_RESET}\n"
     sudo fwupdmgr refresh --force
     sudo fwupdmgr get-updates -y > /dev/null
     sudo fwupdmgr update
-  fi
-
-  if [ "$up_cu" -eq 1 ] && [ "$HAS_CUSTOM" -eq 1 ]; then
-    hr
-    echo -e "${CSS_REDB}█ $MSG_UPD_CUSTOM ${CSS_RESET}\n"
-    sh "$SS_CUST_UPDATE"
   fi
 
   if [ "$ccache_updates" -eq 1 ]; then
