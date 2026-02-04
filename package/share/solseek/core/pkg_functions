@@ -24,22 +24,24 @@ upd_msg(){
 
     if [ "$1" == "list" ] && [ "$TTL_UPDCNT" -gt 0 ]; then
         SS_HASUP_LIST=1
+        if [ ! -f "$UL_CACHE_FILE" ]; then
+              echo -e "$MSG_UPD_DISCO\n\n"
+              if [ "$SOLUS_UPCNT" -gt 0 ]; then
+                echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}"
+                if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
+                  echo -e "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n"
+                fi
+                eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' | fold -s -w 70
+              fi
 
-        UPLIST=$(<"$UL_CACHE_FILE")
-        echo -e "$UPLIST" | fold -s -w 70
-        #echo -e "$MSG_UPD_DISCO\n\n"
-        #if [ "$SOLUS_UPCNT" -gt 0 ]; then
-        #  echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}"
-        #  if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
-        #    echo -e "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n"
-        #  fi
-        #  eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' | fold -s -w 70
-        #fi
-
-        #if [ "$FLATPAK_UPCNT" -gt 0 ]; then
-        # echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}"
-        # flatpak remote-ls --updates --columns=name,version | fold -s -w 70
-        #fi
+              if [ "$FLATPAK_UPCNT" -gt 0 ]; then
+               echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}"
+               flatpak remote-ls --updates --columns=name,version | fold -s -w 70
+              fi
+        else
+            UPLIST=$(<"$UL_CACHE_FILE")
+            echo -e "$UPLIST" | fold -s -w 70
+        fi
     fi
 }
 

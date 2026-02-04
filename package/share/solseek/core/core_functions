@@ -128,7 +128,7 @@ sa_fzf() {
       --wrap \
       --cycle \
       --preview-label=" $MSG_GEN_INFO "\
-      --preview-window=right:wrap:70%\
+      --preview-window=right,70%,wrap\
       --reverse \
       "$@"  # specific args for action
 }
@@ -156,7 +156,7 @@ pkg_fzf() {
       --cycle \
       --ignore-case \
       --preview-label=" $MSG_GEN_INFO "\
-      --preview-window=right:wrap:70%\
+      --preview-window=right,70%,wrap\
       --reverse \
       "$@"  # specific args for action
 }
@@ -360,7 +360,7 @@ case "$1" in
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_GUIDE_TITLE ${CSS_RESET}
 $MSG_PNL_GUIDE_BODY
 
-";;
+📘 WIKI: https://solseek.org/wiki";;
 "pkgaction")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_PKGACT_TITLE ${CSS_RESET}
 $MSG_PNL_PKGACT_BODY
