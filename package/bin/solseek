@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.10.1"
+SS_VERSION="0.11.0"
 
 SS_DATA_PATH="/usr/share/solseek"
 
@@ -31,924 +31,396 @@ case "$1" in
 esac
 # System service update check
 if [ "$1" == "-cu" ]; then
-  if [ "$SS_NOTIFCATIONS" -eq 2 ]; then
-    SS_NOTIFCATIONS=1
-  fi
-  check_updates "system"
-  exit 0
+    if [ "$SS_NOTIFCATIONS" -eq 2 ]; then
+        SS_NOTIFCATIONS=1
+    fi
+    check_updates "system"
+    exit 0
 fi
 # Internal calls
 if [ "$1" == "-ssh" ]; then
-
-  if [[ "$2" == *":"* ]]; then
-      IFS=':' read -r PNLKEY PNLSUB <<< "$2"
-  else
-    PNLKEY="$2"
-  fi
-
-  case "$PNLKEY" in
-    "AMM_UPSYS" | "AMM_WELC")
-      if [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
-        check_updates
-      fi
-  esac
-  case "$PNLKEY" in
-    "AMM_HLP_INST" | "AMM_LST_PII" | "AMM_LST_FII")
-      ss_info_pane "installed";;
-    "AMM_HLP_SRCH" | "AMM_LST_PAS" | "AMM_LST_FAS" | "AMM_DASUB" | "AMM_DCAT" | "AMM_LST_PA" | "AMM_LST_PI" | "AMM_LST_PU" | "AMM_LST_FA" | "AMM_LST_FI")
-      ss_info_pane "search";;
-    "AMM_UPSYS")
-      SS_HASUP_LIST=0
-      if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
-        upd_msg list
-      fi
-      if [ "$SS_HASUP_LIST" -eq 0 ]; then
-        ss_info_pane "update"
-      fi
-      ;;
-    "AMP_RINST"  | "AMP_REM" | "AMP_SCHK" | "AMP_UPDT")
-      printf "$MSG_PKG_ISTATMSG\n"
-      ss_info_pane "pkgaction" ;;
-    "AMP_INST")
-      printf "$MSG_PKG_ASTATMSG\n"
-      ss_info_pane "pkgaction" ;;
-    "AMT_ERBCK")
-      ss_info_pane "rollbacklist"
-      hr
-      eopkg history -l "$SS_ROLLBACK_LIMIT" 2>/dev/null
-
-      ;;
-    "AMM_TOOLS")
-      ss_info_pane "tools" ;;
-    "AMM_ABOUT")
-      ss_info_pane "about" ;;
-    "AMM_WELC")
-      if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
-        upd_msg
-      fi
-      hrclr=201
-      if [ "$HAS_FASTFETCH" -eq 1 ]; then
-        fastfetch -c "$SS_FASTFETCH_CFG" --pipe false 2>/dev/null
-      else
-        ss_fetch 2>/dev/null
-      fi
-      hr
-      ss_info_pane "welcome"
-      hr
-      ss_life
-      echo -e "$MSG_GEN_PKGMGRS: $INST_PKG_MGRS"
-      ;;
-    "A_BACK")
-      echo "$MSG_GEN_BACK" ;;
-    "SELPKG")
-      printf "$MSG_PKG_SELECTED\n"
-      hr
-      echo "$3"| tr -s ' ' '\n'
-      hr
-      ss_info_pane "pkgaction"
-      ;;
-    "AMM_QUIT")
-      echo "$MSG_GEN_EXIT" ;;
-    *) echo "$MSG_APP_NAME" ;;
-  esac
-  exit 0
+    . "$SS_DATA_PATH/modules/panel-help"
+    exit 0
 elif [ "$1" == "-ssi" ]; then
-  if [ -n "$2" ]; then
-
-    if grep -q "$2" "$PI_CACHE_FILE"; then
-      pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
-    else
-      pkg_status="${CSS_YELLOW}$MSG_GEN_AVAILABLE${CSS_RESET}"
-    fi
-
-    if [ -n "$3" ]; then
-      selpkg_clean=$(echo "${@:3}" | grep -o '[^ ]*|' | tr -d '|')
-      echo -e "${CSS_BOLDBRIGHT}$MSG_PKG_SELECTED:${CSS_RESET} $selpkg_clean" | fold -s -w 80 2>/dev/null
-      hr
-    fi
-    echo -e "> $pkg_status\n"
-    get_pkg_info "$2" | fold -s -w 70 2>/dev/null
-
-  else
-    echo "$MSG_GEN_SEL_ITEM"
-  fi
-  exit 0
+    . "$SS_DATA_PATH/modules/panel-pkginfo"
+    exit 0
 elif [ "$1" == "-ssfi" ]; then
-  if [ -n "$2" ]; then
-    if [ -n "$3" ]; then
-      selpkg_clean=$(echo "${@:3}" | grep -o '[^ ]*|' | tr -d '|')
-      echo -e "${CSS_BOLDBRIGHT}$MSG_PKG_SELECTED:${CSS_RESET}: $selpkg_clean" | fold -s -w 80 2>/dev/null
-      hr
-    fi
-    if grep -q "$2" "$FI_CACHE_FILE"; then
-      pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
-    else
-      pkg_status="${CSS_YELLOW}$MSG_GEN_AVAILABLE${CSS_RESET}"
-    fi
-    echo -e "> $pkg_status\n"
-
-    get_appstream_details "$2" | fold -s -w 70 2>/dev/null
-
-  else
-    echo "$MSG_GEN_SEL_ITEM"
-  fi
-  exit 0
+    . "$SS_DATA_PATH/modules/panel-fpinfo"
+    exit 0
 elif [ "$1" == "-sse" ]; then
-  sse_export=0
-  sse_export_fn=""
-  sse_sudo=0
-  sse_type="eopkg"
-
-  case "$2" in
-  "AMT_FPLA" | "AMT_FPLU" | "AMT_FPCLEAN" | "AMT_FCHECK" | "AMT_FREPO" | "AMT_FHIST")
-      sse_type="flatpak" ;;
-  "AMT_INXI")
-      sse_type="inxi" ;;
-  "AMT_SSCFG" | "AMT_SSTMR" | "AMT_RBFW")
-      sse_type="solseek" ;;
-  "A_BLANK")
-      echo " "
-      exit 0 ;;
-  esac
-
-  if [ "$sse_type" == "solseek" ]; then
-    if [ "$2" = "AMT_SSCFG" ]; then
-      if [ "$3" == "run" ]; then
-
-        if [ "$SS_LOCAL_CFG" -eq 0 ]; then
-          cp "$SS_DATA_PATH/config" "$HOME/.config/solseek/"
-        fi
-        if command -v "$SS_EDITOR" &> /dev/null; then
-          "$SS_EDITOR" "$HOME/.config/solseek/config"
-        else
-          echo -e "$(mst "rb")█ "$SS_EDITOR" not found. Using nano.$(mst "rst")"
-          nano "$HOME/.config/solseek/config"
-        fi
-        hr "danger" 3
-        echo -e "$MSG_GEN_PCONFIG!"
-        hr "danger"
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_EDITPVTOP
-        hr
-        ss_info_pane "sscfg"
-      fi
-    elif [ "$2" = "AMT_SSTMR" ]; then
-      TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
-      TMR_CHG_ACTION="enable"
-      TMR_CHG_TXT="ACTIVE"
-      TMR_STATUS_DISP="${CSS_REDB}Inactive${CSS_RESET}"
-      if [ "$TMR_STATUS" == "active" ]; then
-        TMR_CHG_ACTION="disable"
-        TMR_CHG_TXT="INACTIVE"
-        TMR_STATUS_DISP="${CSS_GREENB}Active${CSS_RESET}"
-      fi
-
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙️ ${MSG_INFO_MNGUPCHKSRV}${CSS_RESET} | ${MSG_GEN_CURSTATUS}: $TMR_STATUS_DISP"
-        hr
-        read -n 1 -p "$MSG_GEN_UPCHKQ1 ${TMR_CHG_TXT^^} $MSG_GEN_UPCHKQ2:" PUCHOICE
-        case "$PUCHOICE" in
-          [Yy])
-              echo -e "\n\n"
-              systemctl --user daemon-reload
-              systemctl --user "$TMR_CHG_ACTION" --now solseek-uc.timer
-              systemctl --user "$TMR_CHG_ACTION" solseek-uc.service
-              TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
-              echo -e "\n"
-              hr 3
-              echo -e "$MSG_GEN_NEWSTATUS: ${TMR_STATUS^^}"
-              hr
-              read -p "$MSG_GEN_PRESSENTER..."
-              exit 0
-              ;;
-          *)
-              exit 0
-              ;;
-        esac
-
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_EDITPVTOP
-        hr
-        ss_info_pane "sstmr"
-        echo -e "$TMR_STATUS_DISP"
-      fi
-    elif [ "$2" = "AMT_RBFW" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙ ${ACT_INFO_RBFW}${CSS_RESET}";
-        hr
-        read -n 1 -p "${ACT_INFO_RBFW}? (N/y):" PUCHOICE
-        case "$PUCHOICE" in
-          [Yy])
-              systemctl reboot --firmware-setup
-              exit 0
-              ;;
-          *)
-              exit 0
-              ;;
-        esac
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "${ACT_INFO_RBFW}";
-      fi
-    fi
-
+    . "$SS_DATA_PATH/modules/tools"
     exit 0
-  elif [ "$sse_type" = "eopkg" ]; then
-
-    ccache_eopkg=0
-
-    if [ "$2" = "AMT_EHIST" ]; then
-      sse_cmd="hs"
-      sse_export_fn="$HOME/eopkg_history.txt"
-      sse_sudo=1
-    elif [ "$2" = "AMT_EINST" ]; then
-      sse_cmd="li"
-      sse_export_fn="$HOME/eopkg_all_installed.txt"
-    elif [ "$2" = "AMT_EUSER" ]; then
-      sse_cmd="li -e"
-      sse_export_fn="$HOME/eopkg_user_installed.txt"
-    elif [ "$2" = "AMT_LREPO" ]; then
-      sse_cmd="lr"
-      sse_export_fn="$HOME/eopkg_repos.txt"
-    elif [ "$2" = "rollback" ]; then
-
-      IFS='|' read -r HID HIDTEXT <<< "$3"
-      unset IFS
-      hr 3
-      echo -e "${CSS_BOLDBRIGHT}⚙ EOPKG $ACT_INFO_HROLLBACK: $HIDTEXT ${CSS_RESET}";
-      hr
-      HID=$(echo "$HID" | xargs)
-      sudo eopkg hs -t "$HID"
-      eopkg_cache "force"
-      hr
-      read -p "$MSG_GEN_PRESSENTER..."
-      exit 0
-
-    elif [ "$2" = "AMT_ECHECK" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN: eopkg check${CSS_RESET}";
-        hr
-        sudo eopkg check
-        hr
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "$MSG_GEN_RUN: eopkg check\n";
-        ss_format_help eopkg check
-      fi
-      exit 0
-    elif [ "$2" == "AMT_ERBCK" ]; then
-      echo $MSG_INFO_ACCESSPVTOP
-      hr
-      ss_info_pane "rollback"
-      exit 0
-    elif [ "$2" = "AMT_ERMO" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_ERMO: eopkg remove-orphans${CSS_RESET}";
-        hr
-        sudo eopkg rmo
-        eopkg_cache "force"
-        hr
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "$ACT_INFO_ERMO: eopkg remove-orphans\n";
-        ss_format_help eopkg remove-orphans
-      fi
-      exit 0
-    elif [ "$2" = "AMT_EDC" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_EDC eopkg delete-cache${CSS_RESET}";
-        hr
-        sudo eopkg dc
-        eopkg_cache "force"
-        hr
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "$ACT_INFO_EDC eopkg delete-cache\n";
-        ss_format_help eopkg delete-cache
-      fi
-      exit 0
-    elif [ "$2" = "AMT_EUR" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_EUR eopkg update-repo${CSS_RESET}";
-        hr
-        sudo eopkg ur --force
-        eopkg_cache "force"
-        hr
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "$ACT_INFO_EUR eopkg update-repo\n";
-        ss_format_help eopkg update-repo
-      fi
-      exit 0
-    else
-      echo "$MSG_GEN_BACK"
-      exit 0
-    fi
-
-    if [ "$3" == "export" ]; then
-      hr 3
-      echo -e "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
-      hr
-      if [ "$sse_sudo" -eq 1 ]; then
-        sudo eopkg "$sse_cmd" > $sse_export_fn
-      else
-        eopkg $sse_cmd > $sse_export_fn
-      fi
-      read -p "$MSG_GEN_PRESSENTER..."
-    else
-      echo "$MSG_INFO_EXPPVTOP"
-      hr
-      eopkg $sse_cmd
-    fi
-  elif [ "$sse_type" == "flatpak" ]; then
-    if [ "$2" = "AMT_FPCLEAN" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_CHECK: flatpak uninstall --unused${CSS_RESET}";
-        hr
-        flatpak uninstall --unused
-        hr
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "$ACT_INFO_CHECK: flatpak uninstall --unused\n";
-        ss_format_help flatpak uninstall --unused
-      fi
-      exit 0
-    elif [ "$2" == "AMT_FCHECK" ]; then
-      if [ "$3" == "run" ]; then
-        hr 3
-        echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN: flatpak repair${CSS_RESET}";
-        hr
-        flatpak repair
-        hr
-        read -p "$MSG_GEN_PRESSENTER..."
-      else
-        echo $MSG_INFO_RUNPVTOP
-        hr
-        echo -e "$MSG_GEN_RUN: flatpak repair\n";
-        ss_format_help flatpak repair --unused
-      fi
-      exit 0
-    fi
-    if [ "$2" = "AMT_FPLA" ]; then
-      sse_cmd="list --columns=name,version"
-      sse_export_fn="$HOME/flatpak_all_installed.txt"
-      sse_sudo=1
-    elif [ "$2" = "AMT_FPLU" ]; then
-      sse_cmd="list --app --columns=name,version"
-      sse_export_fn="$HOME/flatpak_user_installed.txt"
-    elif [ "$2" = "AMT_FREPO" ]; then
-      sse_cmd="remotes --show-disabled --columns=name,url,options"
-      sse_export_fn="$HOME/flatpak_remotes.txt"
-    elif [ "$2" = "AMT_FHIST" ]; then
-      sse_cmd="history --reverse"
-      sse_export_fn="$HOME/flatpak_history.txt"
-    fi
-    if [ "$3" == "export" ]; then
-      flatpak $sse_cmd > $sse_export_fn
-      hr 3
-      echo -e "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
-      hr
-      read -p "$MSG_GEN_PRESSENTER..."
-    else
-      echo "$MSG_INFO_EXPPVTOP"
-      hr
-      printf "$(flatpak $sse_cmd 2>/dev/null)"
-    fi
-  elif [ "$sse_type" == "inxi" ]; then
-    sse_export_fn="$HOME/inxi_output.txt"
-    if [ "$3" == "export" ]; then
-      inxi -b > $sse_export_fn
-      hr 3
-      echo "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
-      hr
-      read -p "$MSG_GEN_PRESSENTER..."
-    else
-      echo "$MSG_INFO_EXPPVTOP"
-      hr
-      inxi -b --tty -y 80 2>/dev/null
-    fi
-
-  fi
-  exit 0
 elif [ "$1" == "-ssp" ]; then
-  if [ $# -lt 3 ]; then
-    echo "$MSG_GEN_INVPARAM"
-    read -p "$MSG_GEN_PRESSENTER..."
-  else
-      ccache=0
-      pkgvars="${3//$'\n'/ }"
-      if [ "$2" == "install" ]; then
-        pkg_mgmt_act="it"
-        pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"
-        ccache=1
-      elif [ "$2" == "reinstall" ]; then
-        pkg_mgmt_act="it --reinstall"
-        pkg_mgmt_title="$ACT_PKG_REINSTALL: $pkgvars"
-      elif [ "$2" == "update" ]; then
-        pkg_mgmt_act="up"
-        pkg_mgmt_title="$ACT_PKG_UPDATE: $pkgvars"
-      elif [ "$2" == "remove" ]; then
-        pkg_mgmt_act="rm"
-        pkg_mgmt_title="$ACT_PKG_REMOVE: $pkgvars"
-        ccache=1
-      elif [ "$2" == "check" ]; then
-        pkg_mgmt_act="check"
-        pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
-      fi
-
-      hr 3
-      echo -e "${CSS_BOLDBRIGHT}📦 $MSG_PKG_TTLSTART $pkg_mgmt_title${CSS_RESET}"
-      hr
-      sudo eopkg $pkg_mgmt_act $pkgvars $SS_ASSUMEYES
-      if [ "$ccache" -eq 1 ]; then
-        eopkg_cache "force"
-      fi
-      hr 3
-      echo "$MSG_GEN_PROCCOMP"
-      read -p "$MSG_GEN_PRESSENTER..."
-  fi
-  exit 0
-elif [ "$1" == "-ssf" ]; then
-  if [ $# -lt 3 ]; then
-    echo "$MSG_GEN_INVPARAM"
-    read -p "$MSG_GEN_PRESSENTER..."
-  else
-      ccache=0
-      pkgvars="${3//$'\n'/ }"
-      if [ "$2" == "install" ]; then
-        pkg_mgmt_act="install --system"
-        pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"
-        ccache=1
-      elif [ "$2" == "reinstall" ]; then
-        pkg_mgmt_act="install --reinstall --system"
-        pkg_mgmt_title="$ACT_PKG_REINSTALL: $pkgvars"
-      elif [ "$2" == "update" ]; then
-        pkg_mgmt_act="update"
-        pkg_mgmt_title="$ACT_PKG_UPDATE: $pkgvars"
-      elif [ "$2" == "remove" ]; then
-        pkg_mgmt_act="remove"
-        pkg_mgmt_title="$ACT_PKG_REMOVE: $pkgvars"
-        ccache=1
-      elif [ "$2" == "repair" ]; then
-        pkg_mgmt_act="repair"
-        pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
-      fi
-
-      hr 3
-      echo -e "${CSS_BOLDBRIGHT}📦 $MSG_PKG_TTLSTART $pkg_mgmt_title${CSS_RESET}"
-      hr
-      flatpak $pkg_mgmt_act $pkgvars $SS_ASSUMEYES
-      if [ "$ccache" -eq 1 ]; then
-        fp_cache "force"
-      fi
-      hr "success" 3
-      echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
-      hr "success"
-      read -p "$MSG_GEN_PRESSENTER..."
-  fi
-  exit 0
-elif [ "$1" == "-ssu" ]; then
-  clear
-  if [ "$2" == 'check' ]; then
-    echo -e "${CSS_BOLDBRIGHT}📦 $MSG_GEN_CHECKUPDS${CSS_RESET}"
-    hr
-    check_updates "system" "force"
-    hr "success" 3
-    echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
-    hr "success"
-    read -p "$MSG_GEN_PRESSENTER..."
+    . "$SS_DATA_PATH/modules/install-pkg"
     exit 0
-  fi
-
-  shift $((OPTIND-1))
-  up_eo=0
-  up_fp=0
-  up_sn=0
-  up_db=0
-  up_fw=0
-  up_cu=0
-  up_chk=0
-
-  for arg in "$@"; do
-    if [[ "$arg" == *"="* ]]; then
-      key="${arg%%=*}"
-      value="${arg#*=}"
-      declare "$key=$value"
-    fi
-  done
-  ccache_eopkg=0
-  ccache_flatpak=0
-  ccache_updates=0
-  hr "danger" 3
-  echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
-  if [ "$up_eo" -eq 1 ]; then
-    ccache_eopkg=1
-    ccache_updates=1
-    hr
-    echo -e "${CSS_CYANB}█ EOPKG ${CSS_RESET}\n"
-    sudo eopkg up $SS_ASSUMEYES
-  fi
-  if [ "$up_fp" -eq 1 ] && [ "$HAS_FLATPAK" -eq 1 ]; then
-    ccache_flatpak=1
-    ccache_updates=1
-    hr
-    echo -e "${CSS_BLUEB}█ FLATPAK ${CSS_RESET}\n"
-    flatpak update -y
-  fi
-  if [ "$up_sn" -eq 1 ] && [ "$HAS_SNAP" -eq 1 ]; then
-    hr
-    echo -e "${CSS_REDB}█ SNAP ${CSS_RESET}\n"
-    sudo snap refresh
-  fi
-  if [ "$up_db" -eq 1 ] && [ "$HAS_DISTROBOX" -eq 1 ]; then
-    hr
-    echo -e "${CSS_YELLOWB}█ DISTROBOX ${CSS_RESET}\n"
-    distrobox upgrade -a
-  fi
-  if [ "$up_cu" -eq 1 ] && [ "$HAS_CUSTOM" -eq 1 ]; then
-    hr
-    echo -e "${CSS_REDB}█ $MSG_UPD_CUSTOM ${CSS_RESET}\n"
-    sh "$SS_CUST_UPDATE"
-  fi
-
-  if [ "$up_fw" -eq 1 ] && [ "$HAS_FIRMWARE" -eq 1 ]; then
-    hr
-    echo -e "${CSS_YELLOWB}█ FIRMWARE ${CSS_RESET}\n"
-    sudo fwupdmgr refresh --force
-    sudo fwupdmgr get-updates -y > /dev/null
-    sudo fwupdmgr update
-  fi
-
-  if [ "$ccache_updates" -eq 1 ]; then
-    hr
-    check_updates "system" &
-    if [ "$ccache_eopkg" -eq 1 ]; then
-      eopkg_cache "force"
-    fi
-    if [ "$ccache_flatpak" -eq 1 ]; then
-      fp_cache "force"
-    fi
-  fi
-
-  hr "success" 3
-  echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
-  hr "success"
-  read -n 1 -p "$MSG_GEN_PRESSENTERREB: " PUCHOICE
-  case "$PUCHOICE" in
-    # This matches either 'R' or 'r' (case-insensitive)
-    [Rr])
-        echo -e "\n\n${CSS_BOLDBRIGHT}█ $MSG_GEB_REBOOTIN... ${CSS_RESET}"
-        RBCNT=3
-        for (( i=$RBCNT; i>0; i-- )); do
-            echo -ne "${CSS_BOLDBRIGHT}█ $i ${CSS_RESET}\r"
-            sleep 1
-        done
-        reboot
-        ;;
-    *)
-        exit 0
-        ;;
-  esac
-  exit 0
+elif [ "$1" == "-ssf" ]; then
+    . "$SS_DATA_PATH/modules/install-flatpak"
+    exit 0
+elif [ "$1" == "-ssd" ]; then
+    . "$SS_DATA_PATH/modules/panel-drivers"
+    exit 0
+elif [ "$1" == "-ssu" ]; then
+    . "$SS_DATA_PATH/modules/update-runner"
+    exit 0
 elif [ "$1" == "applist" ]; then
-  if [ "$2" == "pkga" ]; then
-      eopkg_cache
-      cat $PA_CACHE_FILE 2>/dev/null
-  elif [ "$2" == "pkgi" ]; then
-      eopkg_cache
-      cat $PI_CACHE_FILE 2>/dev/null
-  elif [ "$2" == "fpa" ]; then
-      fp_cache
-      cat $FA_CACHE_FILE 2>/dev/null
-  elif [ "$2" == "fpi" ]; then
-      fp_cache
-      cat $FI_CACHE_FILE 2>/dev/null
-  elif [ "$2" == "as" ]; then
-      AS_TMP_CACHE="$AS_CACHE_FILE"
-      appstream_get_list "$3"
-      cat "$AS_TMP_CACHE" | sort -t ']' -k 2
-  fi
-  exit 0
+    . "$SS_DATA_PATH/modules/list-packages"
+    exit 0
 elif [ "$1" == "subact" ]; then
-  # We just set the sub action avoid running the fz logic up here
-  ISSA=1
+    # We just set the sub action avoid running the fz logic up here
+    ISSA=1
 
 elif [ "$1" == "-cc" ]; then
-# force clears all cache files to start clean
-  rm -f $IDX_CACHE_FILE
-  rm -f $AS_CACHE_FILE
-  rm -f $PA_CACHE_FILE
-  rm -f $PI_CACHE_FILE
-  rm -f $FA_CACHE_FILE
-  rm -f $FI_CACHE_FILE
-  rm -f $UP_CACHE_FILE
-  rm -f $UL_CACHE_FILE
-  rm -f $UP_LOCK_FILE
+    # force clears all cache files to start clean
+    rm -f $IDX_CACHE_FILE
+    rm -f $AS_CACHE_FILE
+    rm -f $PA_CACHE_FILE
+    rm -f $PI_CACHE_FILE
+    rm -f $FA_CACHE_FILE
+    rm -f $FI_CACHE_FILE
+    rm -f $UP_CACHE_FILE
+    rm -f $UL_CACHE_FILE
+    rm -f $UP_LOCK_FILE
 
 # This is abstraction of the eopkg/moss command to allow for moss inclusion in the future
 # Allows for full eopkg calls
 elif [ "$1" == "eopkg" ]; then
-  eopkg "${@:2}"
-  exit 0
+    eopkg "${@:2}"
+    exit 0
 # If a paramater is passed, no matches above, pass off to eopkg/moss
 elif [ -n "$1" ]; then
-  # Capture upgrades so we can do both eopkg/moss and flatpak
-  if [ "$1" = "up" ] || [ "$1" = "upgrade" ]; then
-    if [ "$2" == "-e" ]; then
-        solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1
-    else
-        solseek -ssu up_eo=1 up_fp=1 up_sn=1
+    # Capture upgrades so we can do both eopkg/moss and flatpak
+    if [ "$1" = "up" ] || [ "$1" = "upgrade" ]; then
+        if [ "$2" == "-e" ]; then
+            solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1
+        else
+            solseek -ssu up_eo=1 up_fp=1 up_sn=1
+        fi
+        exit 0
     fi
+    ${SS_PKG_MGR} "$@"
     exit 0
-  fi
-  ${SS_PKG_MGR} "$@"
-  exit 0
 fi
 
 # Include and setup Menus
 . "/usr/share/solseek/core/menus"
-## Check for menu style setting
-if [ "$SS_MAINMENU" -eq 2 ]; then
-  MENU_MAIN="$MENU_MAIN2"
-fi
-
-## Remove features from menu for systems not installed
-if [ "$HAS_FLATPAK" -eq 0 ]; then
-  MENU_MAIN=$(echo "$MENU_MAIN" | grep -v '^AMM_SEC_FP|')
-  MENU_MAIN=$(echo "$MENU_MAIN" | grep -v '^AMM_LST_FA|')
-  MENU_MAIN=$(echo "$MENU_MAIN" | grep -v '^AMM_LST_FI|')
-  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_FLATPAK|')
-  MENU_TOOLS=$(echo "$MENU_TOOLS" | grep -v '^AMT_FPLA|')
-  MENU_TOOLS=$(echo "$MENU_TOOLS" | grep -v '^AMT_FPLU|')
-  MENU_TOOLS=$(echo "$MENU_TOOLS" | grep -v '^AMT_FPCLEAN|')
-
-fi
-if [ "$HAS_SNAP" -eq 0 ]; then
-  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_SNAP|')
-fi
-if [ "$HAS_CUSTOM" -eq 0 ]; then
-  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_CUST|')
-fi
-if [ "$HAS_DISTROBOX" -eq 0 ]; then
-  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_DBOX|')
-fi
-if [ "$HAS_FIRMWARE" -eq 0 ]; then
-  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_FMW|')
-fi
 
 
 # Sub action area
 # This allows step-up navigation versus always returning to the main menu
 if [ "$ISSA" -eq 1 ]; then
-  while true; do
-  clear
-  # Updates Sub Action
-  if [ "$2" == "upsys" ]; then
+    while true; do
+      clear
+      # Updates Sub Action
+      if [ "$2" == "upsys" ]; then
+          ## Remove update check if updates are disabled
+          if [ "$SS_DISABLE_UPCHK" -eq 1 ]; then
+              MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_CHECK|')
+              MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^A_BLANK|')
+          fi
 
-    ## Remove update check if updates are disabled
-    if [ "$SS_DISABLE_UPCHK" -eq 1 ]; then
-      MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_CHECK|')
-      MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^A_BLANK|')
-    fi
+          upmode=$(printf "%b" "$MENU_UPDATE" | sa_fzf --prompt="" --header="$ACT_MAIN_UPDATESYS" --preview 'solseek -ssh AMM_UPSYS')
 
-    upmode=$(printf "%b" "$MENU_UPDATE" | sa_fzf --prompt="" --header="$ACT_MAIN_UPDATESYS" --preview 'solseek -ssh AMM_UPSYS')
+          upmode=${upmode%|*}
+          case "$upmode" in
+              "A_BACK" | "") exit 0 ;;
+              "AMU_EOPKG") solseek -ssu up_eo=1;;
+              "AMU_FLATPAK") solseek -ssu up_fp=1;;
+              "AMU_SNAP") solseek -ssu up_sn=1;;
+              "AMU_ALL") solseek -ssu up_eo=1 up_fp=1 up_sn=1;;
+              "AMU_DBOX") solseek -ssu up_db=1;;
+              "AMU_FMW") solseek -ssu up_fw=1;;
+              "AMU_CUST") solseek -ssu up_cu=1;;
+              "AMU_ETHING") solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1;;
+              "AMU_CHECK") solseek -ssu check;;
+              *) continue ;;
+          esac
+      # Tools Sub Action
+      elif [ "$2" == "tools" ]; then
+          toolAction=$(printf "%b" "$MENU_TOOLS" | sa_fzf --prompt="" --header="$ACT_MAIN_INFORMATION" --preview 'solseek -sse {1}')
 
-    upmode=${upmode%|*}
-    case "$upmode" in
-      "A_BACK" | "") exit 0 ;;
-      "AMU_EOPKG") solseek -ssu up_eo=1;;
-      "AMU_FLATPAK") solseek -ssu up_fp=1;;
-      "AMU_SNAP") solseek -ssu up_sn=1;;
-      "AMU_ALL") solseek -ssu up_eo=1 up_fp=1 up_sn=1;;
-      "AMU_DBOX") solseek -ssu up_db=1;;
-      "AMU_FMW") solseek -ssu up_fw=1;;
-      "AMU_CUST") solseek -ssu up_cu=1;;
-      "AMU_ETHING") solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1;;
-      "AMU_CHECK") solseek -ssu check;;
-      *) continue ;;
-    esac
-  # Tools Sub Action
-  elif [ "$2" == "tools" ]; then
-    toolAction=$(printf "%b" "$MENU_TOOLS" | sa_fzf --prompt="" --header="$ACT_MAIN_INFORMATION" --preview 'solseek -sse {1}')
+          toolAction=${toolAction%|*}
+          case "$toolAction" in
+              "A_BACK" | "") exit 0 ;;
+              "AMT_EHIST") solseek -sse "$toolAction" export ;;
+              "AMT_FHIST") solseek -sse "$toolAction" export ;;
+              "AMT_ERBCK") solseek subact rollback ;;
+              "AMT_EINST") solseek -sse "$toolAction" export ;;
+              "AMT_EUSER") solseek -sse "$toolAction" export ;;
+              "AMT_LREPO") solseek -sse "$toolAction" export ;;
+              "AMT_ECHECK") solseek -sse "$toolAction" run ;;
+              "AMT_ERMO") solseek -sse "$toolAction" run ;;
+              "AMT_EDC") solseek -sse "$toolAction" run ;;
+              "AMT_EUR") solseek -sse "$toolAction" run ;;
+              "AMT_FPLA") solseek -sse "$toolAction" export ;;
+              "AMT_FPLU") solseek -sse "$toolAction" export ;;
+              "AMT_FREPO") solseek -sse "$toolAction" export ;;
+              "AMT_FCHECK") solseek -sse "$toolAction" run ;;
+              "AMT_FPCLEAN") solseek -sse "$toolAction" run ;;
+              "AMT_INXI") solseek -sse "$toolAction" export ;;
+              "AMT_SSCFG") solseek -sse "$toolAction" run;;
+              "AMT_SSTMR") solseek -sse "$toolAction" run;;
+              "AMT_RBFW") solseek -sse "$toolAction" run;;
+              *) continue ;;
+          esac
+      # EOPKG Rollback Menu
+      elif [ "$2" == "rollback" ]; then
+          RBMENU="A_BACK|< $ACT_GEN_BACK
+          "
+          RBMENU+=$(eopkg_rollback_menu)
+          toolAction=$(printf "%b" "$RBMENU" | sa_fzf --prompt="" --header="EOPKG Rollback" --preview 'solseek -ssh AMT_ERBCK')
 
-    toolAction=${toolAction%|*}
-    case "$toolAction" in
-      "A_BACK" | "") exit 0 ;;
-      "AMT_EHIST") solseek -sse "$toolAction" export ;;
-      "AMT_FHIST") solseek -sse "$toolAction" export ;;
-      "AMT_ERBCK") solseek subact rollback ;;
-      "AMT_EINST") solseek -sse "$toolAction" export ;;
-      "AMT_EUSER") solseek -sse "$toolAction" export ;;
-      "AMT_LREPO") solseek -sse "$toolAction" export ;;
-      "AMT_ECHECK") solseek -sse "$toolAction" run ;;
-      "AMT_ERMO") solseek -sse "$toolAction" run ;;
-      "AMT_EDC") solseek -sse "$toolAction" run ;;
-      "AMT_EUR") solseek -sse "$toolAction" run ;;
-      "AMT_FPLA") solseek -sse "$toolAction" export ;;
-      "AMT_FPLU") solseek -sse "$toolAction" export ;;
-      "AMT_FREPO") solseek -sse "$toolAction" export ;;
-      "AMT_FCHECK") solseek -sse "$toolAction" run ;;
-      "AMT_FPCLEAN") solseek -sse "$toolAction" run ;;
-      "AMT_INXI") solseek -sse "$toolAction" export ;;
-      "AMT_SSCFG") solseek -sse "$toolAction" run;;
-      "AMT_SSTMR") solseek -sse "$toolAction" run;;
-      "AMT_RBFW") solseek -sse "$toolAction" run;;
-      *) continue ;;
-    esac
-  # EOPKG Rollback Menu
-  elif [ "$2" == "rollback" ]; then
-    RBMENU="A_BACK|< $ACT_GEN_BACK
-    "
-    RBMENU+=$(eopkg_rollback_menu)
-    toolAction=$(printf "%b" "$RBMENU" | sa_fzf --prompt="" --header="EOPKG Rollback" --preview 'solseek -ssh AMT_ERBCK')
+          if [ "${toolAction%|*}" == "A_BACK" ]; then
+              exit 0
+          fi
+          case "$toolAction" in
+              "A_BACK" | "") exit 0 ;;
+              *) solseek -sse rollback "$toolAction" ;;
+          esac
+      # Appstream Catalog Category Menu
+      elif [ "$2" == "lasm" ]; then
 
-    if [ "${toolAction%|*}" == "A_BACK" ]; then
-      exit 0
-    fi
-    case "$toolAction" in
-      "A_BACK" | "") exit 0 ;;
-      *) solseek -sse rollback "$toolAction" ;;
-    esac
-  # Appstream Catalog Category Menu
-  elif [ "$2" == "lasm" ]; then
+          mode=$(printf "%b" "$MENU_DAS" | sa_fzf --prompt="" --header="Desktop App Categories" --preview 'solseek -ssh AMM_DASUB')
+          mode=${mode%|*}
 
-    mode=$(printf "%b" "$MENU_DAS" | sa_fzf --prompt="" --header="Desktop App Categories" --preview 'solseek -ssh AMM_DASUB')
-    mode=${mode%|*}
+          # For Appstream we have extra parsing
+          if [[ "$mode" == *:* ]]; then
+              IFS=':' read -r mode ascat <<< "$mode"
+          fi
 
-    # For Appstream we have extra parsing
-    if [[ "$mode" == *:* ]]; then
-      IFS=':' read -r mode ascat <<< "$mode"
-    fi
+          case "$mode" in
+              "AMM_DCAT") solseek subact las "$ascat" ;;
+              "A_BACK" | "") exit 0 ;;
+          esac
 
-    case "$mode" in
-      "AMM_DCAT") solseek subact las "$ascat" ;;
-      "A_BACK" | "") exit 0 ;;
-    esac
+      # Appstream Catalog
+      elif [ "$2" == "las" ]; then
+          echo -e "$MSG_GEN_LOADCATALOG"
+          app_list=$(solseek "applist" "as" "$3")
 
-  # Appstream Catalog
-  elif [ "$2" == "las" ]; then
-    echo -e "$MSG_GEN_LOADCATALOG"
-    app_list=$(solseek "applist" "as" "$3")
+          pkg=$(printf "%b" "$app_list" | as_fzf --prompt="$MSG_PKG_PROMPT: " --header="Desktop - $3")
 
-    pkg=$(printf "%b" "$app_list" | as_fzf --prompt="$MSG_PKG_PROMPT: " --header="Desktop - $3")
+          [ -z "$pkg" ] && exit 0
 
-    [ -z "$pkg" ] && exit 0
+          IFS='|' read -r kvar package <<< "$pkg"
+          IFS=':' read -r ptype pkgid <<< "$kvar"
 
-    IFS='|' read -r kvar package <<< "$pkg"
-    IFS=':' read -r ptype pkgid <<< "$kvar"
+          if [ "$ptype" == "flatpak" ]; then
 
-    if [ "$ptype" == "flatpak" ]; then
+              AS_HEADER=$MSG_PKG_FPSEL
+              AS_PREVIEW="solseek -ssfi '$pkgid'"
+              AS_ROUTE="-ssf"
 
-      AS_HEADER=$MSG_PKG_FPSEL
-      AS_PREVIEW="solseek -ssfi '$pkgid'"
-      AS_ROUTE="-ssf"
+              if grep -q "$pkgid" "$FI_CACHE_FILE"; then
+                  pkg_status="$MSG_GEN_INSTALLED"
 
-      if grep -q "$pkgid" "$FI_CACHE_FILE"; then
-        pkg_status="$MSG_GEN_INSTALLED"
+                  MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_SCHK|')
+              else
+                  pkg_status="$MSG_GEN_AVAILABLE"
+                  MENU_PKG="$MENU_IPKG"
+              fi
+          else
+              AS_HEADER=$MSG_GEN_SEL
+              AS_PREVIEW="solseek -ssi '$pkgid'"
+              AS_ROUTE="-ssp"
 
-        MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_SCHK|')
+              if grep -q "${pkgid}|" "$PI_CACHE_FILE"; then
+                  pkg_status="$MSG_GEN_INSTALLED"
+
+                  MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_FPREP|')
+              else
+                  pkg_status="$MSG_GEN_AVAILABLE"
+                  MENU_PKG="$MENU_IPKG"
+              fi
+          fi
+
+          pkgAction=$(printf "%b" "$MENU_PKG" | sa_fzf --prompt="" --header="$AS_HEADER" --preview "$AS_PREVIEW")
+          pkgAction=${pkgAction%|*}
+
+          case "$pkgAction" in
+              "AMP_INST") solseek "$AS_ROUTE" "install" "$pkgid" ;;
+              "AMP_RINST") solseek "$AS_ROUTE" "reinstall" "$pkgid" ;;
+              "AMP_REM") solseek "$AS_ROUTE" "remove" "$pkgid" ;;
+              "AMP_FPREP") solseek "$AS_ROUTE" "repair" "$pkgid" ;;
+              "AMP_SCHK") solseek "$AS_ROUTE" "check" "$pkgid" ;;
+              "AMP_UPDT") solseek "$AS_ROUTE" "update" "$pkgid" ;;
+              "A_BACK" | "") continue ;;
+          esac
+
+      # Flatpaks Sub Action
+      elif [ "$2" = "lif" ] || [ "$2" = "laf" ]; then
+          #Flatpak List
+          fp_cache
+
+          if [ "$2" = "lif" ]; then
+              app_list=$(solseek "applist" "fpi")
+              pkg_list_type="$ACT_MAIN_LISTIPKGS"
+          else
+              app_list=$(solseek "applist" "fpa")
+              pkg_list_type="$ACT_MAIN_LISTAPKGS"
+          fi
+
+          pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$ACT_UPD_FLATPAK - $pkg_list_type" --preview 'solseek -ssfi {1} {+}')
+
+          # Return to main menu
+          [ -z "$pkg" ] && exit 0
+          if [[ "$pkg" == Empty* ]]; then
+              continue
+          fi
+          package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
+
+          if grep -q "${package}|" "$FI_CACHE_FILE"; then
+              pkg_status="$MSG_GEN_INSTALLED"
+
+              MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_SCHK|')
+          else
+              pkg_status="$MSG_GEN_AVAILABLE"
+              MENU_PKG="$MENU_IPKG"
+          fi
+          package="${package//$'\n'/ }"
+          # PACKAGE ACTION
+          pkgAction=$(printf "%b" "$MENU_PKG" | sa_fzf --prompt="" --header="$MSG_PKG_FPSEL" --preview "solseek -ssh SELPKG '$package'")
+
+          pkgAction=${pkgAction%|*}
+          case "$pkgAction" in
+              "AMP_INST") solseek -ssf install "$package" ;;
+              "AMP_RINST") solseek -ssf reinstall "$package" ;;
+              "AMP_REM") solseek -ssf remove "$package" ;;
+              "AMP_FPREP") solseek -ssf repair "$package" ;;
+              "AMP_UPDT") solseek -ssf update "$package" ;;
+              "A_BACK" | "") continue ;;
+          esac
+      # Packages Sub Action
+      elif [ "$2" = "li" ] || [ "$2" = "la" ]; then
+
+        # PACKAGE LIST
+          eopkg_cache
+          if [ "$2" = "li" ]; then
+              app_list=$(solseek "applist" "pkgi")
+              pkg_list_type="$ACT_MAIN_LISTIPKGS"
+          else
+              app_list=$(solseek "applist" "pkga")
+              pkg_list_type="$ACT_MAIN_LISTAPKGS"
+          fi
+
+          pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$MSG_PKG_HEADER - $pkg_list_type" --preview 'solseek -ssi {1} {+}')
+
+          # Return to main menu
+          [ -z "$pkg" ] && exit 0
+
+          package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
+
+          if grep -q "${package}|" "$PI_CACHE_FILE"; then
+              pkg_status="$MSG_GEN_INSTALLED"
+
+              MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_FPREP|')
+          else
+              pkg_status="$MSG_GEN_AVAILABLE"
+              MENU_PKG="$MENU_IPKG"
+          fi
+
+          package="${package//$'\n'/ }"
+          # PACKAGE ACTION
+          pkgAction=$(printf "%b" "$MENU_PKG" | sa_fzf --prompt="" --header="$MSG_GEN_SEL" --preview "solseek -ssh SELPKG '$package'")
+
+          pkgAction=${pkgAction%|*}
+          case "$pkgAction" in
+              "AMP_INST") solseek -ssp install "$package" ;;
+              "AMP_RINST") solseek -ssp reinstall "$package" ;;
+              "AMP_REM") solseek -ssp remove "$package" ;;
+              "AMP_SCHK") solseek -ssp check "$package" ;;
+              "AMP_UPDT") solseek -ssp update "$package" ;;
+              "A_BACK" | "") continue ;;
+          esac
+      # Driver Sub Action
+      elif [ "$2" = "drivers" ]; then
+
+        # Driver LIST
+
+          MENUDL="$MENU_DRIVERS"
+          check_nvidia_support "check"
+          if [ "$SS_GPU_NVIDIA" -eq 0 ]; then
+              MENUDL=$(echo "$MENUDL" | grep -v '^nvidia|')
+              MENUDL=$(echo "$MENUDL" | grep -v '^A_BLANKN|')
+          fi
+
+          # PACKAGE ACTION
+          pkg=$(printf "%b" "$MENUDL" | sa_fzf --prompt="" --header="Drivers" --preview 'solseek -ssd {1}')
+          [ -z "$pkg" ] && exit 0
+          pkgchk=${pkg%|*}
+
+          if [ "$pkgchk" == "A_BACK" ]; then
+              exit 0
+          elif [ "$pkgchk" == "A_BLANK" ] || [ "$pkgchk" == "A_BLANKN" ]; then
+              continue
+          else
+              MENUDA="$MENU_IPKG";
+              PREVD="solseek -ssh SELPKG '$pkgchk'"
+              if [ "$pkgchk" == "nvidia" ]; then
+                  check_nvidia_support "menu"
+                  PREVD="solseek -ssh INVIDIA"
+              else
+                  if grep -q "${pkgchk}|" "$PI_CACHE_FILE"; then
+                    pkg_status="$MSG_GEN_INSTALLED"
+                    MENUDA="$MENU_MPKG"
+                    MENUDA=$(echo "$MENUDA" | grep -v '^AMP_FPREP|')
+                  fi
+              fi
+
+              pkgAction=$(printf "%b" "$MENUDA" | sa_fzf --prompt="" --header="$MSG_GEN_SEL" --preview "$PREVD")
+              pkgAction=${pkgAction%|*}
+
+              if [ "$pkgchk" == "nvidia" ]; then
+
+                  case "$pkgAction" in
+                    "AMP_INSTO")
+                      package="${SS_NVMENU_MAP[AMP_INSTO]}"
+                      pkgAction="AMP_INST"
+                      ;;
+                    "AMP_INSTO32")
+                      package="${SS_NVMENU_MAP[AMP_INSTO32]}"
+                      pkgAction="AMP_INST"
+                      ;;
+                    "AMP_INSTP")
+                      package="${SS_NVMENU_MAP[AMP_INSTP]}"
+                      pkgAction="AMP_INST"
+                      ;;
+                    "AMP_INSTP32")
+                      package="${SS_NVMENU_MAP[AMP_INSTP32]}"
+                      pkgAction="AMP_INST"
+                      ;;
+                    "AMP_INSTL")
+                      package="${SS_NVMENU_MAP[AMP_INSTL]}"
+                      pkgAction="AMP_INST"
+                      ;;
+                    "AMP_INSTL32")
+                      package="${SS_NVMENU_MAP[AMP_INSTOL32]}"
+                      pkgAction="AMP_INST"
+                      ;;
+                    "AMP_ADD32")
+                      package="${SS_NVMENU_MAP[AMP_ADD32]}"
+                      pkgAction="AMP_INST"
+                      ;;
+                    "AMP_REM")
+                      package="${SS_NVMENU_MAP[AMP_REM]}"
+                  esac
+              else
+                  package="$pkgchk"
+              fi
+
+              case "$pkgAction" in
+                  "AMP_INST") solseek -ssp install "$package" ;;
+                  "AMP_RINST") solseek -ssp reinstall "$package" ;;
+                  "AMP_REM") solseek -ssp remove "$package" ;;
+                  "AMP_SCHK") solseek -ssp check "$package" ;;
+                  "AMP_UPDT") solseek -ssp update "$package" ;;
+                  "" | A_BACK) continue ;;
+              esac
+          fi
       else
-        pkg_status="$MSG_GEN_AVAILABLE"
-        MENU_PKG="$MENU_IPKG"
+        exit 0
       fi
-    else
-      AS_HEADER=$MSG_GEN_SEL
-      AS_PREVIEW="solseek -ssi '$pkgid'"
-      AS_ROUTE="-ssp"
-
-      if grep -q "$pkgid" "$PI_CACHE_FILE"; then
-        pkg_status="$MSG_GEN_INSTALLED"
-
-        MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_FPREP|')
-      else
-        pkg_status="$MSG_GEN_AVAILABLE"
-        MENU_PKG="$MENU_IPKG"
-      fi
-    fi
-
-    pkgAction=$(printf "%b" "$MENU_PKG" | sa_fzf --prompt="" --header="$AS_HEADER" --preview "$AS_PREVIEW")
-    pkgAction=${pkgAction%|*}
-
-    case "$pkgAction" in
-      "AMP_INST") solseek "$AS_ROUTE" "install" "$pkgid" ;;
-      "AMP_RINST") solseek "$AS_ROUTE" "reinstall" "$pkgid" ;;
-      "AMP_REM") solseek "$AS_ROUTE" "remove" "$pkgid" ;;
-      "AMP_FPREP") solseek "$AS_ROUTE" "repair" "$pkgid" ;;
-      "AMP_SCHK") solseek "$AS_ROUTE" "check" "$pkgid" ;;
-      "AMP_UPDT") solseek "$AS_ROUTE" "update" "$pkgid" ;;
-      "A_BACK" | "") continue ;;
-    esac
-
-  # Flatpaks Sub Action
-  elif [ "$2" = "lif" ] || [ "$2" = "laf" ]; then
-      #Flatpak List
-      fp_cache
-
-      if [ "$2" = "lif" ]; then
-        app_list=$(solseek "applist" "fpi")
-        pkg_list_type="$ACT_MAIN_LISTIPKGS"
-      else
-        app_list=$(solseek "applist" "fpa")
-        pkg_list_type="$ACT_MAIN_LISTAPKGS"
-      fi
-
-      pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$ACT_UPD_FLATPAK - $pkg_list_type" --preview 'solseek -ssfi {1} {+}')
-
-      # Return to main menu
-      [ -z "$pkg" ] && exit 0
-      if [[ "$pkg" == Empty* ]]; then
-        continue
-      fi
-      package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
-
-      if grep -q "$package" "$FI_CACHE_FILE"; then
-        pkg_status="$MSG_GEN_INSTALLED"
-
-        MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_SCHK|')
-      else
-        pkg_status="$MSG_GEN_AVAILABLE"
-        MENU_PKG="$MENU_IPKG"
-      fi
-      package="${package//$'\n'/ }"
-      # PACKAGE ACTION
-      pkgAction=$(printf "%b" "$MENU_PKG" | sa_fzf --prompt="" --header="$MSG_PKG_FPSEL" --preview "solseek -ssh SELPKG '$package'")
-
-      pkgAction=${pkgAction%|*}
-      case "$pkgAction" in
-        "AMP_INST") solseek -ssf install "$package" ;;
-        "AMP_RINST") solseek -ssf reinstall "$package" ;;
-        "AMP_REM") solseek -ssf remove "$package" ;;
-        "AMP_FPREP") solseek -ssf repair "$package" ;;
-        "AMP_UPDT") solseek -ssf update "$package" ;;
-        "A_BACK" | "") continue ;;
-      esac
-  # Packages Sub Action
-  elif [ "$2" = "li" ] || [ "$2" = "la" ]; then
-
-    # PACKAGE LIST
-      eopkg_cache
-      if [ "$2" = "li" ]; then
-        app_list=$(solseek "applist" "pkgi")
-        pkg_list_type="$ACT_MAIN_LISTIPKGS"
-      else
-        app_list=$(solseek "applist" "pkga")
-        pkg_list_type="$ACT_MAIN_LISTAPKGS"
-      fi
-
-      pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="$MSG_PKG_PROMPT: " --header="$MSG_PKG_HEADER - $pkg_list_type" --preview 'solseek -ssi {1} {+}')
-
-      # Return to main menu
-      [ -z "$pkg" ] && exit 0
-
-      package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
-
-      if grep -q "$package" "$PI_CACHE_FILE"; then
-        pkg_status="$MSG_GEN_INSTALLED"
-
-        MENU_PKG=$(echo "$MENU_MPKG" | grep -v '^AMP_FPREP|')
-      else
-        pkg_status="$MSG_GEN_AVAILABLE"
-        MENU_PKG="$MENU_IPKG"
-      fi
-
-      package="${package//$'\n'/ }"
-      # PACKAGE ACTION
-      pkgAction=$(printf "%b" "$MENU_PKG" | sa_fzf --prompt="" --header="$MSG_GEN_SEL" --preview "solseek -ssh SELPKG '$package'")
-
-      pkgAction=${pkgAction%|*}
-      case "$pkgAction" in
-        "AMP_INST") solseek -ssp install "$package" ;;
-        "AMP_RINST") solseek -ssp reinstall "$package" ;;
-        "AMP_REM") solseek -ssp remove "$package" ;;
-        "AMP_SCHK") solseek -ssp check "$package" ;;
-        "AMP_UPDT") solseek -ssp update "$package" ;;
-        "A_BACK" | "") continue ;;
-      esac
-  else
-  exit 0
-  fi
-  done
-  exit 0
+    done
+    exit 0
 fi
 
 # End Sub action area
@@ -957,27 +429,28 @@ clean_cache "regen" "update"
 clear
 # Start Interface
 while true; do
-  clear
+    clear
 
-  mode=$(printf "%b" "$MENU_MAIN" | sa_fzf --prompt="" --header="Solseek" --preview 'solseek -ssh {1}')
+    mode=$(printf "%b" "$MENU_MAIN" | sa_fzf --prompt="" --header="Solseek" --preview 'solseek -ssh {1}')
 
-  mode=${mode%|*}
+    mode=${mode%|*}
 
-  # For Appstream we have extra parsing
-  if [[ "$mode" == *:* ]]; then
-    IFS=':' read -r mode ascat <<< "$mode"
-  fi
+    # For Appstream we have extra parsing
+    if [[ "$mode" == *:* ]]; then
+      IFS=':' read -r mode ascat <<< "$mode"
+    fi
 
-  case "$mode" in
-    "AMM_QUIT" | "") exit 0 ;;
-    "AMM_LST_PI" | "AMM_LST_PII") solseek subact li ;;
-    "AMM_LST_PA" | "AMM_LST_PAS") solseek subact la ;;
-    "AMM_LST_FA" | "AMM_LST_FAS") solseek subact laf ;;
-    "AMM_LST_FI" | "AMM_LST_FII") solseek subact lif ;;
-    "AMM_DASUB") solseek subact lasm ;;
-    "AMM_DCAT") solseek subact las "$ascat" ;;
-    "AMM_UPSYS") solseek subact upsys ;;
-    "AMM_TOOLS") solseek subact tools ;;
-    *) continue ;;
-  esac
+    case "$mode" in
+        "AMM_QUIT" | "") exit 0 ;;
+        "AMM_LST_PI" | "AMM_LST_PII") solseek subact li ;;
+        "AMM_LST_PA" | "AMM_LST_PAS") solseek subact la ;;
+        "AMM_LST_FA" | "AMM_LST_FAS") solseek subact laf ;;
+        "AMM_LST_FI" | "AMM_LST_FII") solseek subact lif ;;
+        "AMM_DASUB") solseek subact lasm ;;
+        "AMM_DCAT") solseek subact las "$ascat" ;;
+        "AMM_UPSYS") solseek subact upsys ;;
+        "AMM_TOOLS") solseek subact tools ;;
+        "AMM_DMGR") solseek subact drivers ;;
+        *) continue ;;
+    esac
 done
