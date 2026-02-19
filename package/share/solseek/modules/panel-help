@@ -1,0 +1,78 @@
+if [[ "$2" == *":"* ]]; then
+    IFS=':' read -r PNLKEY PNLSUB <<< "$2"
+else
+    PNLKEY="$2"
+fi
+
+case "$PNLKEY" in
+    "AMM_UPSYS" | "AMM_WELC")
+      if [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
+          check_updates
+      fi
+esac
+case "$PNLKEY" in
+    "AMM_HLP_INST" | "AMM_LST_PII" | "AMM_LST_FII")
+        ss_info_pane "installed";;
+    "AMM_HLP_SRCH" | "AMM_LST_PAS" | "AMM_LST_FAS" | "AMM_DASUB" | "AMM_DCAT" | "AMM_LST_PA" | "AMM_LST_PI" | "AMM_LST_PU" | "AMM_LST_FA" | "AMM_LST_FI")
+        ss_info_pane "search";;
+    "AMM_UPSYS")
+        SS_HASUP_LIST=0
+        if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
+            upd_msg list
+        fi
+        if [ "$SS_HASUP_LIST" -eq 0 ]; then
+            ss_info_pane "update"
+        fi
+      ;;
+    "AMP_RINST"  | "AMP_REM" | "AMP_SCHK" | "AMP_UPDT")
+        printf "$MSG_PKG_ISTATMSG\n"
+        ss_info_pane "pkgaction" ;;
+    "AMP_INST")
+        printf "$MSG_PKG_ASTATMSG\n"
+        ss_info_pane "pkgaction" ;;
+    "AMT_ERBCK")
+        ss_info_pane "rollbacklist"
+        hr
+        eopkg history -l "$SS_ROLLBACK_LIMIT" 2>/dev/null
+      ;;
+    "AMM_TOOLS")
+        ss_info_pane "tools" ;;
+    "AMM_DMGR")
+        ss_info_pane "drivers" ;;
+    "AMM_ABOUT")
+        ss_info_pane "about" ;;
+    "AMM_WELC")
+        if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
+            upd_msg
+        fi
+        hrclr=201
+        if [ "$HAS_FASTFETCH" -eq 1 ]; then
+            fastfetch -c "$SS_FASTFETCH_CFG" --pipe false 2>/dev/null
+        else
+            ss_fetch 2>/dev/null
+        fi
+        hr
+        ss_info_pane "welcome"
+        hr
+        ss_life
+        echo -e "$MSG_GEN_PKGMGRS: $INST_PKG_MGRS"
+      ;;
+    "A_BACK")
+        echo "$MSG_GEN_BACK" ;;
+    "SELPKG")
+        printf "$MSG_PKG_SELECTED\n"
+        hr
+        echo "$3"| tr -s ' ' '\n'
+        hr
+        ss_info_pane "pkgaction"
+      ;;
+    "INVIDIA")
+        echo -e "${MSG_PNL_NVIDIA_TITLE}"
+        hr
+        echo -e "${MSG_PNL_NVIDIA_BODY}";
+
+      ;;
+    "AMM_QUIT")
+        echo "$MSG_GEN_EXIT" ;;
+    *) echo "$MSG_APP_NAME" ;;
+esac

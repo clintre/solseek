@@ -1,0 +1,295 @@
+sse_export=0
+sse_export_fn=""
+sse_sudo=0
+sse_type="eopkg"
+
+case "$2" in
+"AMT_FPLA" | "AMT_FPLU" | "AMT_FPCLEAN" | "AMT_FCHECK" | "AMT_FREPO" | "AMT_FHIST")
+    sse_type="flatpak" ;;
+"AMT_INXI")
+    sse_type="inxi" ;;
+"AMT_SSCFG" | "AMT_SSTMR" | "AMT_RBFW")
+    sse_type="solseek" ;;
+"A_BLANK")
+    echo " "
+    exit 0 ;;
+esac
+
+if [ "$sse_type" == "solseek" ]; then
+  if [ "$2" = "AMT_SSCFG" ]; then
+    if [ "$3" == "run" ]; then
+
+      if [ "$SS_LOCAL_CFG" -eq 0 ]; then
+        cp "$SS_DATA_PATH/config" "$HOME/.config/solseek/"
+      fi
+      if command -v "$SS_EDITOR" &> /dev/null; then
+        "$SS_EDITOR" "$HOME/.config/solseek/config"
+      else
+        echo -e "$(mst "rb")█ "$SS_EDITOR" not found. Using nano.$(mst "rst")"
+        nano "$HOME/.config/solseek/config"
+      fi
+      hr "danger" 3
+      echo -e "$MSG_GEN_PCONFIG!"
+      hr "danger"
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_EDITPVTOP
+      hr
+      ss_info_pane "sscfg"
+    fi
+  elif [ "$2" = "AMT_SSTMR" ]; then
+    TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
+    TMR_CHG_ACTION="enable"
+    TMR_CHG_TXT="ACTIVE"
+    TMR_STATUS_DISP="${CSS_REDB}Inactive${CSS_RESET}"
+    if [ "$TMR_STATUS" == "active" ]; then
+      TMR_CHG_ACTION="disable"
+      TMR_CHG_TXT="INACTIVE"
+      TMR_STATUS_DISP="${CSS_GREENB}Active${CSS_RESET}"
+    fi
+
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙️ ${MSG_INFO_MNGUPCHKSRV}${CSS_RESET} | ${MSG_GEN_CURSTATUS}: $TMR_STATUS_DISP"
+      hr
+      read -n 1 -p "$MSG_GEN_UPCHKQ1 ${TMR_CHG_TXT^^} $MSG_GEN_UPCHKQ2:" PUCHOICE
+      case "$PUCHOICE" in
+        [Yy])
+            echo -e "\n\n"
+            systemctl --user daemon-reload
+            systemctl --user "$TMR_CHG_ACTION" --now solseek-uc.timer
+            systemctl --user "$TMR_CHG_ACTION" solseek-uc.service
+            TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
+            echo -e "\n"
+            hr 3
+            echo -e "$MSG_GEN_NEWSTATUS: ${TMR_STATUS^^}"
+            hr
+            read -p "$MSG_GEN_PRESSENTER..."
+            exit 0
+            ;;
+        *)
+            exit 0
+            ;;
+      esac
+
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_EDITPVTOP
+      hr
+      ss_info_pane "sstmr"
+      echo -e "$TMR_STATUS_DISP"
+    fi
+  elif [ "$2" = "AMT_RBFW" ]; then
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙ ${ACT_INFO_RBFW}${CSS_RESET}";
+      hr
+      read -n 1 -p "${ACT_INFO_RBFW}? (N/y):" PUCHOICE
+      case "$PUCHOICE" in
+        [Yy])
+            systemctl reboot --firmware-setup
+            exit 0
+            ;;
+        *)
+            exit 0
+            ;;
+      esac
+    else
+      echo $MSG_INFO_RUNPVTOP
+      hr
+      echo -e "${ACT_INFO_RBFW}";
+    fi
+  fi
+
+  exit 0
+elif [ "$sse_type" = "eopkg" ]; then
+
+  ccache_eopkg=0
+
+  if [ "$2" = "AMT_EHIST" ]; then
+    sse_cmd="hs"
+    sse_export_fn="$HOME/eopkg_history.txt"
+    sse_sudo=1
+  elif [ "$2" = "AMT_EINST" ]; then
+    sse_cmd="li"
+    sse_export_fn="$HOME/eopkg_all_installed.txt"
+  elif [ "$2" = "AMT_EUSER" ]; then
+    sse_cmd="li -e"
+    sse_export_fn="$HOME/eopkg_user_installed.txt"
+  elif [ "$2" = "AMT_LREPO" ]; then
+    sse_cmd="lr"
+    sse_export_fn="$HOME/eopkg_repos.txt"
+  elif [ "$2" = "rollback" ]; then
+
+    IFS='|' read -r HID HIDTEXT <<< "$3"
+    unset IFS
+    hr 3
+    echo -e "${CSS_BOLDBRIGHT}⚙ EOPKG $ACT_INFO_HROLLBACK: $HIDTEXT ${CSS_RESET}";
+    hr
+    HID=$(echo "$HID" | xargs)
+    sudo eopkg hs -t "$HID"
+    eopkg_cache "force"
+    hr
+    read -p "$MSG_GEN_PRESSENTER..."
+    exit 0
+
+  elif [ "$2" = "AMT_ECHECK" ]; then
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN: eopkg check${CSS_RESET}";
+      hr
+      sudo eopkg check
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_RUNPVTOP
+      hr
+      echo -e "$MSG_GEN_RUN: eopkg check\n";
+      ss_format_help eopkg check
+    fi
+    exit 0
+  elif [ "$2" == "AMT_ERBCK" ]; then
+    echo $MSG_INFO_ACCESSPVTOP
+    hr
+    ss_info_pane "rollback"
+    exit 0
+  elif [ "$2" = "AMT_ERMO" ]; then
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_ERMO: eopkg remove-orphans${CSS_RESET}";
+      hr
+      sudo eopkg rmo
+      eopkg_cache "force"
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_RUNPVTOP
+      hr
+      echo -e "$ACT_INFO_ERMO: eopkg remove-orphans\n";
+      ss_format_help eopkg remove-orphans
+    fi
+    exit 0
+  elif [ "$2" = "AMT_EDC" ]; then
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_EDC eopkg delete-cache${CSS_RESET}";
+      hr
+      sudo eopkg dc
+      eopkg_cache "force"
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_RUNPVTOP
+      hr
+      echo -e "$ACT_INFO_EDC eopkg delete-cache\n";
+      ss_format_help eopkg delete-cache
+    fi
+    exit 0
+  elif [ "$2" = "AMT_EUR" ]; then
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_EUR eopkg update-repo${CSS_RESET}";
+      hr
+      sudo eopkg ur --force
+      eopkg_cache "force"
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_RUNPVTOP
+      hr
+      echo -e "$ACT_INFO_EUR eopkg update-repo\n";
+      ss_format_help eopkg update-repo
+    fi
+    exit 0
+  else
+    echo "$MSG_GEN_BACK"
+    exit 0
+  fi
+
+  if [ "$3" == "export" ]; then
+    hr 3
+    echo -e "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
+    hr
+    if [ "$sse_sudo" -eq 1 ]; then
+      sudo eopkg "$sse_cmd" > $sse_export_fn
+    else
+      eopkg $sse_cmd > $sse_export_fn
+    fi
+    read -p "$MSG_GEN_PRESSENTER..."
+  else
+    echo "$MSG_INFO_EXPPVTOP"
+    hr
+    eopkg $sse_cmd
+  fi
+elif [ "$sse_type" == "flatpak" ]; then
+  if [ "$2" = "AMT_FPCLEAN" ]; then
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_CHECK: flatpak uninstall --unused${CSS_RESET}";
+      hr
+      flatpak uninstall --unused
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_RUNPVTOP
+      hr
+      echo -e "$ACT_INFO_CHECK: flatpak uninstall --unused\n";
+      ss_format_help flatpak uninstall --unused
+    fi
+    exit 0
+  elif [ "$2" == "AMT_FCHECK" ]; then
+    if [ "$3" == "run" ]; then
+      hr 3
+      echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN: flatpak repair${CSS_RESET}";
+      hr
+      flatpak repair
+      hr
+      read -p "$MSG_GEN_PRESSENTER..."
+    else
+      echo $MSG_INFO_RUNPVTOP
+      hr
+      echo -e "$MSG_GEN_RUN: flatpak repair\n";
+      ss_format_help flatpak repair --unused
+    fi
+    exit 0
+  fi
+  if [ "$2" = "AMT_FPLA" ]; then
+    sse_cmd="list --columns=name,version"
+    sse_export_fn="$HOME/flatpak_all_installed.txt"
+    sse_sudo=1
+  elif [ "$2" = "AMT_FPLU" ]; then
+    sse_cmd="list --app --columns=name,version"
+    sse_export_fn="$HOME/flatpak_user_installed.txt"
+  elif [ "$2" = "AMT_FREPO" ]; then
+    sse_cmd="remotes --show-disabled --columns=name,url,options"
+    sse_export_fn="$HOME/flatpak_remotes.txt"
+  elif [ "$2" = "AMT_FHIST" ]; then
+    sse_cmd="history --reverse"
+    sse_export_fn="$HOME/flatpak_history.txt"
+  fi
+  if [ "$3" == "export" ]; then
+    flatpak $sse_cmd > $sse_export_fn
+    hr 3
+    echo -e "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
+    hr
+    read -p "$MSG_GEN_PRESSENTER..."
+  else
+    echo "$MSG_INFO_EXPPVTOP"
+    hr
+    printf "$(flatpak $sse_cmd 2>/dev/null)"
+  fi
+elif [ "$sse_type" == "inxi" ]; then
+  sse_export_fn="$HOME/inxi_output.txt"
+  if [ "$3" == "export" ]; then
+    inxi -b > $sse_export_fn
+    hr 3
+    echo "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
+    hr
+    read -p "$MSG_GEN_PRESSENTER..."
+  else
+    echo "$MSG_INFO_EXPPVTOP"
+    hr
+    inxi -b --tty -y 80 2>/dev/null
+  fi
+
+fi

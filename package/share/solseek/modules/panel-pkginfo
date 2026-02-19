@@ -1,0 +1,19 @@
+if [ -n "$2" ]; then
+
+    if grep -q "$2" "$PI_CACHE_FILE"; then
+      pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
+    else
+      pkg_status="${CSS_YELLOW}$MSG_GEN_AVAILABLE${CSS_RESET}"
+    fi
+
+    if [ -n "$3" ]; then
+      selpkg_clean=$(echo "${@:3}" | grep -o '[^ ]*|' | tr -d '|')
+      echo -e "${CSS_BOLDBRIGHT}$MSG_PKG_SELECTED:${CSS_RESET} $selpkg_clean" | fold -s -w 80 2>/dev/null
+      hr
+    fi
+    echo -e "> $pkg_status\n"
+    get_pkg_info "$2" | fold -s -w 70 2>/dev/null
+
+  else
+    echo "$MSG_GEN_SEL_ITEM"
+  fi

@@ -1,0 +1,37 @@
+if [ $# -lt 3 ]; then
+echo "$MSG_GEN_INVPARAM"
+read -p "$MSG_GEN_PRESSENTER..."
+else
+    ccache=0
+    pkgvars="${3//$'\n'/ }"
+    if [ "$2" == "install" ]; then
+        pkg_mgmt_act="install --system"
+        pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"
+        ccache=1
+    elif [ "$2" == "reinstall" ]; then
+        pkg_mgmt_act="install --reinstall --system"
+        pkg_mgmt_title="$ACT_PKG_REINSTALL: $pkgvars"
+    elif [ "$2" == "update" ]; then
+        pkg_mgmt_act="update"
+        pkg_mgmt_title="$ACT_PKG_UPDATE: $pkgvars"
+    elif [ "$2" == "remove" ]; then
+        pkg_mgmt_act="remove"
+        pkg_mgmt_title="$ACT_PKG_REMOVE: $pkgvars"
+        ccache=1
+    elif [ "$2" == "repair" ]; then
+        pkg_mgmt_act="repair"
+        pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
+    fi
+
+    hr 3
+    echo -e "${CSS_BOLDBRIGHT}📦 $MSG_PKG_TTLSTART $pkg_mgmt_title${CSS_RESET}"
+    hr
+    flatpak $pkg_mgmt_act $pkgvars $SS_ASSUMEYES
+    if [ "$ccache" -eq 1 ]; then
+        fp_cache "force"
+    fi
+    hr "success" 3
+    echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
+    hr "success"
+    read -p "$MSG_GEN_PRESSENTER..."
+fi

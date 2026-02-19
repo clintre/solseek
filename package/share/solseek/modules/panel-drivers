@@ -1,0 +1,19 @@
+if [ "$2" == "A_BACK" ]; then
+  echo "Back to Menu"
+  exit 0
+fi
+echo "Select to Manage"
+hr
+
+if [ "$2" == "nvidia" ]; then
+    check_nvidia_support "info"
+elif [ "$2" != "A_BLANK" ] && [ "$2" != "A_BLANKN" ]; then
+    if grep -q "$2|" "$PI_CACHE_FILE"; then
+        echo -e "Status: ${CSS_GREEN}Installed${CSS_RESET}"
+    else
+        echo -e "Status: ${CSS_YELLOW}Not Installed${CSS_RESET}"
+    fi
+    echo -e "\n"
+    get_pkg_info "$2" | fold -s -w 70 2>/dev/null
+fi
+exit 0

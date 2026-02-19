@@ -1,0 +1,36 @@
+if [ $# -lt 3 ]; then
+echo "$MSG_GEN_INVPARAM"
+read -p "$MSG_GEN_PRESSENTER..."
+else
+    ccache=0
+    pkgvars="${3//$'\n'/ }"
+    if [ "$2" == "install" ]; then
+        pkg_mgmt_act="it"
+        pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"
+        ccache=1
+    elif [ "$2" == "reinstall" ]; then
+        pkg_mgmt_act="it --reinstall"
+        pkg_mgmt_title="$ACT_PKG_REINSTALL: $pkgvars"
+    elif [ "$2" == "update" ]; then
+        pkg_mgmt_act="up"
+        pkg_mgmt_title="$ACT_PKG_UPDATE: $pkgvars"
+    elif [ "$2" == "remove" ]; then
+        pkg_mgmt_act="rm"
+        pkg_mgmt_title="$ACT_PKG_REMOVE: $pkgvars"
+        ccache=1
+    elif [ "$2" == "check" ]; then
+        pkg_mgmt_act="check"
+        pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
+    fi
+
+    hr 3
+    echo -e "${CSS_BOLDBRIGHT}📦 $MSG_PKG_TTLSTART $pkg_mgmt_title${CSS_RESET}"
+    hr
+    sudo eopkg $pkg_mgmt_act $pkgvars $SS_ASSUMEYES
+    if [ "$ccache" -eq 1 ]; then
+        eopkg_cache "force"
+    fi
+    hr 3
+    echo "$MSG_GEN_PROCCOMP"
+    read -p "$MSG_GEN_PRESSENTER..."
+fi

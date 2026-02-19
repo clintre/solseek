@@ -1,0 +1,17 @@
+if [ "$2" == "pkga" ]; then
+    eopkg_cache
+    cat $PA_CACHE_FILE 2>/dev/null
+elif [ "$2" == "pkgi" ]; then
+    eopkg_cache
+    cat $PI_CACHE_FILE 2>/dev/null
+elif [ "$2" == "fpa" ]; then
+    fp_cache
+    cat $FA_CACHE_FILE 2>/dev/null
+elif [ "$2" == "fpi" ]; then
+    fp_cache
+    cat $FI_CACHE_FILE 2>/dev/null
+elif [ "$2" == "as" ]; then
+    AS_TMP_CACHE="$AS_CACHE_FILE"
+    appstream_get_list "$3"
+    cat "$AS_TMP_CACHE" | sort -t ']' -k 2
+fi
