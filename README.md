@@ -5,7 +5,7 @@
 
 🌟[Features](#features) 📑[Requirements & Installation](https://github.com/clintre/solseek/wiki#getting-started) 📗[Wiki](https://github.com/clintre/solseek/wiki) 💪[Contributing](#contributing)
 
-Solseek is a simple terminal user interface that allows you to browse, search, and manage packages for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
+Solseek is a simple terminal user interface that allows you to browse, search, and manage packages and drivers for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
 
 ⚠️ **Please note that until version 1.x this will be fast changing**
 
@@ -17,6 +17,8 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Complete app store similar to Discover or Gnome Software
   - Select and install multiple packages at once
   - Manage system updates for installed tools such as; eopkg, flatpak, snap, distrobox, and fwupd
+  - Rollback system to help issues brought on by updates or installs
+  - Driver manager for Nvidia and printer drivers (more coming)
   - Verify all packages
   - View and export installed packages for eopkg and flatpak (all and/or user installed)
   - Recall (rollback) system package actions
@@ -24,12 +26,12 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - View system configurations
 
 ## Known Limitations / Issues
-  - Currently only in English, French, and Polish
+  - Currently only in English, French, Polish, Slovenian, and Spanish
   - Limited Snap support. Only updates, no list or searching. Full Snap support is not planned at this time.
 
 ## Planned
   - Additional languages (looking for help on this)
-  - Recipes for common installs on Solus (Nvidia, Distrobox, etc)
+  - Recipes for common installs on Solus (Distrobox, etc)
   - moss support (AerynOS & future Solus)
 
 ## Contributing
