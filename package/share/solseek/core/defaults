@@ -14,12 +14,72 @@ SS_SOLUS_REPO="Solus"
 SS_SOLUS_LR=0
 SS_SOLUS_US=0
 SS_CUST_UPDATE=""
+
 declare -i SS_SOLUS_RCNT=0
 
 SS_LOCAL_CFG=0
 SS_EDITOR="nano"
 
 SS_CACHE_PATH="$HOME/.cache/solseek"
+
+## Nvidia Control Defaults
+
+SS_GPU=""
+SS_GPU_NVIDIA=0
+SS_NVIDIA_OPEN=0
+SS_NVIDIA_INSTALLED=""
+SS_NVIDIA32_INSTALLED=""
+SS_NVIDIA_CURRENT=""
+
+if [ "$SS_LTS_KERNEL" -eq 0 ]; then
+   SS_NVIDIA_CURRENT="-current"
+fi
+
+declare -A SS_NVIDIA32_MAP
+
+SS_NVIDIA32_MAP=(
+    ["nvidia-open"]="nvidia-glx-driver-32bit"
+    ["nvidia-open-current"]="nvidia-glx-driver-32bit"
+    ["nvidia-glx-driver"]="nvidia-glx-driver-32bit"
+    ["nvidia-glx-driver-current"]="nvidia-glx-driver-32bit"
+    ["nvidia-beta-driver"]="nvidia-beta-driver-32bit"
+    ["nvidia-beta-driver-current"]="nvidia-beta-driver-32bit"
+    ["nvidia-470-glx-driver"]="nvidia-470-glx-driver-32bit"
+    ["nvidia-470-glx-driver-current"]="nvidia-470-glx-driver-32bit"
+)
+
+
+declare -A SS_NVMENU_MAP
+
+SS_NVMENU_MAP=(
+    ["AMP_INSTO"]="nvidia-open${SS_NVIDIA_CURRENT}"
+    ["AMP_INSTO32"]="nvidia-open${SS_NVIDIA_CURRENT} nvidia-glx-driver-32bit"
+    ["AMP_INSTP"]="nvidia-glx-driver${SS_NVIDIA_CURRENT}"
+    ["AMP_INSTP32"]="nvidia-glx-driver${SS_NVIDIA_CURRENT} nvidia-glx-driver-32bit"
+    ["AMP_INSTL"]="nvidia-470-glx-driver${SS_NVIDIA_CURRENT} nvidia-470-glx-driver-32bit"
+    ["AMP_ADD32"]=""
+    ["AMP_REM"]=""
+)
+
+## Nvidia Driver check list
+SS_NVIDIA_DRIVERS="
+nvidia-open
+nvidia-open-current
+nvidia-glx-driver
+nvidia-glx-driver-current
+nvidia-glx-driver-current-experimental
+nvidia-beta-driver
+nvidia-beta-driver-current
+nvidia-470-glx-driver
+nvidia-470-glx-driver-current
+nvidia-470-glx-driver-current-experimental
+nvidia-470-glx-driver-common
+nvidia-glx-driver-common
+nvidia-beta-driver-common
+nvidia-470-glx-driver-32bit
+nvidia-glx-driver-32bit
+nvidia-beta-driver-32bit
+"
 
 ## Base Styling
 CSS_BOLDBRIGHT="\033[1m"

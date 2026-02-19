@@ -1,126 +1,168 @@
 
-MENU_MAIN=$(cat <<EOF
-AMM_WELC|🏠$(mst "1sp" "bbr")$ACT_MAIN_WELCOME$(mst "rst")
-AMM_UPSYS|🔄$(mst "1sp" "bbr")$ACT_MAIN_UPDATESYS$(mst "rst")
+MENU_MAIN="AMM_WELC|🏠$(mst "1sp" "bbr")${ACT_MAIN_WELCOME}$(mst "rst")
+AMM_UPSYS|🔄$(mst "1sp" "bbr")${ACT_MAIN_UPDATESYS}$(mst "rst")
 A_BLANK|$(menu_bar)
-AMM_HLP_INST|💻$(mst "1sp" "bbr")$ACT_MAIN_INSTALLED$(mst "rst")
-AMM_LST_PII|$(mst "1sp")- $ACT_MAIN_PACKAGES
-AMM_LST_FII|$(mst "1sp")- $ACT_MAIN_FLATPAKS
-AMM_HLP_SRCH|🔍$(mst "1sp" "bbr")$ACT_MAIN_SEARCH$(mst "rst")
-AMM_LST_PAS|$(mst "1sp")- $ACT_MAIN_PACKAGES
-AMM_LST_FAS|$(mst "1sp")- $ACT_MAIN_FLATPAKS
-AMM_DASUB|$(mst "1sp")- $MSG_GEN_DESKAPPS
+AMM_HLP_INST|💻$(mst "1sp" "bbr")${ACT_MAIN_INSTALLED}$(mst "rst")
+AMM_LST_PII|$(mst "1sp")- ${ACT_MAIN_PACKAGES}
+AMM_LST_FII|$(mst "1sp")- ${ACT_MAIN_FLATPAKS}
+AMM_HLP_SRCH|🔍$(mst "1sp" "bbr")${ACT_MAIN_SEARCH}$(mst "rst")
+AMM_LST_PAS|$(mst "1sp")- ${ACT_MAIN_PACKAGES}
+AMM_LST_FAS|$(mst "1sp")- ${ACT_MAIN_FLATPAKS}
+AMM_DASUB|$(mst "1sp")- ${MSG_GEN_DESKAPPS}
 A_BLANK|$(menu_bar)
-AMM_TOOLS|🧰$(mst "1sp" "bbr")$ACT_MAIN_INFORMATION$(mst "rst")
-AMM_ABOUT|📃$(mst "1sp" "bbr")$ACT_MAIN_ABOUT$(mst "rst")
-AMM_QUIT|❌$(mst "1sp" "rb")$ACT_MAIN_QUIT $(mst "rst")
-EOF
-)
+AMM_DMGR|⚡$(mst "1sp" "bbr")${MSG_GEN_DRIVERS}$(mst "rst")
+AMM_TOOLS|🧰$(mst "1sp" "bbr")${ACT_MAIN_INFORMATION}$(mst "rst")
+AMM_ABOUT|📃$(mst "1sp" "bbr")${ACT_MAIN_ABOUT}$(mst "rst")
+AMM_QUIT|❌$(mst "1sp" "rb")${ACT_MAIN_QUIT} $(mst "rst")
+"
 
-MENU_MAIN2=$(cat <<EOF
-AMM_WELC|$ACT_MAIN_WELCOME
-AMM_LST_PA|📦$(mst "1sp" "bbr")$ACT_MAIN_SECPKGLST$(mst "rst")
-AMM_LST_PA|$(mst "1sp")- $ACT_MAIN_LISTAPKGS
-AMM_LST_PI|$(mst "1sp")- $ACT_MAIN_LISTIPKGS
-AMM_LST_FA|📦$(mst "1sp" "bbr")$ACT_MAIN_SECFLPLST$(mst "rst")
-AMM_LST_FA|$(mst "1sp")- $ACT_MAIN_LISTAPKGS
-AMM_LST_FI|$(mst "1sp")- $ACT_MAIN_LISTIPKGS
+
+MENU_MAIN2="AMM_WELC|${ACT_MAIN_WELCOME}
+AMM_LST_PA|📦$(mst "1sp" "bbr")${ACT_MAIN_SECPKGLST}$(mst "rst")
+AMM_LST_PA|$(mst "1sp")- ${ACT_MAIN_LISTAPKGS}
+AMM_LST_PI|$(mst "1sp")- ${ACT_MAIN_LISTIPKGS}
+AMM_LST_FA|📦$(mst "1sp" "bbr")${ACT_MAIN_SECFLPLST}$(mst "rst")
+AMM_LST_FA|$(mst "1sp")- ${ACT_MAIN_LISTAPKGS}
+AMM_LST_FI|$(mst "1sp")- ${ACT_MAIN_LISTIPKGS}
 A_BLANK|📦$(mst "1sp" "bbr")$MSG_GEN_DESKAPPS$(mst "rst")
-AMM_DCAT:AudioVideo|$(mst "1sp")- $MSG_GEN_AUDIOVIDEO
-AMM_DCAT:Development|$(mst "1sp")- $MSG_GEN_DEVELOPMENT
-AMM_DCAT:Education|$(mst "1sp")- $MSG_GEN_EDUCATION
-AMM_DCAT:Game|$(mst "1sp")- $MSG_GEN_GAME
-AMM_DCAT:Graphics|$(mst "1sp")- $MSG_GEN_GRAPHICS
-AMM_DCAT:Network|$(mst "1sp")- $MSG_GEN_NETWORK
-AMM_DCAT:Office|$(mst "1sp")- $MSG_GEN_OFFICE
-AMM_DCAT:Science|$(mst "1sp")- $MSG_GEN_SCIENCE
-AMM_DCAT:Settings|$(mst "1sp")- $MSG_GEN_SETTINGS
-AMM_DCAT:System|$(mst "1sp")- $MSG_GEN_SYSTEM
-AMM_DCAT:WebBrowser|$(mst "1sp")- $MSG_GEN_WBROWSER
-AMM_DCAT:Utility|$(mst "1sp")- $MSG_GEN_UTILITY
-A_BLANK|💻$(mst "1sp" "bbr")$MSG_GEN_SYSTEM$(mst "rst")
-AMM_UPSYS|$(mst "1sp")- $ACT_MAIN_UPDATESYS
-AMM_TOOLS|$(mst "1sp")- $ACT_MAIN_INFORMATION
+AMM_DCAT:AudioVideo|$(mst "1sp")- ${MSG_GEN_AUDIOVIDEO}
+AMM_DCAT:Development|$(mst "1sp")- ${MSG_GEN_DEVELOPMENT}
+AMM_DCAT:Education|$(mst "1sp")- ${MSG_GEN_EDUCATION}
+AMM_DCAT:Game|$(mst "1sp")- ${MSG_GEN_GAME}
+AMM_DCAT:Graphics|$(mst "1sp")- ${MSG_GEN_GRAPHICS}
+AMM_DCAT:Network|$(mst "1sp")- ${MSG_GEN_NETWORK}
+AMM_DCAT:Office|$(mst "1sp")- ${MSG_GEN_OFFICE}
+AMM_DCAT:Science|$(mst "1sp")- ${MSG_GEN_SCIENCE}
+AMM_DCAT:Settings|$(mst "1sp")- ${MSG_GEN_SETTINGS}
+AMM_DCAT:System|$(mst "1sp")- ${MSG_GEN_SYSTEM}
+AMM_DCAT:WebBrowser|$(mst "1sp")- ${MSG_GEN_WBROWSER}
+AMM_DCAT:Utility|$(mst "1sp")- ${MSG_GEN_UTILITY}
+A_BLANK|💻$(mst "1sp" "bbr")${MSG_GEN_SYSTEM}$(mst "rst")
+AMM_UPSYS|$(mst "1sp")- ${ACT_MAIN_UPDATESYS}
+AMM_TOOLS|$(mst "1sp")- ${ACT_MAIN_INFORMATION}
 A_BLANK|$(menu_bar)
-AMM_ABOUT|📃$(mst "1sp" "bbr")$ACT_MAIN_ABOUT$(mst "rst")
-AMM_QUIT|❌$(mst "1sp" "rb")$ACT_MAIN_QUIT $(mst "rst")
-EOF
-)
+AMM_ABOUT|📃$(mst "1sp" "bbr")${ACT_MAIN_ABOUT}$(mst "rst")
+AMM_QUIT|❌$(mst "1sp" "rb")${ACT_MAIN_QUIT} $(mst "rst")
+"
 
-MENU_DAS=$(cat <<EOF
-A_BACK|< $ACT_GEN_BACK
-AMM_DCAT:AudioVideo|$(mst "1sp")$MSG_GEN_AUDIOVIDEO
-AMM_DCAT:Development|$(mst "1sp")$MSG_GEN_DEVELOPMENT
-AMM_DCAT:Education|$(mst "1sp")$MSG_GEN_EDUCATION
-AMM_DCAT:Game|$(mst "1sp")$MSG_GEN_GAME
-AMM_DCAT:Graphics|$(mst "1sp")$MSG_GEN_GRAPHICS
-AMM_DCAT:Network|$(mst "1sp")$MSG_GEN_NETWORK
-AMM_DCAT:Office|$(mst "1sp")$MSG_GEN_OFFICE
-AMM_DCAT:Science|$(mst "1sp")$MSG_GEN_SCIENCE
-AMM_DCAT:Settings|$(mst "1sp")$MSG_GEN_SETTINGS
-AMM_DCAT:System|$(mst "1sp")$MSG_GEN_SYSTEM
-AMM_DCAT:WebBrowser|$(mst "1sp")$MSG_GEN_WBROWSER
-AMM_DCAT:Utility|$(mst "1sp")$MSG_GEN_UTILITY
-EOF
-)
+MENU_DAS="A_BACK|< ${ACT_GEN_BACK}
+AMM_DCAT:AudioVideo|$(mst "1sp")${MSG_GEN_AUDIOVIDEO}
+AMM_DCAT:Development|$(mst "1sp")${MSG_GEN_DEVELOPMENT}
+AMM_DCAT:Education|$(mst "1sp")${MSG_GEN_EDUCATION}
+AMM_DCAT:Game|$(mst "1sp")${MSG_GEN_GAME}
+AMM_DCAT:Graphics|$(mst "1sp")${MSG_GEN_GRAPHICS}
+AMM_DCAT:Network|$(mst "1sp")${MSG_GEN_NETWORK}
+AMM_DCAT:Office|$(mst "1sp")${MSG_GEN_OFFICE}
+AMM_DCAT:Science|$(mst "1sp")${MSG_GEN_SCIENCE}
+AMM_DCAT:Settings|$(mst "1sp")${MSG_GEN_SETTINGS}
+AMM_DCAT:System|$(mst "1sp")${MSG_GEN_SYSTEM}
+AMM_DCAT:WebBrowser|$(mst "1sp")${MSG_GEN_WBROWSER}
+AMM_DCAT:Utility|$(mst "1sp")${MSG_GEN_UTILITY}
+"
 
-MENU_UPDATE=$(cat <<EOF
-A_BACK|< $ACT_GEN_BACK
-AMU_EOPKG|$ACT_UPD_EOPKG
-AMU_FLATPAK|$ACT_UPD_FLATPAK
-AMU_SNAP|$ACT_UPD_SNAP
-AMU_ALL|$ACT_UPD_ALL
-AMU_DBOX|$ACT_UPD_DISTROBOX
-AMU_FMW|$ACT_UPD_FIRMWARE
-AMU_CUST|$ACT_UPD_CUSTOM
-AMU_ETHING|$ACT_UPD_EVERYTHING
+MENU_UPDATE="A_BACK|< ${ACT_GEN_BACK}
+AMU_EOPKG|${ACT_UPD_EOPKG}
+AMU_FLATPAK|${ACT_UPD_FLATPAK}
+AMU_SNAP|${ACT_UPD_SNAP}
+AMU_ALL|${ACT_UPD_ALL}
+AMU_DBOX|${ACT_UPD_DISTROBOX}
+AMU_FMW|${ACT_UPD_FIRMWARE}
+AMU_CUST|${ACT_UPD_CUSTOM}
+AMU_ETHING|${ACT_UPD_EVERYTHING}
 A_BLANK|$(menu_bar)
-AMU_CHECK|$ACT_UPD_CHECK
-EOF
-)
+AMU_CHECK|${ACT_UPD_CHECK}
+"
 
-MENU_TOOLS=$(cat <<EOF
-A_BACK|< $ACT_GEN_BACK
+MENU_TOOLS="A_BACK|< ${ACT_GEN_BACK}
 A_BLANK|$(mst "bbr")EOPKG$(mst "rst")
-AMT_EHIST|- $ACT_INFO_EHIST
-AMT_ERBCK|- $ACT_INFO_ROLLBACK
-AMT_EINST|- $ACT_INFO_EINST
-AMT_EUSER|- $ACT_INFO_EUSER
-AMT_LREPO|- $ACT_INFO_LREPO
-AMT_ECHECK|- $ACT_INFO_CHECK
-AMT_ERMO|- $ACT_INFO_ERMO
-AMT_EDC|- $ACT_INFO_EDC
-AMT_EUR|- $ACT_INFO_EUR
+AMT_EHIST|- ${ACT_INFO_EHIST}
+AMT_ERBCK|- ${ACT_INFO_ROLLBACK}
+AMT_EINST|- ${ACT_INFO_EINST}
+AMT_EUSER|- ${ACT_INFO_EUSER}
+AMT_LREPO|- ${ACT_INFO_LREPO}
+AMT_ECHECK|- ${ACT_INFO_CHECK}
+AMT_ERMO|- ${ACT_INFO_ERMO}
+AMT_EDC|- ${ACT_INFO_EDC}
+AMT_EUR|- ${ACT_INFO_EUR}
 A_BLANK|$(mst "bbr")FLATPAK$(mst "rst")
-AMT_FHIST|- $ACT_INFO_EHIST
-AMT_FPLA|- $ACT_INFO_EINST
-AMT_FPLU|- $ACT_INFO_EUSER
-AMT_FREPO|- $ACT_INFO_LREPO
-AMT_FCHECK|- $ACT_INFO_CHECK
-AMT_FPCLEAN|- $ACT_INFO_ERMO
-A_BLANK|$(mst "bbr")$ACT_INFO_SYSTEM$(mst "rst")
-AMT_INXI|- $ACT_INFO_INXI
-AMT_RBFW|- $ACT_INFO_RBFW
+AMT_FHIST|- ${ACT_INFO_EHIST}
+AMT_FPLA|- ${ACT_INFO_EINST}
+AMT_FPLU|- ${ACT_INFO_EUSER}
+AMT_FREPO|- ${ACT_INFO_LREPO}
+AMT_FCHECK|- ${ACT_INFO_CHECK}
+AMT_FPCLEAN|- ${ACT_INFO_ERMO}
+A_BLANK|$(mst "bbr")${ACT_INFO_SYSTEM}$(mst "rst")
+AMT_INXI|- ${ACT_INFO_INXI}
+AMT_RBFW|- ${ACT_INFO_RBFW}
 A_BLANK|$(mst "bbr")SOLSEEK$(mst "rst")
-AMT_SSCFG|- $ACT_INFO_SSCFG
-AMT_SSTMR|- $ACT_INFO_UPCHKSVC
-EOF
-)
+AMT_SSCFG|- ${ACT_INFO_SSCFG}
+AMT_SSTMR|- ${ACT_INFO_UPCHKSVC}
+"
 
-MENU_IPKG=$(cat <<EOF
-A_BACK|< $ACT_GEN_BACK
-AMP_INST|$ACT_PKG_INSTALL
-EOF
-)
+MENU_DRIVERS="A_BACK|< ${ACT_GEN_BACK}
+A_BLANKN|$(mst "bbr")GPU$(mst "rst")
+nvidia|- Nvidia GPU
+A_BLANK|$(mst "bbr")${MSG_GEN_PRINTER} / ${MSG_GEN_SCANNER}$(mst "rst")
+brlaser|- Brother ${MSG_GEN_PRINTER}
+brscan4|- Brother ${MSG_GEN_SCANNER}
+canon-ufriilt-common|- Canon
+dymo-cups-drivers|- Dymo
+epson-inkjet-printer-escpr|- Epson
+hplip|- HP
+"
 
-MENU_MPKG=$(cat <<EOF
-A_BACK|< $ACT_GEN_BACK
-AMP_UPDT|$ACT_PKG_UPDATE
-AMP_RINST|$ACT_PKG_REINSTALL
-AMP_FPREP|$ACT_PKG_REPAIR
-AMP_SCHK|$ACT_PKG_CHECK
-AMP_REM|${CSS_REDB}$ACT_PKG_REMOVE${CSS_RESET}
-EOF
-)
+MENU_IPKG="A_BACK|< ${ACT_GEN_BACK}
+AMP_INST|${ACT_PKG_INSTALL}
+"
 
-MENU_FOOTER="🡙 $MSG_FTR_NAVI | ⏎ $MSG_FTR_SEL | $MSG_FTR_BACK"
+MENU_MPKG="A_BACK|< ${ACT_GEN_BACK}
+AMP_UPDT|${ACT_PKG_UPDATE}
+AMP_RINST|${ACT_PKG_REINSTALL}
+AMP_FPREP|${ACT_PKG_REPAIR}
+AMP_SCHK|${ACT_PKG_CHECK}
+AMP_REM|${CSS_REDB}${ACT_PKG_REMOVE}${CSS_RESET}
+"
+
+MENU_INVIDIA="A_BACK|< $ACT_GEN_BACK
+AMP_INSTO|${ACT_PKG_INSTALL} ${MSG_GEN_OPEN}
+AMP_INSTO32|${ACT_PKG_INSTALL} ${MSG_GEN_OPEN} + 32 Bit
+AMP_INSTP|${ACT_PKG_INSTALL} ${MSG_GEN_PROPRIETARY}
+AMP_INSTP32|${ACT_PKG_INSTALL} ${MSG_GEN_PROPRIETARY} + 32 Bit
+AMP_INSTL|${ACT_PKG_INSTALL} ${MSG_GEN_LEGACY} (470)
+AMP_INSTL32|${ACT_PKG_INSTALL} ${MSG_GEN_LEGACY} (470) + 32 Bit
+AMP_ADD32|${ACT_PKG_INSTALL} 32 Bit
+AMP_REM|${CSS_REDB}${ACT_PKG_REMOVE}${CSS_RESET}
+"
+
+
+
+MENU_FOOTER="🡙 ${MSG_FTR_NAVI} | ⏎ ${MSG_FTR_SEL} | ${MSG_FTR_BACK}"
+
+## Check for menu style setting
+if [ "$SS_MAINMENU" -eq 2 ]; then
+  MENU_MAIN="$MENU_MAIN2"
+fi
+
+## Remove features from menu for systems not installed
+if [ "$HAS_FLATPAK" -eq 0 ]; then
+  MENU_MAIN=$(echo "$MENU_MAIN" | grep -v '^AMM_SEC_FP|')
+  MENU_MAIN=$(echo "$MENU_MAIN" | grep -v '^AMM_LST_FA|')
+  MENU_MAIN=$(echo "$MENU_MAIN" | grep -v '^AMM_LST_FI|')
+  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_FLATPAK|')
+  MENU_TOOLS=$(echo "$MENU_TOOLS" | grep -v '^AMT_FPLA|')
+  MENU_TOOLS=$(echo "$MENU_TOOLS" | grep -v '^AMT_FPLU|')
+  MENU_TOOLS=$(echo "$MENU_TOOLS" | grep -v '^AMT_FPCLEAN|')
+
+fi
+if [ "$HAS_SNAP" -eq 0 ]; then
+  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_SNAP|')
+fi
+if [ "$HAS_CUSTOM" -eq 0 ]; then
+  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_CUST|')
+fi
+if [ "$HAS_DISTROBOX" -eq 0 ]; then
+  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_DBOX|')
+fi
+if [ "$HAS_FIRMWARE" -eq 0 ]; then
+  MENU_UPDATE=$(echo "$MENU_UPDATE" | grep -v '^AMU_FMW|')
+fi

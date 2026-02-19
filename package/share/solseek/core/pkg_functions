@@ -398,3 +398,90 @@ appstream_get_list(){
     rm -f "$TMP_PGK_FILE"
 }
 
+# Get NVIDIA VGA compatible controller info
+check_nvidia_support() {
+
+  if [ "$1" == "check" ] || [ "$1" == "info" ]; then
+      ALL_GPUS=$(lspci -nn | grep -i -E 'VGA|3D|Display')
+
+      # First, check if an NVIDIA GPU is present
+      if echo "$ALL_GPUS" | grep -q -i 'NVIDIA'; then
+          # Extract the NVIDIA GPU name, removing the leading PCI bus ID
+          SS_GPU=$(echo "$ALL_GPUS" | grep -i 'NVIDIA' | head -n 1 | sed -E 's/^.*: //')
+          SS_GPU_NVIDIA=1
+      else
+          SS_GPU=""
+      fi
+
+      if [ "$SS_GPU_NVIDIA" -eq 1 ]; then
+
+          # Check for Open Kernel Module Support
+          # (GTX 16xx, RTX series, MX550/570, modern A-series/H-series workstations).
+          if echo "$SS_GPU" | grep -q -i -E 'RTX|GTX 16[0-9][0-9]|MX5[57]0|A[0-9]0|H[0-9]0|T[0-9][0-9][0-9]|Quadro RTX'; then
+              SS_NVIDIA_OPEN=1
+          else
+              SS_NVIDIA_OPEN=0
+          fi
+
+          # Detect installed 64-bit NVIDIA driver package
+          NV_PKG=$(awk -F '|' '$1 ~ /^nvidia-(open|470-glx-driver|glx-driver|beta-driver|developer-driver)(-current)?$/ {print $1; exit}' "$PI_CACHE_FILE")
+
+
+          if [ -n "$NV_PKG" ]; then
+              SS_NVIDIA_INSTALLED="${NV_PKG}"
+          fi
+
+          #Detect installed 32-bit NVIDIA driver package ---
+          NV32_PKG=$(awk -F '|' '$1 ~ /^nvidia.*32bit$/ {print $1; exit}' "$PI_CACHE_FILE" 2>/dev/null)
+
+          if [ -n "$NV32_PKG" ]; then
+            SS_NVIDIA32_INSTALLED="${NV32_PKG}"
+          fi
+      fi
+      if [ "$1" == "info" ]; then
+          if [ "$SS_GPU_NVIDIA" -eq 1 ]; then
+              echo -e "${CSS_BOLDBRIGHT}${MSG_GEN_DETECTED} GPU:${CSS_RESET} ${SS_GPU}"
+              hr
+              echo -e "${CSS_BOLDBRIGHT}${MSG_GEN_DETECTED} ${MSG_GEN_DRIVERS}${CSS_RESET}"
+              if [ -n "$SS_NVIDIA_INSTALLED" ]; then
+                  echo -e "${CSS_GREEN}$SS_NVIDIA_INSTALLED${CSS_RESET}"
+                  if [ -n "$SS_NVIDIA32_INSTALLED" ]; then
+                      echo -e "${CSS_GREEN}32bit${CSS_RESET} ✅"
+                  else
+                      echo -e "${CSS_YELLOW}32bit${CSS_RESET} ❌"
+                  fi
+                  hr
+                  nvidia-smi
+              else
+                  echo -e "${CSS_YELLOW}Nouveau${CSS_RESET}"
+              fi
+          else
+               echo -e "${CSS_YELLOW}${MSG_GEN_UNSUPPORTED} GPU${CSS_RESET}"
+          fi
+      fi
+
+  elif [ "$1" == "menu" ]; then
+      MENUDA="$MENU_INVIDIA"
+      if [ -n "$SS_NVIDIA_INSTALLED" ]; then
+          MENUDA=$(echo "$MENUDA" | grep -v '^AMP_INST')
+          if [ -n "$SS_NVIDIA32_INSTALLED" ]; then
+              MENUDA=$(echo "$MENUDA" | grep -v '^AMP_ADD32|')
+          else
+              SS_NVMENU_MAP["AMP_ADD32"]="${SS_NVIDIA32_MAP[$SS_NVIDIA_INSTALLED]}"
+          fi
+          SS_NVMENU_MAP["AMP_REM"]="${SS_NVIDIA_INSTALLED} ${SS_NVIDIA32_INSTALLED}"
+      else
+          MENUDA=$(echo "$MENUDA" | grep -v '^AMP_REM|')
+          MENUDA=$(echo "$MENUDA" | grep -v '^AMP_ADD32|')
+          if [ "$SS_NVIDIA_OPEN" -eq 1 ]; then
+              MENUDA=$(echo "$MENUDA" | grep -v '^AMP_INSTP')
+              MENUDA=$(echo "$MENUDA" | grep -v '^AMP_INSTL')
+          else
+              MENUDA=$(echo "$MENUDA" | grep -v '^AMP_INSTO')
+          fi
+      fi
+
+  fi
+
+}
+

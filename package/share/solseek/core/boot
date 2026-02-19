@@ -1,12 +1,17 @@
+SS_LTS_KERNEL=0
 # System package manager
 if command -v "eopkg" &> /dev/null; then
   SS_PKG_MGR="eopkg"
+  if [[ "$(uname -r)" != *"current"* ]]; then
+    SS_LTS_KERNEL=1
+  fi
 elif command -v "moss" &> /dev/null; then
   SS_PKG_MGR="moss"
 else
   echo "Error: No supported package manager detected!"
   exit 1
 fi
+
 
 #Create cache/config directory if it does'nt exist
 mkdir -p "$HOME/.cache/solseek"

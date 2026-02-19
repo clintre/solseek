@@ -92,6 +92,14 @@ menu_bar(){
   echo "$clr""────────────────────""$rst"
 }
 
+# Language function
+sslang(){
+  local lstring="$1"
+  if [ "$SS_PKG_MGR" == "moss" ]; then
+    lstring=$(echo "$lstring" | sed 's/eopkg/moss/Ig')
+  fi
+  echo "$lstring"
+}
 
 
 ss_format_help(){
@@ -419,17 +427,19 @@ esac
 case "$1" in
 "update")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_UPD_TITLE ${CSS_RESET}
-$MSG_PNL_UPD_BODY
-
-";;
+$MSG_PNL_UPD_BODY";;
 esac
 
 case "$1" in
 "tools")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_TOOL_TITLE ${CSS_RESET}
-$MSG_PNL_TOOL_BODY
+$MSG_PNL_TOOL_BODY";;
+esac
 
-";;
+case "$1" in
+"drivers")
+PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_DRIVERS_TITLE ${CSS_RESET}
+$MSG_PNL_DRIVERS_BODY";;
 esac
 echo -e "$PANELTXT" | fold -s -w 70 2>/dev/null
 
