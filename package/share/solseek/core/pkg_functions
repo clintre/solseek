@@ -3,7 +3,7 @@ upd_msg(){
     SOLUS_UPCNT=0
     FLATPAK_UPCNT=0
     UPCNT_FP=0
-    UPMSG="$MSG_UPD_AVAIL_UPD $MSG_UPD_NONE"
+    UPMSG="${CSS_BOLDBRIGHT}${MSG_UPD_AVAIL_UPD}: ${MSG_UPD_NONE}${CSS_RESET}"
 
     if [ ! -f "$UP_LOCK_FILE" ] && [ -f "$UP_CACHE_FILE" ]; then
         . "$UP_CACHE_FILE"
@@ -16,13 +16,14 @@ upd_msg(){
             UPMSG_FP=" | $MSG_UPD_FLATPAK: $FLATPAK_UPCNT"
         fi
 
-        UPMSG="$MSG_UPD_AVAIL_UPD $MSG_UPD_SYSTEM: $SOLUS_UPCNT $UPMSG_FP"
+        UPMSG="${CSS_BOLDBRIGHT}${MSG_UPD_AVAIL_UPD}: ${CSS_GREENB}${MSG_UPD_SYSTEM}: ${SOLUS_UPCNT} ${UPMSG_FP}${CSS_RESET}"
     fi
 
     echo -e "$UPMSG"
-    hr
+
 
     if [ "$1" == "list" ] && [ "$TTL_UPDCNT" -gt 0 ]; then
+        hr "w30"
         SS_HASUP_LIST=1
         if [ ! -f "$UL_CACHE_FILE" ]; then
               echo -e "$MSG_UPD_DISCO\n\n"
@@ -42,6 +43,8 @@ upd_msg(){
             UPLIST=$(<"$UL_CACHE_FILE")
             echo -e "$UPLIST" | fold -s -w 70
         fi
+    else
+      echo -e ""
     fi
 }
 
@@ -441,7 +444,7 @@ check_nvidia_support() {
       if [ "$1" == "info" ]; then
           if [ "$SS_GPU_NVIDIA" -eq 1 ]; then
               echo -e "${CSS_BOLDBRIGHT}${MSG_GEN_DETECTED} GPU:${CSS_RESET} ${SS_GPU}"
-              hr
+              hr "w30"
               echo -e "${CSS_BOLDBRIGHT}${MSG_GEN_DETECTED} ${MSG_GEN_DRIVERS}${CSS_RESET}"
               if [ -n "$SS_NVIDIA_INSTALLED" ]; then
                   echo -e "${CSS_GREEN}$SS_NVIDIA_INSTALLED${CSS_RESET}"
@@ -450,7 +453,7 @@ check_nvidia_support() {
                   else
                       echo -e "${CSS_YELLOW}32bit${CSS_RESET} ❌"
                   fi
-                  hr
+                  echo ""
                   nvidia-smi
               else
                   echo -e "${CSS_YELLOW}Nouveau${CSS_RESET}"

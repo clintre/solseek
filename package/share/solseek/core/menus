@@ -41,6 +41,7 @@ A_BLANK|💻$(mst "1sp" "bbr")${MSG_GEN_SYSTEM}$(mst "rst")
 AMM_UPSYS|$(mst "1sp")- ${ACT_MAIN_UPDATESYS}
 AMM_TOOLS|$(mst "1sp")- ${ACT_MAIN_INFORMATION}
 A_BLANK|$(menu_bar)
+AMM_DMGR|⚡$(mst "1sp" "bbr")${MSG_GEN_DRIVERS}$(mst "rst")
 AMM_ABOUT|📃$(mst "1sp" "bbr")${ACT_MAIN_ABOUT}$(mst "rst")
 AMM_QUIT|❌$(mst "1sp" "rb")${ACT_MAIN_QUIT} $(mst "rst")
 "
@@ -109,6 +110,11 @@ canon-ufriilt-common|- Canon
 dymo-cups-drivers|- Dymo
 epson-inkjet-printer-escpr|- Epson
 hplip|- HP
+A_BLANK|$(mst "bbr")Other$(mst "rst")
+broadcom-sta|- Broadcom Wireless
+openrazer|- Open Razer
+piper|- Piper
+xone|- Xbox
 "
 
 MENU_IPKG="A_BACK|< ${ACT_GEN_BACK}

@@ -51,6 +51,7 @@ hr(){
   line="─"
   clr=""
   rst=""
+  wcols=$(tput cols)
 
   if echo "$@" | grep -q "danger"; then
     if echo "$@" | grep -q "3"; then
@@ -72,10 +73,18 @@ hr(){
     fi
   fi
 
+  if echo "$@" | grep -q "w50"; then
+    wcols=50
+  elif echo "$@" | grep -q "w30"; then
+    wcols=30
+  elif echo "$@" | grep -q "w10"; then
+    wcols=10
+  fi
+
   if [[ -n "$clr" ]]; then
     rst=$(mst "rst")
   fi
-  printf "$clr""%.0s$line""$rst" $(seq 1 "$(tput cols)"); echo
+  printf "${clr}""%.0s${line}""${rst}" $(seq 1 "${wcols}"); echo
 }
 
 menu_bar(){
@@ -160,11 +169,11 @@ pkg_fzf() {
       --height=100% \
       --min-height=30 \
       --multi \
-      --wrap \
+      --wrap="word" \
       --cycle \
       --ignore-case \
       --preview-label=" $MSG_GEN_INFO "\
-      --preview-window=right,70%,wrap\
+      --preview-window=right,70%,wrap-word\
       --reverse \
       "$@"  # specific args for action
 }
@@ -376,11 +385,13 @@ $MSG_PNL_PKGACT_BODY
 ";;
 "installed")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_INSTALLED_TITLE ${CSS_RESET}
+
 $MSG_PNL_INSTALLED_BODY
 
 ";;
 "search")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_SEARCH_TITLE ${CSS_RESET}
+
 $MSG_PNL_SEARCH_BODY
 
 ";;
@@ -411,6 +422,7 @@ esac
 case "$1" in
 "list")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_LIST_TITLE ${CSS_RESET}
+
 $MSG_PNL_LIST_BODY
 
 ";;
@@ -419,6 +431,7 @@ esac
 case "$1" in
 "deskapps")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_DESKAPPS_TITLE ${CSS_RESET}
+
 $MSG_PNL_DESKAPPS_BODY
 
 ";;
@@ -433,12 +446,14 @@ esac
 case "$1" in
 "tools")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_TOOL_TITLE ${CSS_RESET}
+
 $MSG_PNL_TOOL_BODY";;
 esac
 
 case "$1" in
 "drivers")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_DRIVERS_TITLE ${CSS_RESET}
+
 $MSG_PNL_DRIVERS_BODY";;
 esac
 echo -e "$PANELTXT" | fold -s -w 70 2>/dev/null
