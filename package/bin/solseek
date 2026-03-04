@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="0.12.0"
+SS_VERSION="0.12.1"
 
 SS_DATA_PATH="/usr/share/solseek"
 
@@ -268,7 +268,7 @@ if [ "$ISSA" -eq 1 ]; then
           fi
           package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
 
-          if grep -q "${package}|" "${FI_CACHE_FIL}E"; then
+          if grep -q "${package}|" "${FI_CACHE_FILE}"; then
               pkg_status="${MSG_GEN_INSTALLED}"
 
               MENU_PKG=$(echo "${MENU_MPKG}" | grep -v '^AMP_SCHK|')
