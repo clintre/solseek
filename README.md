@@ -7,8 +7,6 @@
 
 Solseek is a simple terminal user interface that allows you to browse, search, and manage packages and drivers for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
 
-⚠️ **Please note that until version 1.x this will be fast changing**
-
 📽️ [Click here](https://youtu.be/MT7w6rZLmt0) or image below to see a short demo video.
 
 [![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://youtu.be/MT7w6rZLmt0)
@@ -30,9 +28,12 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Limited Snap support. Only updates, no list or searching. Full Snap support is not planned at this time.
 
 ## Planned
-  - Additional languages (looking for help on this)
-  - Recipes for common installs on Solus (Distrobox, etc)
-  - moss support (AerynOS & future Solus)
+| Feature | Info | Delivery |
+| ----------- | ----------- | ----------- |
+| **Additional Languages** | Looking for translators | 🔃 |
+| **Recipes** | Looking for translators | 1.? |
+| **moss support** | AerynOS & future Solus | 1.? |
+| **tmux support** | Enhance UX | 1.0 |
 
 ## Contributing
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
