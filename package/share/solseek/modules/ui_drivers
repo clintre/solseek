@@ -1,0 +1,82 @@
+# Driver LIST
+
+MENUDL="$MENU_DRIVERS"
+check_nvidia_support "check"
+if [ "$SS_GPU_NVIDIA" -eq 0 ]; then
+    MENUDL=$(echo "${MENUDL}" | grep -v '^nvidia|')
+    MENUDL=$(echo "${MENUDL}" | grep -v '^A_BLANKN|')
+fi
+
+# PACKAGE ACTION
+pkg=$(printf "%b" "${MENUDL}" | sa_fzf --prompt="" --header="${MSG_GEN_DRIVERS}" --preview 'solseek -ssd {1}')
+[ -z "$pkg" ] && exit 0
+pkgchk=${pkg%|*}
+
+if [ "$pkgchk" == "A_BACK" ]; then
+    exit 0
+elif [ "$pkgchk" == "A_BLANK" ] || [ "$pkgchk" == "A_BLANKN" ]; then
+    continue
+else
+    MENUDA="$MENU_IPKG";
+    PREVD="solseek -ssh SELPKG '${pkgchk}'"
+    if [ "$pkgchk" == "nvidia" ]; then
+        check_nvidia_support "menu"
+        PREVD="solseek -ssh INVIDIA"
+    else
+        if grep -q "${pkgchk}|" "${PI_CACHE_FILE}"; then
+        pkg_status="${MSG_GEN_INSTALLED}"
+        MENUDA="${MENU_MPKG}"
+        MENUDA=$(echo "${MENUDA}" | grep -v '^AMP_FPREP|')
+        fi
+    fi
+
+    pkgAction=$(printf "%b" "${MENUDA}" | sa_fzf --prompt="" --header="${MSG_GEN_SEL}" --preview "${PREVD}")
+    pkgAction=${pkgAction%|*}
+
+    if [ "$pkgchk" == "nvidia" ]; then
+
+        case "$pkgAction" in
+        "AMP_INSTO")
+            package="${SS_NVMENU_MAP[AMP_INSTO]}"
+            pkgAction="AMP_INST"
+            ;;
+        "AMP_INSTO32")
+            package="${SS_NVMENU_MAP[AMP_INSTO32]}"
+            pkgAction="AMP_INST"
+            ;;
+        "AMP_INSTP")
+            package="${SS_NVMENU_MAP[AMP_INSTP]}"
+            pkgAction="AMP_INST"
+            ;;
+        "AMP_INSTP32")
+            package="${SS_NVMENU_MAP[AMP_INSTP32]}"
+            pkgAction="AMP_INST"
+            ;;
+        "AMP_INSTL")
+            package="${SS_NVMENU_MAP[AMP_INSTL]}"
+            pkgAction="AMP_INST"
+            ;;
+        "AMP_INSTL32")
+            package="${SS_NVMENU_MAP[AMP_INSTOL32]}"
+            pkgAction="AMP_INST"
+            ;;
+        "AMP_ADD32")
+            package="${SS_NVMENU_MAP[AMP_ADD32]}"
+            pkgAction="AMP_INST"
+            ;;
+        "AMP_REM")
+            package="${SS_NVMENU_MAP[AMP_REM]}"
+        esac
+    else
+        package="${pkgchk}"
+    fi
+
+    case "$pkgAction" in
+        "AMP_INST") solseek -ssp install "${package}" ;;
+        "AMP_RINST") solseek -ssp reinstall "${package}" ;;
+        "AMP_REM") solseek -ssp remove "${package}" ;;
+        "AMP_SCHK") solseek -ssp check "${package}" ;;
+        "AMP_UPDT") solseek -ssp update "${package}" ;;
+        "" | A_BACK) continue ;;
+    esac
+fi

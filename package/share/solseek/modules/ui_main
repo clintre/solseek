@@ -1,0 +1,22 @@
+mode=$(printf "%b" "${MENU_MAIN}" | sa_fzf --prompt="" --header="Solseek" --preview 'solseek -ssh {1}')
+
+mode=${mode%|*}
+
+# For Appstream we have extra parsing
+if [[ "$mode" == *:* ]]; then
+    IFS=':' read -r mode ascat <<< "$mode"
+fi
+
+case "$mode" in
+    "AMM_QUIT" | "") exit 0 ;;
+    "AMM_LST_PI" | "AMM_LST_PII") solseek subact li ;;
+    "AMM_LST_PA" | "AMM_LST_PAS") solseek subact la ;;
+    "AMM_LST_FA" | "AMM_LST_FAS") solseek subact laf ;;
+    "AMM_LST_FI" | "AMM_LST_FII") solseek subact lif ;;
+    "AMM_DASUB") solseek subact lasm ;;
+    "AMM_DCAT") solseek subact las "$ascat" ;;
+    "AMM_UPSYS") solseek subact upsys ;;
+    "AMM_TOOLS") solseek subact tools ;;
+    "AMM_DMGR") solseek subact drivers ;;
+    *) continue ;;
+esac

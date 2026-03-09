@@ -1,0 +1,12 @@
+RBMENU="A_BACK|< ${ACT_GEN_BACK}
+          "
+RBMENU+=$(eopkg_rollback_menu)
+toolAction=$(printf "%b" "${RBMENU}" | sa_fzf --prompt="" --header="${ACT_INFO_HROLLBACK}" --preview 'solseek -ssh AMT_ERBCK')
+
+if [ "${toolAction%|*}" == "A_BACK" ]; then
+    exit 0
+fi
+case "$toolAction" in
+    "A_BACK" | "") exit 0 ;;
+    *) solseek -sse rollback "${toolAction}" ;;
+esac

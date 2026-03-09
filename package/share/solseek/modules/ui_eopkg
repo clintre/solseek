@@ -1,0 +1,38 @@
+# PACKAGE LIST
+eopkg_cache
+if [ "$2" = "li" ]; then
+    app_list=$(solseek "applist" "pkgi")
+    pkg_list_type="${ACT_MAIN_LISTIPKGS}"
+else
+    app_list=$(solseek "applist" "pkga")
+    pkg_list_type="${ACT_MAIN_LISTAPKGS}"
+fi
+
+pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="${MSG_PKG_PROMPT}: " --header="${MSG_PKG_HEADER} - ${pkg_list_type}" --preview 'solseek -ssi {1} {+}')
+
+# Return to main menu
+[ -z "$pkg" ] && exit 0
+
+package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
+
+if grep -q "${package}|" "${PI_CACHE_FILE}"; then
+    pkg_status="${MSG_GEN_INSTALLED}"
+    MENU_PKG=$(echo "${MENU_MPKG}" | grep -v '^AMP_FPREP|')
+else
+    pkg_status="${MSG_GEN_AVAILABLE}"
+    MENU_PKG="${MENU_IPKG}"
+fi
+
+package="${package//$'\n'/ }"
+# PACKAGE ACTION
+pkgAction=$(printf "%b" "${MENU_PKG}" | sa_fzf --prompt="" --header="${MSG_GEN_SEL}" --preview "solseek -ssh SELPKG '${package}'")
+
+pkgAction=${pkgAction%|*}
+case "$pkgAction" in
+    "AMP_INST") solseek -ssp install "${package}" ;;
+    "AMP_RINST") solseek -ssp reinstall "${package}" ;;
+    "AMP_REM") solseek -ssp remove "${package}" ;;
+    "AMP_SCHK") solseek -ssp check "${package}" ;;
+    "AMP_UPDT") solseek -ssp update "${package}" ;;
+    "A_BACK" | "") continue ;;
+esac

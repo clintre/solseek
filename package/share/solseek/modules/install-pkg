@@ -23,14 +23,18 @@ else
         pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
     fi
 
-    hr 3
+    hr "danger" 3
     echo -e "${CSS_BOLDBRIGHT}📦 $MSG_PKG_TTLSTART $pkg_mgmt_title${CSS_RESET}"
-    hr
+    hr "danger" 3
     sudo eopkg $pkg_mgmt_act $pkgvars $SS_ASSUMEYES
     if [ "$ccache" -eq 1 ]; then
+        hr "w30" "noclr" 3
+        echo -e "${CSS_BOLDBRIGHT}█ ${MSG_GEN_CACHE} ${CSS_RESET}"
+        hr "w30" "noclr" 3
         eopkg_cache "force"
     fi
-    hr 3
-    echo "$MSG_GEN_PROCCOMP"
+    hr "success" 3
+    echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
+    hr "success" 3
     read -p "$MSG_GEN_PRESSENTER..."
 fi

@@ -1,0 +1,51 @@
+echo -e "${MSG_GEN_LOADCATALOG}"
+app_list=$(solseek "applist" "as" "$3")
+
+pkg=$(printf "%b" "${app_list}" | as_fzf --prompt="${MSG_PKG_PROMPT}: " --header="${MSG_GEN_DESKAPPS} - ${3}")
+
+[ -z "$pkg" ] && exit 0
+
+IFS='|' read -r kvar package <<< "$pkg"
+IFS=':' read -r ptype pkgid <<< "$kvar"
+
+if [ "$ptype" == "flatpak" ]; then
+
+    AS_HEADER=${MSG_PKG_FPSEL}
+    AS_PREVIEW="solseek -ssfi '${pkgid}'"
+    AS_ROUTE="-ssf"
+
+    if grep -q "$pkgid" "$FI_CACHE_FILE"; then
+        pkg_status="${MSG_GEN_INSTALLED}"
+
+        MENU_PKG=$(echo "${MENU_MPKG}" | grep -v '^AMP_SCHK|')
+    else
+        pkg_status="${MSG_GEN_AVAILABLE}"
+        MENU_PKG="${MENU_IPKG}"
+    fi
+else
+    AS_HEADER=${MSG_GEN_SEL}
+    AS_PREVIEW="solseek -ssi '${pkgid}'"
+    AS_ROUTE="-ssp"
+
+    if grep -q "${pkgid}|" "${PI_CACHE_FILE}"; then
+        pkg_status="${MSG_GEN_INSTALLED}"
+
+        MENU_PKG=$(echo "${MENU_MPKG}" | grep -v '^AMP_FPREP|')$
+    else
+        pkg_status="${MSG_GEN_AVAILABLE}"
+        MENU_PKG="${MENU_IPKG}"
+    fi
+fi
+
+pkgAction=$(printf "%b" "${MENU_PKG}" | sa_fzf --prompt="" --header="${AS_HEADER}" --preview "${AS_PREVIEW}")
+pkgAction=${pkgAction%|*}
+
+case "$pkgAction" in
+    "AMP_INST") solseek "${AS_ROUTE}" "install" "${pkgid}" ;;
+    "AMP_RINST") solseek "${AS_ROUTE}" "reinstall" "${pkgid}" ;;
+    "AMP_REM") solseek "${AS_ROUTE}" "remove" "${pkgid}" ;;
+    "AMP_FPREP") solseek "${AS_ROUTE}" "repair" "${pkgid}" ;;
+    "AMP_SCHK") solseek "${AS_ROUTE}" "check" "${pkgid}" ;;
+    "AMP_UPDT") solseek "${AS_ROUTE}" "update" "${pkgid}" ;;
+    "A_BACK" | "") continue ;;
+esac

@@ -1,0 +1,26 @@
+toolAction=$(printf "%b" "${MENU_TOOLS}" | sa_fzf --prompt="" --header="${ACT_MAIN_INFORMATION}" --preview 'solseek -sse {1}')
+
+toolAction=${toolAction%|*}
+case "${toolAction}" in
+    "A_BACK" | "") exit 0 ;;
+    "AMT_EHIST") solseek -sse "${toolAction}" export ;;
+    "AMT_FHIST") solseek -sse "${toolAction}" export ;;
+    "AMT_ERBCK") solseek subact rollback ;;
+    "AMT_EINST") solseek -sse "${toolAction}" export ;;
+    "AMT_EUSER") solseek -sse "${toolAction}" export ;;
+    "AMT_LREPO") solseek -sse "${toolAction}" export ;;
+    "AMT_ECHECK") solseek -sse "${toolAction}" run ;;
+    "AMT_ERMO") solseek -sse "${toolAction}" run ;;
+    "AMT_EDC") solseek -sse "${toolAction}" run ;;
+    "AMT_EUR") solseek -sse "${toolAction}" run ;;
+    "AMT_FPLA") solseek -sse "${toolAction}" export ;;
+    "AMT_FPLU") solseek -sse "${toolAction}" export ;;
+    "AMT_FREPO") solseek -sse "${toolAction}" export ;;
+    "AMT_FCHECK") solseek -sse "${toolAction}" run ;;
+    "AMT_FPCLEAN") solseek -sse "${toolAction}" run ;;
+    "AMT_INXI") solseek -sse "${toolAction}" export ;;
+    "AMT_SSCFG") solseek -sse "${toolAction}" run;;
+    "AMT_SSTMR") solseek -sse "${toolAction}" run;;
+    "AMT_RBFW") solseek -sse "${toolAction}" run;;
+    *) continue ;;
+esac

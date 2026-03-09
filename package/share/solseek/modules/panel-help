@@ -55,7 +55,7 @@ case "$PNLKEY" in
         ss_info_pane "welcome"
         echo ""
         ss_life
-        echo -e "${MSG_GEN_PKGMGRS}: ${INST_PKG_MGRS}"
+        echo -e "${CSS_BOLDBRIGHT}${MSG_GEN_PKGMGRS}:${CSS_RESET} ${INST_PKG_MGRS}"
       ;;
     "A_BACK")
         echo -e "⬅️ ${CSS_BOLDBRIGHT}${MSG_GEN_BACK}${CSS_RESET}" ;;

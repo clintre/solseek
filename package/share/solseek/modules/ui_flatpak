@@ -1,0 +1,41 @@
+#Flatpak List
+fp_cache
+
+if [ "$2" = "lif" ]; then
+    app_list=$(solseek "applist" "fpi")
+    pkg_list_type="${ACT_MAIN_LISTIPKGS}"
+else
+    app_list=$(solseek "applist" "fpa")
+    pkg_list_type="${ACT_MAIN_LISTAPKGS}"
+fi
+
+pkg=$(printf "%b" "${app_list}" | pkg_fzf --prompt="${MSG_PKG_PROMPT}: " --header="${ACT_UPD_FLATPAK} - $pkg_list_type" --preview 'solseek -ssfi {1} {+}')
+
+# Return to main menu
+[ -z "$pkg" ] && exit 0
+if [[ "$pkg" == Empty* ]]; then
+    continue
+fi
+package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
+
+if grep -q "${package}|" "${FI_CACHE_FILE}"; then
+    pkg_status="${MSG_GEN_INSTALLED}"
+
+    MENU_PKG=$(echo "${MENU_MPKG}" | grep -v '^AMP_SCHK|')
+else
+    pkg_status="${MSG_GEN_AVAILABLE}"
+    MENU_PKG="${MENU_IPKG}"
+fi
+package="${package//$'\n'/ }"
+# PACKAGE ACTION
+pkgAction=$(printf "%b" "${MENU_PKG}" | sa_fzf --prompt="" --header="${MSG_PKG_FPSEL}" --preview "solseek -ssh SELPKG '${package}'")
+
+pkgAction=${pkgAction%|*}
+case "$pkgAction" in
+    "AMP_INST") solseek -ssf install "${package}" ;;
+    "AMP_RINST") solseek -ssf reinstall "${package}" ;;
+    "AMP_REM") solseek -ssf remove "${package}" ;;
+    "AMP_FPREP") solseek -ssf repair "${package}" ;;
+    "AMP_UPDT") solseek -ssf update "${package}" ;;
+    "A_BACK" | "") continue ;;
+esac

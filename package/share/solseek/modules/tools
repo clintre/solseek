@@ -21,15 +21,33 @@ if [ "$sse_type" == "solseek" ]; then
             if [ "$SS_LOCAL_CFG" -eq 0 ]; then
                 cp "$SS_DATA_PATH/config" "$HOME/.config/solseek/"
             fi
+
+            CFG_HASH1=$(sha256sum "$HOME/.config/solseek/config" | awk '{print $1}')
+
             if command -v "$SS_EDITOR" &> /dev/null; then
                 "$SS_EDITOR" "$HOME/.config/solseek/config"
             else
                 echo -e "$(mst "rb")█ "$SS_EDITOR" not found. Using nano.$(mst "rst")"
                 nano "$HOME/.config/solseek/config"
             fi
+
+            CFG_HASH2=$(sha256sum "$HOME/.config/solseek/config" | awk '{print $1}')
+
             hr "danger" 3
-            echo -e "$MSG_GEN_PCONFIG!"
-            hr "danger"
+            echo -e "📝 ${CSS_BOLDBRIGHT}${MSG_PNL_SSCFG_TITLE}${CSS_RESET}"
+            hr "danger" 3
+            echo ""
+            if [ "$CFG_HASH1" != "$CFG_HASH2" ]; then
+                echo ""
+                echo -e "🚩 ${CSS_REDB}${MSG_GEN_PCONFIG}!${CSS_RESET}"
+                echo ""
+            else
+                echo ""
+                echo -e "${CSS_BOLDBRIGHT}${ACT_MAIN_UPDATESYS}: ${MSG_UPD_NONE}${CSS_RESET}"
+                echo ""
+            fi
+            echo ""
+            hr "success" 3
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_EDITPVTOP
@@ -48,21 +66,23 @@ if [ "$sse_type" == "solseek" ]; then
         fi
 
         if [ "$3" == "run" ]; then
-            hr 3
+            hr "danger" 3
             echo -e "${CSS_BOLDBRIGHT}⚙️ ${MSG_INFO_MNGUPCHKSRV}${CSS_RESET} | ${MSG_GEN_CURSTATUS}: $TMR_STATUS_DISP"
-            hr
+            hr "danger" 3
             read -n 1 -p "$MSG_GEN_UPCHKQ1 ${TMR_CHG_TXT^^} $MSG_GEN_UPCHKQ2:" PUCHOICE
             case "$PUCHOICE" in
                 [Yy])
-                    echo -e "\n\n"
+                    echo ""
                     systemctl --user daemon-reload
                     systemctl --user "$TMR_CHG_ACTION" --now solseek-uc.timer
                     systemctl --user "$TMR_CHG_ACTION" solseek-uc.service
                     TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
-                    echo -e "\n"
-                    hr 3
+                    echo ""
+                    hr "w30" "noclr" 3
                     echo -e "$MSG_GEN_NEWSTATUS: ${TMR_STATUS^^}"
-                    hr
+                    hr "w30" "noclr" 3
+                    echo ""
+                    hr "success" 3
                     read -p "$MSG_GEN_PRESSENTER..."
                     exit 0
                     ;;
@@ -80,9 +100,9 @@ if [ "$sse_type" == "solseek" ]; then
         fi
     elif [ "$2" = "AMT_RBFW" ]; then
         if [ "$3" == "run" ]; then
-            hr 3
+            hr "danger" 3
             echo -e "${CSS_BOLDBRIGHT}⚙ ${ACT_INFO_RBFW}${CSS_RESET}";
-            hr
+            hr "danger" 3
             read -n 1 -p "${ACT_INFO_RBFW}? (N/y):" PUCHOICE
             case "$PUCHOICE" in
               [Yy])
@@ -121,23 +141,23 @@ elif [ "$sse_type" = "eopkg" ]; then
 
         IFS='|' read -r HID HIDTEXT <<< "$3"
         unset IFS
-        hr 3
+        hr "danger" 3
         echo -e "${CSS_BOLDBRIGHT}⚙ EOPKG $ACT_INFO_HROLLBACK: $HIDTEXT ${CSS_RESET}";
-        hr
+        hr "danger" 3
         HID=$(echo "$HID" | xargs)
         sudo eopkg hs -t "$HID"
         eopkg_cache "force"
-        hr
+        hr "success" 3
         read -p "$MSG_GEN_PRESSENTER..."
         exit 0
 
     elif [ "$2" = "AMT_ECHECK" ]; then
         if [ "$3" == "run" ]; then
-            hr 3
-            echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN: eopkg check${CSS_RESET}";
-            hr
+            hr "danger" 3
+            echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN - eopkg check${CSS_RESET}";
+            hr "danger" 3
             sudo eopkg check
-            hr
+            hr "success" 3
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
@@ -153,12 +173,12 @@ elif [ "$sse_type" = "eopkg" ]; then
         exit 0
     elif [ "$2" = "AMT_ERMO" ]; then
         if [ "$3" == "run" ]; then
-            hr 3
-            echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_ERMO: eopkg remove-orphans${CSS_RESET}";
-            hr
+            hr "danger" 3
+            echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_ERMO - eopkg remove-orphans${CSS_RESET}";
+            hr "danger" 3
             sudo eopkg rmo
             eopkg_cache "force"
-            hr
+            hr "success" 3
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
@@ -169,12 +189,12 @@ elif [ "$sse_type" = "eopkg" ]; then
         exit 0
     elif [ "$2" = "AMT_EDC" ]; then
         if [ "$3" == "run" ]; then
-            hr 3
-            echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_EDC eopkg delete-cache${CSS_RESET}";
-            hr
+            hr "danger" 3
+            echo -e "${CSS_BOLDBRIGHT}⚙ ${ACT_INFO_EDC} - eopkg delete-cache${CSS_RESET}";
+            hr "danger" 3
             sudo eopkg dc
             eopkg_cache "force"
-            hr
+            hr "success" 3
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
@@ -185,12 +205,12 @@ elif [ "$sse_type" = "eopkg" ]; then
         exit 0
     elif [ "$2" = "AMT_EUR" ]; then
         if [ "$3" == "run" ]; then
-            hr 3
-            echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_EUR eopkg update-repo${CSS_RESET}";
-            hr
+            hr "danger" 3
+            echo -e "${CSS_BOLDBRIGHT}⚙ ${ACT_INFO_EUR} - eopkg update-repo${CSS_RESET}";
+            hr "danger" 3
             sudo eopkg ur --force
             eopkg_cache "force"
-            hr
+            hr "success" 3
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
@@ -205,14 +225,16 @@ elif [ "$sse_type" = "eopkg" ]; then
     fi
 
     if [ "$3" == "export" ]; then
-        hr 3
+        hr "danger" 3
         echo -e "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
-        hr
+        hr "danger" 3
         if [ "$sse_sudo" -eq 1 ]; then
             sudo eopkg "$sse_cmd" > $sse_export_fn
         else
           eopkg $sse_cmd > $sse_export_fn
         fi
+        echo -e "\n${MSG_GEN_PROCCOMP}\n"
+        hr "success" 3
         read -p "$MSG_GEN_PRESSENTER..."
       else
         echo "$MSG_INFO_EXPPVTOP"
@@ -222,11 +244,11 @@ elif [ "$sse_type" = "eopkg" ]; then
 elif [ "$sse_type" == "flatpak" ]; then
     if [ "$2" = "AMT_FPCLEAN" ]; then
       if [ "$3" == "run" ]; then
-          hr 3
+          hr "danger" 3
           echo -e "${CSS_BOLDBRIGHT}⚙ $ACT_INFO_CHECK: flatpak uninstall --unused${CSS_RESET}";
-          hr
+          hr "danger" 3
           flatpak uninstall --unused
-          hr
+          hr "success" 3
           read -p "$MSG_GEN_PRESSENTER..."
       else
           echo $MSG_INFO_RUNPVTOP
@@ -237,16 +259,16 @@ elif [ "$sse_type" == "flatpak" ]; then
       exit 0
     elif [ "$2" == "AMT_FCHECK" ]; then
         if [ "$3" == "run" ]; then
-            hr 3
-            echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN: flatpak repair${CSS_RESET}";
-            hr
+            hr "danger" 3
+            echo -e "${CSS_BOLDBRIGHT}⚙ $MSG_GEN_RUN - flatpak repair${CSS_RESET}";
+            hr "danger" 3
             flatpak repair
-            hr
+            hr "success" 3
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
             hr "w30"
-            echo -e "$MSG_GEN_RUN: flatpak repair\n";
+            echo -e "$MSG_GEN_RUN - flatpak repair\n";
             ss_format_help flatpak repair --unused
         fi
         exit 0
@@ -266,10 +288,12 @@ elif [ "$sse_type" == "flatpak" ]; then
         sse_export_fn="$HOME/flatpak_history.txt"
     fi
     if [ "$3" == "export" ]; then
-        flatpak $sse_cmd > $sse_export_fn
-        hr 3
+        hr "danger" 3
         echo -e "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
-        hr
+        hr "danger" 3
+        flatpak $sse_cmd > $sse_export_fn
+        echo -e "\n${MSG_GEN_PROCCOMP}\n"
+        hr "success" 3
         read -p "$MSG_GEN_PRESSENTER..."
     else
         echo "$MSG_INFO_EXPPVTOP"
@@ -279,10 +303,12 @@ elif [ "$sse_type" == "flatpak" ]; then
 elif [ "$sse_type" == "inxi" ]; then
   sse_export_fn="$HOME/inxi_output.txt"
   if [ "$3" == "export" ]; then
-      inxi -b > $sse_export_fn
-      hr 3
+      hr "danger" 3
       echo "${CSS_BOLDBRIGHT}📁 $MSG_GEN_EXPTO: $sse_export_fn${CSS_RESET}"
-      hr
+      hr "danger" 3
+      inxi -b > $sse_export_fn
+      echo -e "\n${MSG_GEN_PROCCOMP}\n"
+      hr "success" 3
       read -p "$MSG_GEN_PRESSENTER..."
   else
       echo "$MSG_INFO_EXPPVTOP"

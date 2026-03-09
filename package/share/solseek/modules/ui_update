@@ -1,0 +1,22 @@
+## Remove update check if updates are disabled
+if [ "$SS_DISABLE_UPCHK" -eq 1 ]; then
+    MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v '^AMU_CHECK|')
+    MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v '^A_BLANK|')
+fi
+
+upmode=$(printf "%b" "${MENU_UPDATE}" | sa_fzf --prompt="" --header="${ACT_MAIN_UPDATESYS}" --preview 'solseek -ssh AMM_UPSYS')
+
+upmode=${upmode%|*}
+case "$upmode" in
+    "A_BACK" | "") exit 0 ;;
+    "AMU_EOPKG") solseek -ssu up_eo=1;;
+    "AMU_FLATPAK") solseek -ssu up_fp=1;;
+    "AMU_SNAP") solseek -ssu up_sn=1;;
+    "AMU_ALL") solseek -ssu up_eo=1 up_fp=1 up_sn=1;;
+    "AMU_DBOX") solseek -ssu up_db=1;;
+    "AMU_FMW") solseek -ssu up_fw=1;;
+    "AMU_CUST") solseek -ssu up_cu=1;;
+    "AMU_ETHING") solseek -ssu up_eo=1 up_fp=1 up_sn=1 up_db=1 up_fw=1 up_cu=1;;
+    "AMU_CHECK") solseek -ssu check;;
+    *) continue ;;
+esac
