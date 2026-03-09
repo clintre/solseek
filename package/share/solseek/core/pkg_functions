@@ -50,141 +50,144 @@ upd_msg(){
 
 check_updates(){
     if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
-      echo "#Lock file for update checks" > "$UP_LOCK_FILE"
-      if [ "$1" == "system" ] || [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
+        echo "#Lock file for update checks" > "$UP_LOCK_FILE"
+        if [ "$1" == "system" ] || [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
 
-          if [ "$2" == "force" ]; then
-            echo -e "Checking..."
-          fi
-          PREV_UPCNT_TTL=0;
+            PREV_UPCNT_TTL=0;
 
-          if [ -f "$UP_CACHE_FILE" ]; then
-            . "$UP_CACHE_FILE"
-            PREV_UPCNT_TTL="$PREV_UPCNT_TTL"
-          fi
+            if [ -f "$UP_CACHE_FILE" ]; then
+                . "$UP_CACHE_FILE"
+                PREV_UPCNT_TTL="$PREV_UPCNT_TTL"
+            fi
 
-          echo "#Update Count Cache File" > "$UP_CACHE_FILE"
+            echo "#Update Count Cache File" > "$UP_CACHE_FILE"
 
-          HASUP=0
-          UPCNT_SOLUS=0
-          UPCNT_FP=0
-          UPMSG_FP=""
-          NOTI_LVL="normal"
-          NOTI_ID=$(shuf -i 9000-11000 -n 1)
+            HASUP=0
+            UPCNT_SOLUS=0
+            UPCNT_FP=0
+            UPMSG_FP=""
+            NOTI_LVL="normal"
+            NOTI_ID=$(shuf -i 9000-11000 -n 1)
 
-          # Make sure we are getting the latest
-          pkcon refresh force &> /dev/null
-          UPCNT_SOLUS=`pkcon get-updates --plain | grep -E -c "^(Security|Normal|Bugfix|Important)"`
-          if [ "$HAS_FLATPAK" -eq 1 ]; then
-              UPCNT_FP=`flatpak remote-ls --updates | wc -l`
-              UPMSG_FP=" | $MSG_UPD_FLATPAK: $UPCNT_FP"
-          else
-              UPCNT_FP=0
-          fi
+            # Make sure we are getting the latest
+            pkcon refresh force &> /dev/null
+            UPCNT_SOLUS=`pkcon get-updates --plain | grep -E -c "^(Security|Normal|Bugfix|Important)"`
 
-          UPCNT_TTL=$((UPCNT_SOLUS + UPCNT_FP))
+            if [ "$2" == "force" ]; then
+                echo -e "${CSS_CYANB}█ ${CSS_CYAN}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}\n${CSS_NBSP}${CSS_NBSP}${UPCNT_SOLUS} ${MSG_GEN_AVAILABLE}"
+            fi
+            if [ "$HAS_FLATPAK" -eq 1 ]; then
+                UPCNT_FP=`flatpak remote-ls --updates | wc -l`
+                UPMSG_FP=" | $MSG_UPD_FLATPAK: $UPCNT_FP"
 
-          if [ "$UPCNT_SOLUS" -gt 0 ]; then
-            NOTI_LVL="critical"
-            NOTI_ID=11111
-          fi
-
-          echo "TTL_UPDCNT=$UPCNT_TTL" >> "$UP_CACHE_FILE"
-          echo "SOLUS_UPCNT=$UPCNT_SOLUS" >> "$UP_CACHE_FILE"
-          echo "FLATPAK_UPCNT=$UPCNT_FP" >> "$UP_CACHE_FILE"
-
-          if [ "$UPCNT_TTL" -gt 0 ]; then
-            if [ "$UPCNT_TTL" -ne "$PREV_UPCNT_TTL" ] || [ ! -f "$UL_CACHE_FILE" ]; then
-              echo "$MSG_UPD_DISCO\n\n" > "$UL_CACHE_FILE"
-              if [ "$UPCNT_SOLUS" -gt 0 ]; then
-                echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}" >> "$UL_CACHE_FILE"
-                if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
-                  echo "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n" >> "$UL_CACHE_FILE"
+                if [ "$2" == "force" ]; then
+                    echo ""
+                    echo -e "${CSS_BLUEB}█ ${CSS_BLUE}${MSG_UPD_FLATPAK}${CSS_RESET}\n${CSS_NBSP}${CSS_NBSP}${UPCNT_FP} ${MSG_GEN_AVAILABLE}"
                 fi
-                eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' >> "$UL_CACHE_FILE"
-              fi
-
-              if [ "$UPCNT_FP" -gt 0 ]; then
-                echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}" >> "$UL_CACHE_FILE"
-                flatpak remote-ls --updates --columns=name,version >> "$UL_CACHE_FILE"
-              fi
-
-
+            else
+                UPCNT_FP=0
             fi
-            if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
-              UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
-              notify-send --app-name="Solseek" --urgency="$NOTI_LVL" --replace-id=$NOTI_ID -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
-            fi
-          fi
 
-      fi
-      rm -f "$UP_LOCK_FILE"
+            UPCNT_TTL=$((UPCNT_SOLUS + UPCNT_FP))
+
+            if [ "$UPCNT_SOLUS" -gt 0 ]; then
+                NOTI_LVL="critical"
+                NOTI_ID=11111
+            fi
+
+            echo "TTL_UPDCNT=$UPCNT_TTL" >> "$UP_CACHE_FILE"
+            echo "SOLUS_UPCNT=$UPCNT_SOLUS" >> "$UP_CACHE_FILE"
+            echo "FLATPAK_UPCNT=$UPCNT_FP" >> "$UP_CACHE_FILE"
+
+            if [ "$UPCNT_TTL" -gt 0 ]; then
+                if [ "$UPCNT_TTL" -ne "$PREV_UPCNT_TTL" ] || [ ! -f "$UL_CACHE_FILE" ]; then
+                    echo "$MSG_UPD_DISCO\n\n" > "$UL_CACHE_FILE"
+                    if [ "$UPCNT_SOLUS" -gt 0 ]; then
+                        echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}" >> "$UL_CACHE_FILE"
+                        if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
+                            echo "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n" >> "$UL_CACHE_FILE"
+                        fi
+                        eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' >> "$UL_CACHE_FILE"
+                    fi
+
+                    if [ "$UPCNT_FP" -gt 0 ]; then
+                        echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}" >> "$UL_CACHE_FILE"
+                        flatpak remote-ls --updates --columns=name,version >> "$UL_CACHE_FILE"
+                    fi
+                fi
+                if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
+                    UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
+                    notify-send --app-name="Solseek" --urgency="$NOTI_LVL" --replace-id=$NOTI_ID -t 9000 -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+                fi
+            fi
+        fi
+        rm -f "$UP_LOCK_FILE"
     fi
 }
 
 
 fp_cache(){
-  if [ "$HAS_FLATPAK" -eq 1 ]; then
-    DOUPDATE=0
-    rm -f "$UL_CACHE_FILE"
+    if [ "$HAS_FLATPAK" -eq 1 ]; then
+        DOUPDATE=0
+        rm -f "$UL_CACHE_FILE"
 
-    if [ "$1" == "force" ] || [ ! -f "$FI_CACHE_FILE" ] || [ -n "$(find "$FI_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
-        DOUPDATE=1
+        if [ "$1" == "force" ] || [ ! -f "$FI_CACHE_FILE" ] || [ -n "$(find "$FI_CACHE_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+            DOUPDATE=1
+        fi
+
+        if [ "$DOUPDATE" -eq 1 ]; then
+            echo "$MSG_GEN_FCACHE"
+            rm -f "$FI_CACHE_FILE"
+            rm -f "$FA_CACHE_FILE"
+
+            flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE"
+
+            flatpak remote-ls --"$SS_FLATPAK_REPTYPE" flathub --columns=application,name | \
+            awk '!seen[$1]++' | \
+            grep -v 'org\.freedesktop\.Platform\.GL32\.nvidia\|org\.freedesktop\.Platform\.GL\.nvidia' | \
+            sed -E 's/\t(.*)/|◯ \1/' | \
+            sort -t '|' -k 2 > "$FA_CACHE_FILE"
+
+            # If the user has no flatpaks installed, lets create an empty entry for FZF
+            if [ ! -s "$FI_CACHE_FILE" ]; then
+                touch "$FI_CACHE_FILE"
+                echo "Empty|Empty" > "$FI_CACHE_FILE"
+                #If it does lets merge the installed entries with available as FP has no command for this
+            else
+                TMP_PGK_FILE=$(mktemp)
+
+                awk -F'|' '
+
+                FNR==NR {
+                    # Store the entire line using the first field (Package ID) as the key
+                    installed[$1] = $0
+                    next
+                }
+
+                $1 in installed {
+                    # Print the stored replacement line and skip to the next record
+                    print installed[$1]
+                    next
+                }
+
+                { print }
+                ' "$FI_CACHE_FILE" "$FA_CACHE_FILE" > "$TMP_PGK_FILE" && mv "$TMP_PGK_FILE" "$FA_CACHE_FILE"
+
+                rm -f "$TMP_PGK_FILE"
+            fi
+        fi
     fi
-
-    if [ "$DOUPDATE" -eq 1 ]; then
-      echo "$MSG_GEN_FCACHE"
-      rm -f "$FI_CACHE_FILE"
-      rm -f "$FA_CACHE_FILE"
-
-      flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE"
-
-      flatpak remote-ls --"$SS_FLATPAK_REPTYPE" flathub --columns=application,name | \
-      awk '!seen[$1]++' | \
-      grep -v 'org\.freedesktop\.Platform\.GL32\.nvidia\|org\.freedesktop\.Platform\.GL\.nvidia' | \
-      sed -E 's/\t(.*)/|◯ \1/' | \
-      sort -t '|' -k 2 > "$FA_CACHE_FILE"
-
-      # If the user has no flatpaks installed, lets create an empty entry for FZF
-      if [ ! -s "$FI_CACHE_FILE" ]; then
-        touch "$FI_CACHE_FILE"
-        echo "Empty|Empty" > "$FI_CACHE_FILE"
-        #If it does lets merge the installed entries with available as FP has no command for this
-        else
-        TMP_PGK_FILE=$(mktemp)
-
-        awk -F'|' '
-
-        FNR==NR {
-            # Store the entire line using the first field (Package ID) as the key
-            installed[$1] = $0
-            next
-        }
-
-        $1 in installed {
-            # Print the stored replacement line and skip to the next record
-            print installed[$1]
-            next
-        }
-
-        { print }
-        ' "$FI_CACHE_FILE" "$FA_CACHE_FILE" > "$TMP_PGK_FILE" && mv "$TMP_PGK_FILE" "$FA_CACHE_FILE"
-
-        rm -f "$TMP_PGK_FILE"
-      fi
-    fi
-  fi
 
 }
 
 
 get_pkg_info(){
-  if [ "$SS_PKG_MGR" == "eopkg" ]; then
-    eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
-  else
-    ## this will need refinement
-    moss search "$1"
-  fi
+    if [ "$SS_PKG_MGR" == "eopkg" ]; then
+        eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
+    else
+      ## this will need refinement
+        moss search "$1"
+    fi
 }
 
 get_appstream_details(){
@@ -193,75 +196,73 @@ get_appstream_details(){
 
 
 eopkg_build_index(){
-  echo "$MSG_GEN_PCACHE"
-  eopkg la -N 2>/dev/null | awk 'NR>2 {print $1}' > "$IDX_CACHE_FILE"
-
+    echo "$MSG_GEN_PCACHE"
+    eopkg la -N 2>/dev/null | awk 'NR>2 {print $1}' > "$IDX_CACHE_FILE"
 }
 
 eopkg_cache(){
-  DOUPDATE=0
-  rm -f "$UL_CACHE_FILE"
-  LATESTHF=$(ls -t /var/lib/eopkg/history/*.xml 2>/dev/null | head -n 1)
+    DOUPDATE=0
+    rm -f "$UL_CACHE_FILE"
+    LATESTHF=$(ls -t /var/lib/eopkg/history/*.xml 2>/dev/null | head -n 1)
 
-  if [ "$1" == "force" ]; then
-    DOUPDATE=1
-  elif [ -f "$PA_CACHE_FILE" ] && [ -f "$PI_CACHE_FILE" ] && [ -f "$LATESTHF" ]; then
-    LAST_OP_TIME=$(stat -c "%Y" "$LATESTHF")
-    PA_CACHE_TIME=$(stat -c "%Y" "$PA_CACHE_FILE")
+    if [ "$1" == "force" ]; then
+        DOUPDATE=1
+    elif [ -f "$PA_CACHE_FILE" ] && [ -f "$PI_CACHE_FILE" ] && [ -f "$LATESTHF" ]; then
+        LAST_OP_TIME=$(stat -c "%Y" "$LATESTHF")
+        PA_CACHE_TIME=$(stat -c "%Y" "$PA_CACHE_FILE")
 
-    if [ "$LAST_OP_TIME" -gt "$PA_CACHE_TIME" ]; then
-      DOUPDATE=1
-    fi
-  else
-    DOUPDATE=1
-  fi
-
-  if [ "$DOUPDATE" -eq 1 ]; then
-    echo "$MSG_GEN_PCACHE"
-    rm -f "$PI_CACHE_FILE"
-    rm -f "$PA_CACHE_FILE"
-
-    TMP_PGK_FILE=$(mktemp)
-    # Setup active Solus eopkg repo if using local cache. If the file is missing revert to online
-    if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
-      IDX_PATH="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml"
-
-      if [ ! -f "$IDX_PATH" ]; then
-        ## if we have the xz version cp it local, extract and use that
-        if [ -f "$IDX_PATH.xz" ]; then
-          TMP_IDX_FILE=$(mktemp)
-          cp -f "$IDX_PATH.xz" "$SS_CACHE_PATH"
-          unxz -f "$SS_CACHE_PATH/eopkg-index.xml.xz"
-          IDX_PATH="$SS_CACHE_PATH/eopkg-index.xml"
-        else
-          SS_EOPKG_LCACHE=0
-          echo -e "$MSG_GEN_LCMISSING.\n"
+        if [ "$LAST_OP_TIME" -gt "$PA_CACHE_TIME" ]; then
+            DOUPDATE=1
         fi
-      fi
-    fi
-
-    eopkg li 2>/dev/null | awk 'NR>2 {print $1 "|" "\033[32m" "⬤ " $1 "\033[0m"}' > "$PI_CACHE_FILE"
-
-    if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
-      awk -F'[<>]' '/<Package>/ {in_pkg=1} in_pkg && $2=="Name" && length($3)>0 {
-      val=$3;
-      gsub(/[[:cntrl:]]/, "", val);       # Remove invisible control chars (like \r)
-      gsub(/^[[:space:]]+|[[:space:]]+$/, "", val); # Trim leading/trailing whitespace
-      if (length(val) > 0) print val "|" "◯ " val;
-      in_pkg=0
-  }' "$IDX_PATH" | sort -u > "$PA_CACHE_FILE"
-
-      awk -F'|' 'FNR==NR {seen[$1]; next} !($1 in seen)' "$PI_CACHE_FILE" $PA_CACHE_FILE > "$TMP_PGK_FILE"
-
-
     else
-      eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1 "|" "◯ " $1 }' > "$TMP_PGK_FILE"
+        DOUPDATE=1
     fi
 
-    cat "$PI_CACHE_FILE" "$TMP_PGK_FILE" | sort > "$PA_CACHE_FILE"
+    if [ "$DOUPDATE" -eq 1 ]; then
+        echo "$MSG_GEN_PCACHE"
+        rm -f "$PI_CACHE_FILE"
+        rm -f "$PA_CACHE_FILE"
 
-    rm -f "$TMP_PGK_FILE"
-  fi
+        TMP_PGK_FILE=$(mktemp)
+        # Setup active Solus eopkg repo if using local cache. If the file is missing revert to online
+        if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
+            IDX_PATH="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml"
+
+            if [ ! -f "$IDX_PATH" ]; then
+                ## if we have the xz version cp it local, extract and use that
+                if [ -f "$IDX_PATH.xz" ]; then
+                    TMP_IDX_FILE=$(mktemp)
+                    cp -f "$IDX_PATH.xz" "$SS_CACHE_PATH"
+                    unxz -f "$SS_CACHE_PATH/eopkg-index.xml.xz"
+                    IDX_PATH="$SS_CACHE_PATH/eopkg-index.xml"
+                else
+                    SS_EOPKG_LCACHE=0
+                    echo -e "$MSG_GEN_LCMISSING.\n"
+                fi
+            fi
+        fi
+
+        eopkg li 2>/dev/null | awk '{print $1 "|" "\033[32m⬤ " $1 "\033[0m"}' > "$PI_CACHE_FILE"
+
+        if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
+            awk -F'[<>]' '/<Package>/ {in_pkg=1} in_pkg && $2=="Name" && length($3)>0 {
+            val=$3;
+            gsub(/[[:cntrl:]]/, "", val);       # Remove invisible control chars (like \r)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", val); # Trim leading/trailing whitespace
+            if (length(val) > 0) print val "|" "◯ " val;
+            in_pkg=0
+            }' "$IDX_PATH" | sort -u > "$PA_CACHE_FILE"
+
+            awk -F'|' 'FNR==NR {seen[$1]; next} !($1 in seen)' "$PI_CACHE_FILE" $PA_CACHE_FILE > "$TMP_PGK_FILE"
+
+        else
+            eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1 "|" "◯ " $1 }' > "$TMP_PGK_FILE"
+        fi
+
+        cat "$PI_CACHE_FILE" "$TMP_PGK_FILE" | sort > "$PA_CACHE_FILE"
+
+        rm -f "$TMP_PGK_FILE"
+    fi
 
 }
 
@@ -271,11 +272,11 @@ clean_cache(){
         rm -f "$UL_CACHE_FILE"
     fi
     if echo "$@" | grep -q "regen";  then
-      echo "$MSG_GEN_CACHE"
-      rm -f "$UP_LOCK_FILE"
-      check_updates "system" &
-      fp_cache "force" &
-      eopkg_cache
+        echo "$MSG_GEN_CACHE"
+        rm -f "$UP_LOCK_FILE"
+        check_updates "system" &
+        fp_cache "force" &
+        eopkg_cache
     fi
 }
 
@@ -340,9 +341,9 @@ appstream_get_list(){
 
     #echo -e "$MSG_GEN_LOADCATALOG";
     if [ "$1" == "All" ]; then
-      LC_ALL=C appstreamcli search . --no-color > "$TMP_PGK_FILE"
+        LC_ALL=C appstreamcli search . --no-color > "$TMP_PGK_FILE"
     else
-      LC_ALL=C appstreamcli list-categories "$1" --no-color > "$TMP_PGK_FILE"
+        LC_ALL=C appstreamcli list-categories "$1" --no-color > "$TMP_PGK_FILE"
     fi
 
 
@@ -487,4 +488,3 @@ check_nvidia_support() {
   fi
 
 }
-
