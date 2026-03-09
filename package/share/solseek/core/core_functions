@@ -4,110 +4,146 @@ mst(){
 
   if [[ $1 =~ ^[0-9]+$ ]]; then
 
-    if [ "$2" == "bbr" ]; then
-      OUT="\033[1;38;5;$1m"
-    else
-      OUT="\033[38;5;$1m"
-    fi
+      if [ "$2" == "bbr" ]; then
+          OUT="\033[1;38;5;$1m"
+      else
+          OUT="\033[38;5;$1m"
+      fi
   else
-    if echo "$@" | grep -q "rst"; then
-      OUT="$CSS_RESET"
-    else
-      if echo "$@" | grep -q "1sp"; then
-        OUT="$CSS_NBSP"
-      elif echo "$@" | grep -q "2sp"; then
-        OUT="$CSS_NBSP$CSS_NBSP"
-      fi
+      if echo "$@" | grep -q "rst"; then
+          OUT="$CSS_RESET"
+      else
+        if echo "$@" | grep -q "1sp"; then
+            OUT="$CSS_NBSP"
+        elif echo "$@" | grep -q "2sp"; then
+            OUT="$CSS_NBSP$CSS_NBSP"
+        fi
 
-      if echo "$@" | grep -q "bbr"; then
-        OUT+="$CSS_BOLDBRIGHT"
-      elif echo "$@" | grep -q "yb"; then
-        OUT+="$CSS_YELLOWB"
-      elif echo "$@" | grep -q "cb"; then
-        OUT+="$CSS_CYANB"
-      elif echo "$@" | grep -q "bb"; then
-        OUT+="$CSS_BLUEB"
-      elif echo "$@" | grep -q "gb"; then
-        OUT+="$CSS_GREENB"
-      elif echo "$@" | grep -q "rb"; then
-        OUT+="$CSS_REDB"
-      elif echo "$@" | grep -q "y"; then
-        OUT+="$CSS_YELLOW"
-      elif echo "$@" | grep -q "c"; then
-        OUT+="$CSS_CYAN"
-      elif echo "$@" | grep -q "b"; then
-        OUT+="$CSS_BLUE"
-      elif echo "$@" | grep -q "g"; then
-        OUT+="$CSS_GREEN"
-      elif echo "$@" | grep -q "r"; then
-        OUT+="$CSS_RED"
+        if echo "$@" | grep -q "bbr"; then
+            OUT+="$CSS_BOLDBRIGHT"
+        elif echo "$@" | grep -q "yb"; then
+            OUT+="$CSS_YELLOWB"
+        elif echo "$@" | grep -q "cb"; then
+            OUT+="$CSS_CYANB"
+        elif echo "$@" | grep -q "bb"; then
+            OUT+="$CSS_BLUEB"
+        elif echo "$@" | grep -q "gb"; then
+            OUT+="$CSS_GREENB"
+        elif echo "$@" | grep -q "rb"; then
+            OUT+="$CSS_REDB"
+        elif echo "$@" | grep -q "y"; then
+            OUT+="$CSS_YELLOW"
+        elif echo "$@" | grep -q "c"; then
+            OUT+="$CSS_CYAN"
+        elif echo "$@" | grep -q "b"; then
+            OUT+="$CSS_BLUE"
+        elif echo "$@" | grep -q "g"; then
+            OUT+="$CSS_GREEN"
+        elif echo "$@" | grep -q "r"; then
+            OUT+="$CSS_RED"
+        fi
       fi
-    fi
   fi
   echo "$OUT"
 }
 
 hr(){
-  line="─"
-  clr=""
-  rst=""
-  wcols=$(tput cols)
+    line="─"
+    clr=""
+    rst=""
+    wcols=$(tput cols)
 
-  if echo "$@" | grep -q "danger"; then
-    if echo "$@" | grep -q "3"; then
-      clr=$(mst "rb")
-    else
-      clr=$(mst "r")
+    if echo "$@" | grep -q "danger"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "rb")
+        else
+            clr=$(mst "r")
+        fi
+    elif echo "$@" | grep -q "success"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "gb")
+        else
+            clr=$(mst "g")
+        fi
+    elif echo "$@" | grep -q "cyan"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "cb")
+        else
+            clr=$(mst "c")
+        fi
+    elif echo "$@" | grep -q "yellow"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "yb")
+        else
+            clr=$(mst "y")
+        fi
+    elif echo "$@" | grep -q "blue"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "bb")
+        else
+            clr=$(mst "b")
+        fi
+    elif echo "$@" | grep -q "green"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "gb")
+        else
+            clr=$(mst "g")
+        fi
+    elif echo "$@" | grep -q "red"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "rb")
+        else
+            clr=$(mst "r")
+        fi
+    elif echo "$@" | grep -q "noclr"; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst "bbr")
+        else
+            clr=""
+        fi
+    elif [[ -n "$SS_COLOR_BASE" ]] && [[ $SS_COLOR_BASE =~ ^[0-9]+$ ]]; then
+        if echo "$@" | grep -q "3"; then
+            clr=$(mst $SS_COLOR_BASE "bbr")
+        else
+            clr=$(mst $SS_COLOR_BASE)
+        fi
     fi
-  elif echo "$@" | grep -q "success"; then
-    if echo "$@" | grep -q "3"; then
-      clr=$(mst "gb")
-    else
-      clr=$(mst "g")
-    fi
-  elif [[ -n "$SS_COLOR_BASE" ]] && [[ $SS_COLOR_BASE =~ ^[0-9]+$ ]]; then
-    if echo "$@" | grep -q "3"; then
-      clr=$(mst $SS_COLOR_BASE "bbr")
-    else
-      clr=$(mst $SS_COLOR_BASE)
-    fi
-  fi
 
-  if echo "$@" | grep -q "w50"; then
-    wcols=50
-  elif echo "$@" | grep -q "w30"; then
-    wcols=30
-  elif echo "$@" | grep -q "w10"; then
-    wcols=10
-  fi
+    if echo "$@" | grep -q "w50"; then
+        wcols=50
+    elif echo "$@" | grep -q "w30"; then
+        wcols=30
+    elif echo "$@" | grep -q "w10"; then
+        wcols=10
+    fi
 
-  if [[ -n "$clr" ]]; then
-    rst=$(mst "rst")
-  fi
-  printf "${clr}""%.0s${line}""${rst}" $(seq 1 "${wcols}"); echo
+    if [[ -n "$clr" ]]; then
+        rst=$(mst "rst")
+    fi
+    printf "${clr}""%.0s${line}""${rst}" $(seq 1 "${wcols}"); echo
 }
 
 menu_bar(){
 
-  clr=""
-  rst=""
+    clr=""
+    rst=""
 
-  if [[ -n "$SS_COLOR_BASE" ]] && [[ $SS_COLOR_BASE =~ ^[0-9]+$ ]]; then
-      clr=$(mst $SS_COLOR_BASE)
-  fi
-  if [[ -n "$clr" ]]; then
-    rst=$(mst "rst")
-  fi
-  echo "$clr""────────────────────""$rst"
+    if [[ -n "$SS_COLOR_BASE" ]] && [[ $SS_COLOR_BASE =~ ^[0-9]+$ ]]; then
+        clr=$(mst $SS_COLOR_BASE)
+    fi
+    if [[ -n "$clr" ]]; then
+        rst=$(mst "rst")
+    fi
+    echo "$clr""────────────────────""$rst"
 }
 
 # Language function
 sslang(){
-  local lstring="$1"
-  if [ "$SS_PKG_MGR" == "moss" ]; then
-    lstring=$(echo "$lstring" | sed 's/eopkg/moss/Ig')
-  fi
-  echo "$lstring"
+    local lstring="$1"
+    if [ "$SS_PKG_MGR" == "moss" ]; then
+        lstring=$(echo "$lstring" | sed 's/eopkg/moss/Ig')
+    fi
+    echo "$lstring"
 }
 
 
@@ -220,18 +256,18 @@ ss_life(){
     raw_date=$(< "$SS_CACHE_PATH/birthdate")
   fi
   if [[ -n "$raw_date" ]]; then
-    BDAY="$MSG_GEN_SYSLIFE: "
+    BDAY="${CSS_BOLDBRIGHT}${MSG_GEN_SYSLIFE}:${CSS_RESET} "
     install_sec=$(date -d "$raw_date" +%s)
     current_sec=$(date +%s)
     diff_days=$(( (current_sec - install_sec) / 86400 ))
     if (( diff_days >= 365 )); then
         years=$(( diff_days / 365 ))
         remaining_days=$(( diff_days % 365 ))
-        BDAY+="${years} $MSG_GEN_YEARS / ${remaining_days} $MSG_GEN_DAYS"
+        BDAY+="${years} ${MSG_GEN_YEARS} / ${remaining_days} ${MSG_GEN_DAYS}"
     else
-        BDAY+="${diff_days} $MSG_GEN_DAYS"
+        BDAY+="${diff_days} ${MSG_GEN_DAYS}"
     fi
-    echo -e "$BDAY"
+    echo -e "${BDAY}"
   fi
 
 }
@@ -340,7 +376,7 @@ ss_fetch(){
 
   # Check for Flatpak
   if command -v flatpak &> /dev/null; then
-    if [ -f "$PI_CACHE_FILE" ]; then
+    if [ -f "$FI_CACHE_FILE" ]; then
         count=$(wc -l < "$FI_CACHE_FILE")
     else
         count=$(flatpak list --app | wc -l)
@@ -377,7 +413,7 @@ case "$1" in
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_GUIDE_TITLE ${CSS_RESET}
 $MSG_PNL_GUIDE_BODY
 
-📘 WIKI: https://solseek.org/wiki";;
+📘 https://solseek.org/wiki";;
 "pkgaction")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_PKGACT_TITLE ${CSS_RESET}
 $MSG_PNL_PKGACT_BODY
@@ -411,6 +447,7 @@ $(get_changelog)
 ";;
 "sscfg")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_SSCFG_TITLE ${CSS_RESET}
+. "$UP_CACHE_FILE"
 
 $MSG_PNL_SSCFG_BODY";;
 "sstmr")
