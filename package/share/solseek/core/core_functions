@@ -447,7 +447,6 @@ $(get_changelog)
 ";;
 "sscfg")
 PANELTXT+="${CSS_BOLDBRIGHT}$MSG_PNL_SSCFG_TITLE ${CSS_RESET}
-. "$UP_CACHE_FILE"
 
 $MSG_PNL_SSCFG_BODY";;
 "sstmr")
