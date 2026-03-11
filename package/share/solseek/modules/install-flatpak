@@ -21,8 +21,8 @@ else
     elif [ "$2" == "repair" ]; then
         pkg_mgmt_act="repair"
         pkg_mgmt_title="$ACT_PKG_CHECK: $pkgvars"
+        SS_ASSUMEYES=""
     fi
-
     hr "danger" 3
     echo -e "${CSS_BOLDBRIGHT}📦 $MSG_PKG_TTLSTART ${pkg_mgmt_title}${CSS_RESET}"
     hr "danger" 3
