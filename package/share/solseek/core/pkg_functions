@@ -150,8 +150,7 @@ fp_cache(){
 
             # If the user has no flatpaks installed, lets create an empty entry for FZF
             if [ ! -s "$FI_CACHE_FILE" ]; then
-                touch "$FI_CACHE_FILE"
-                echo "Empty|Empty" > "$FI_CACHE_FILE"
+                >"$FI_CACHE_FILE"
                 #If it does lets merge the installed entries with available as FP has no command for this
             else
                 TMP_PGK_FILE=$(mktemp)
