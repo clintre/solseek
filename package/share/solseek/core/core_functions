@@ -381,7 +381,9 @@ ss_fetch(){
     else
         count=$(flatpak list --app | wc -l)
     fi
-      pkgs_output="${pkgs_output}, ${count} (flatpak)"
+	if [[ "$count" -gt 0 ]]; then
+        pkgs_output="${pkgs_output}, ${count} (flatpak)"
+    fi
   fi
   pkgs_output=${pkgs_output%, }
 
