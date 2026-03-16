@@ -25,9 +25,13 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Update notification service (even when not running)
   - View system configurations
 
+<hr>
+
 ## Known Limitations / Issues
   - Currently only in English, French, Polish, Slovenian, and Spanish
   - Limited Snap support. Only updates, no list or searching. Full Snap support is not planned at this time.
+
+<hr>
 
 ## Planned
 | Feature | Info | Delivery |
@@ -37,10 +41,14 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 | **moss support** | AerynOS & future Solus | 1.? |
 | **tmux support** | Enhance UX | 1.0 |
 
+<hr>
+
 ## Contributing
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
 - [Adding or Correction Language Files](https://github.com/clintre/solseek/discussions/13)
 - Adding language file guide coming, but if you are familiar with Github, copy the en directory and contents and translate.
+
+<hr>
 
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
