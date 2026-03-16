@@ -53,7 +53,9 @@ The biggest need right now is the language files. If you are not as familiar wit
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
 There was no need to write some system to extract the data as the Solus team has done a wonderful job already with eopkg and it allows me to simply wrap this tool around the strengths of it.
-    
+
+<hr>
+
 ## Inspirations from other distro tools
   - [pacseek](https://github.com/moson-mo/pacseek) - Overall concept
   - [dnfseek](https://github.com/OmarHesham2356/dnfseek) - Using fzf for handling the UI/UX
