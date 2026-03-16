@@ -11,6 +11,8 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 [![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://youtu.be/MT7w6rZLmt0)
 
+<hr id="features">
+
 ## Features
   - Complete app store similar to Discover or Gnome Software
   - Select and install multiple packages at once
@@ -39,10 +41,6 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
 - [Adding or Correction Language Files](https://github.com/clintre/solseek/discussions/13)
 - Adding language file guide coming, but if you are familiar with Github, copy the en directory and contents and translate.
-
-## For Fun
-Yeah never going to have a huge star history, this is just for fun.
-[![Star History Chart](https://app.repohistory.com/api/svg?repo=clintre/solseek&type=Date&background=0D1117&color=62C3F8)](https://app.repohistory.com/star-history)
 
 ## Credits
 Solus and eopkg! Solseek uses eopkg natively to handle the packaging information and interaction. 
