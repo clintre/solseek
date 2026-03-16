@@ -139,6 +139,8 @@ fp_cache(){
             echo "$MSG_GEN_FCACHE"
             rm -f "$FI_CACHE_FILE"
             rm -f "$FA_CACHE_FILE"
+            # This updates the appstream catalog for flatpaks
+            solseek fpasc &
 
             flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE"
 
@@ -150,8 +152,8 @@ fp_cache(){
 
             # If the user has no flatpaks installed, lets create an empty entry for FZF
             if [ ! -s "$FI_CACHE_FILE" ]; then
+                #Create blank file so fzf works
                 >"$FI_CACHE_FILE"
-                #If it does lets merge the installed entries with available as FP has no command for this
             else
                 TMP_PGK_FILE=$(mktemp)
 
