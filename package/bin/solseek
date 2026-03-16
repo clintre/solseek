@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="1.0.0"
+SS_VERSION="1.0.2"
 
 SS_DATA_PATH="/usr/share/solseek"
 
@@ -80,7 +80,10 @@ elif [ "$1" == "-cc" ]; then
     rm -f ${UP_CACHE_FILE}
     rm -f ${UL_CACHE_FILE}
     rm -f ${UP_LOCK_FILE}
-
+elif [ "$1" == "fpasc" ]; then
+    flatpak update --appstream &> /dev/null
+    appstreamcli refresh --force &> /dev/null
+    exit 0
 # This is abstraction of the eopkg/moss command to allow for moss inclusion in the future
 # Allows for full eopkg calls
 elif [ "$1" == "eopkg" ]; then
