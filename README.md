@@ -25,10 +25,18 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Update notification service (even when not running)
   - View system configurations
 
+## Language Support
+  - English
+  - French
+  - German
+  - Polish
+  - Slovenian
+  - Spanish
+
 <hr>
 
 ## Known Limitations / Issues
-  - Currently only in English, French, Polish, Slovenian, and Spanish
+  - Limited Language support
   - Limited Snap support. Only updates, no list or searching. Full Snap support is not planned at this time.
 
 <hr>
