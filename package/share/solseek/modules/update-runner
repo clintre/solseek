@@ -33,6 +33,9 @@ done
 ccache_eopkg=0
 ccache_flatpak=0
 ccache_updates=0
+show_softreboot=0
+show_hardreboot=0
+reboot_msg=""
 
 hr "danger" 3
 echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
@@ -40,9 +43,21 @@ hr "danger" 3
 if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
     ccache_eopkg=1
     ccache_updates=1
+    show_hardreboot=1
+    show_softreboot=1
+
     hr "w30" "cyan"
     echo -e "${CSS_CYANB}█ EOPKG ${CSS_RESET}"
     hr "w30" "cyan"
+    echo -e "${MSG_GEN_CHECKUPDS}\n"
+
+    UPGRADE_LIST=$(sudo env LC_ALL=C eopkg up -n 2>/dev/null)
+    #Check the dry-run list for our critical packages to disable soft reboot option
+    if echo "$UPGRADE_LIST" | grep -qE '\b(nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
+        show_softreboot=0
+        reboot_msg="${MSG_GEN_REBOOTMSG}"
+    fi
+
     sudo eopkg up $SS_ASSUMEYES
 fi
 if [ "$up_fp" -eq 1 ] && [ "$HAS_FLATPAK" -eq 1 ]; then
@@ -94,28 +109,59 @@ if [ "$ccache_updates" -eq 1 ]; then
     fi
 fi
 hr "success" 3
-echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
+echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP${CSS_RESET}"
 hr "success" 3
-if [ "$ccache_eopkg" -eq 1 ]; then
-    read -n 1 -p "$MSG_GEN_PRESSENTERREB: " PUCHOICE
-    case "$PUCHOICE" in
-        # This matches either 'R' or 'r' (case-insensitive)
-        [Rr])
-            echo -e "\n\n${CSS_BOLDBRIGHT}█ $MSG_GEB_REBOOTIN... ${CSS_RESET}"
-            RBCNT=3
-            for (( i=$RBCNT; i>0; i-- )); do
-                echo -ne "${CSS_BOLDBRIGHT}█ $i ${CSS_RESET}\r"
-                sleep 1
-            done
-            reboot
-            ;;
-        *)
-            exit 0
-            ;;
-    esac
-else
-    read -p "$MSG_GEN_PRESSENTER..."
-    exit 0
+
+OPTION_MENU="${CSS_GREENB}> ${MSG_GEN_PRESSENTER}"
+if [ "$show_softreboot" -eq 1 ]; then
+    OPTION_MENU="${OPTION_MENU} ${CSS_YELLOWB}> ${MSG_GEN_PRESSENTERRESB}"
 fi
+if [ "$show_hardreboot" -eq 1 ]; then
+    OPTION_MENU="${OPTION_MENU} ${CSS_REDB}> ${MSG_GEN_PRESSENTERREB}"
+fi
+echo ""
+
+if [ -n "$reboot_msg" ]; then
+    hr "w30" "red"
+    echo -e "${CSS_REDB}!!! ${reboot_msg} !!!${CSS_RESET}"
+    hr "w30" "red"
+    echo ""
+fi
+
+echo -e "${OPTION_MENU}${CSS_RESET}"
+
+read -n 1 -p ": " PUCHOICE
+case "$PUCHOICE" in
+    # This matches either 'R' or 'r' (case-insensitive)
+    [Ss])
+        if [ "$show_softreboot" -eq 0 ]; then
+            exit 0
+        fi
+        echo -e "\n\n${CSS_BOLDBRIGHT}█ $MSG_GEB_REBOOTIN... ${CSS_RESET}"
+        RBCNT=3
+        for (( i=$RBCNT; i>0; i-- )); do
+            echo -ne "${CSS_BOLDBRIGHT}█ $i ${CSS_RESET}\r"
+            sleep 1
+        done
+        systemctl soft-reboot
+        ;;
+    # This matches either 'R' or 'r' (case-insensitive)
+    [Rr])
+
+        if [ "$show_hardreboot" -eq 0 ]; then
+            exit 0
+        fi
+        echo -e "\n\n${CSS_BOLDBRIGHT}█ $MSG_GEB_REBOOTIN... ${CSS_RESET}"
+        RBCNT=3
+        for (( i=$RBCNT; i>0; i-- )); do
+            echo -ne "${CSS_BOLDBRIGHT}█ $i ${CSS_RESET}\r"
+            sleep 1
+        done
+        reboot
+        ;;
+    *)
+        exit 0
+        ;;
+esac
 
 
