@@ -15,6 +15,8 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 ## Features
   - Complete app store similar to Discover or Gnome Software
+  - Works as a desktop app or from terminal
+  - Navigate and use with keyboard and/or mouse
   - Select and install multiple packages at once
   - Manage system updates for installed tools such as; eopkg, flatpak, snap, distrobox, and fwupd
   - Rollback system to help issues brought on by updates or installs
@@ -24,6 +26,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Recall (rollback) system package actions
   - Update notification service (even when not running)
   - View system configurations
+  - Quick update both system packages and flatpak using `solseek up`
 
 ## Language Support
   - English
