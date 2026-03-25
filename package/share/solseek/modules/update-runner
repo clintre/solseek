@@ -67,6 +67,7 @@ if [ "$up_fp" -eq 1 ] && [ "$HAS_FLATPAK" -eq 1 ]; then
     echo -e "${CSS_BLUEB}█ FLATPAK ${CSS_RESET}"
     hr "w30" "blue"
     flatpak update -y
+    flatpak mask
 fi
 if [ "$up_sn" -eq 1 ] && [ "$HAS_SNAP" -eq 1 ]; then
     hr "w30" "red"
