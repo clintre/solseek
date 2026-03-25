@@ -37,7 +37,8 @@ upd_msg(){
 
               if [ "$FLATPAK_UPCNT" -gt 0 ]; then
                echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}"
-               flatpak remote-ls --updates --columns=name,version | fold -s -w 70
+               flatpak remote-ls --updates --columns=application,name,version | grep -vFw -f <(flatpak mask | awk '{print $1}') | sed 's/^[^ \t]*[ \t]*//'  | fold -s -w 70
+               #flatpak remote-ls --updates --columns=name,version | fold -s -w 70
               fi
         else
             UPLIST=$(<"$UL_CACHE_FILE")
@@ -77,7 +78,9 @@ check_updates(){
                 echo -e "${CSS_CYANB}█ ${CSS_CYAN}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}\n${CSS_NBSP}${CSS_NBSP}${UPCNT_SOLUS} ${MSG_GEN_AVAILABLE}"
             fi
             if [ "$HAS_FLATPAK" -eq 1 ]; then
-                UPCNT_FP=`flatpak remote-ls --updates | wc -l`
+                #UPCNT_FP=`flatpak remote-ls --updates | wc -l`
+                UPCNT_FP=$(flatpak remote-ls --updates --columns=application | grep -vFxf <(flatpak mask | awk '{print $1}') | wc -l)
+
                 UPMSG_FP=" | $MSG_UPD_FLATPAK: $UPCNT_FP"
 
                 if [ "$2" == "force" ]; then
@@ -112,7 +115,8 @@ check_updates(){
 
                     if [ "$UPCNT_FP" -gt 0 ]; then
                         echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}" >> "$UL_CACHE_FILE"
-                        flatpak remote-ls --updates --columns=name,version >> "$UL_CACHE_FILE"
+                        flatpak remote-ls --updates --columns=application,name,version | grep -vFw -f <(flatpak mask | awk '{print $1}') | sed 's/^[^ \t]*[ \t]*//' >> "$UL_CACHE_FILE"
+                        #flatpak remote-ls --updates --columns=name,version >> "$UL_CACHE_FILE"
                     fi
                 fi
                 if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
