@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="1.1.3"
+SS_VERSION="1.1.4"
 
 SS_DATA_PATH="/usr/share/solseek"
 
