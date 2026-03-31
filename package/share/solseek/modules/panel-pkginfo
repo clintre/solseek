@@ -1,5 +1,5 @@
 if [ -n "$2" ]; then
-
+    sleep 1
     if grep -q "$2" "$PI_CACHE_FILE"; then
         pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
     else
