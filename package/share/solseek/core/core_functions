@@ -272,6 +272,10 @@ ss_life(){
 
 }
 
+ss_clean_of(){
+    find /tmp -maxdepth 1 -type d -name "onefile_*" -newermt "5 seconds ago" -exec rm -rf {} + &> /dev/null
+}
+
 ss_debug(){
 
 eopkgVer=$(eopkg --version)

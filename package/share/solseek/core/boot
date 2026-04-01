@@ -71,6 +71,8 @@ FI_CACHE_FILE="$SS_CACHE_PATH/iflatpaks"
 UP_CACHE_FILE="$SS_CACHE_PATH/updatemsg"
 UL_CACHE_FILE="$SS_CACHE_PATH/updatelst"
 UP_LOCK_FILE="$SS_CACHE_PATH/update_lock"
+HISTORY_FILE="$SS_CACHE_PATH/history"
+RB_HISTORY_FILE="$SS_CACHE_PATH/rb_history"
 
 #Supported Update Systems
 CORE_PKG_TYPE=""
@@ -148,6 +150,9 @@ if [ "$SS_PKG_MGR" == "eopkg" ]; then
     # Check if local eopkg index file exists
     if [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" ]; then
         SS_EOPKG_FINDEX=1
+        SS_SOLUS_REPO_FILE="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml"
+    elif [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml.xz" ]; then
+        SS_SOLUS_REPO_FILE="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml.xz"
     fi
 
 elif [ "$SS_PKG_MGR" == "moss" ]; then

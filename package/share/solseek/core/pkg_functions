@@ -188,7 +188,13 @@ fp_cache(){
 
 get_pkg_info(){
     if [ "$SS_PKG_MGR" == "eopkg" ]; then
-        eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
+        if [[ -n "$SS_SOLUS_REPO_FILE" ]]; then
+            $SS_DATA_PATH/helpers/eopkg-info.py "$SS_SOLUS_REPO_FILE" "$1"
+        else
+            ss_clean_of
+            sleep 0.5 && eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
+        fi
+
     else
       ## this will need refinement
         moss search "$1"
@@ -227,6 +233,8 @@ eopkg_cache(){
         echo "$MSG_GEN_PCACHE"
         rm -f "$PI_CACHE_FILE"
         rm -f "$PA_CACHE_FILE"
+        rm -f "$RB_HISTORY_FILE"
+        rm -f "$HISTORY_FILE"
 
         TMP_PGK_FILE=$(mktemp)
         # Setup active Solus eopkg repo if using local cache. If the file is missing revert to online
@@ -290,11 +298,18 @@ eopkg_rollback_menu(){
     LC_ALL=C eopkg history -l "$SS_ROLLBACK_LIMIT" | sed -nE 's/^(.*#([0-9]+)):.*/\2|\1/p'
 }
 eopkg_history_data(){
-    LLIMIT="$SS_HISTORY_LIMIT"
+
     if [ "$1" == "rollback" ]; then
-        LLIMIT="$SS_ROLLBACK_LIMIT"
+        if [ "$1" == "force" ] || [ ! -f "$RB_HISTORY_FILE" ] || [ -n "$(find "$RB_HISTORY_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+            eopkg history -l "${SS_ROLLBACK_LIMIT}" > "$RB_HISTORY_FILE";
+        fi
+        cat $RB_HISTORY_FILE 2>/dev/null
+    else
+        if [ "$1" == "force" ] || [ ! -f "$HISTORY_FILE" ] || [ -n "$(find "$HISTORY_FILE" -mmin +"$SS_CACHE_EXPIRES" 2>/dev/null)" ]; then
+            eopkg history > "$HISTORY_FILE";
+        fi
+        cat $HISTORY_FILE 2>/dev/null
     fi
-    eopkg history
 }
 
 appstream_write_entry() {
