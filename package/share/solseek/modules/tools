@@ -230,16 +230,17 @@ elif [ "$sse_type" = "eopkg" ]; then
         hr "danger" 3
         if [ "$sse_sudo" -eq 1 ]; then
             sudo eopkg "$sse_cmd" > $sse_export_fn
-        else
+            else
           eopkg $sse_cmd > $sse_export_fn
         fi
         echo -e "\n${MSG_GEN_PROCCOMP}\n"
         hr "success" 3
         read -p "$MSG_GEN_PRESSENTER..."
-      else
+    else
         echo "$MSG_INFO_EXPPVTOP"
         hr "w30"
-        eopkg $sse_cmd
+        ss_clean_of
+        sleep 0.5 && eopkg $sse_cmd
     fi
 elif [ "$sse_type" == "flatpak" ]; then
     if [ "$2" = "AMT_FPCLEAN" ]; then

@@ -33,7 +33,7 @@ case "$PNLKEY" in
     "AMT_ERBCK")
         ss_info_pane "rollbacklist"
         hr
-        eopkg history -l "${SS_ROLLBACK_LIMIT}" 2>/dev/null
+        eopkg_history_data "rollback"
       ;;
     "AMM_TOOLS")
         ss_info_pane "tools" ;;

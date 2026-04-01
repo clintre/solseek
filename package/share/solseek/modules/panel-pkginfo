@@ -1,6 +1,4 @@
 if [ -n "$2" ]; then
-    # cleanup previous directories that did not get cleaned
-    find /tmp -maxdepth 1 -type d -name "onefile_*" -newermt "5 seconds ago" -exec rm -rf {} +
 
     if grep -q "$2" "$PI_CACHE_FILE"; then
         pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
@@ -16,7 +14,7 @@ if [ -n "$2" ]; then
     fi
     echo -e "> $pkg_status\n"
     #get_pkg_info "$2" | fold -s -w 70 2>/dev/null
-    sleep 0.5 && get_pkg_info "$2" | sed 's/^[[:space:]]*//' | fold -s -w 80 2>/dev/null
+    get_pkg_info "$2" | sed 's/^[[:space:]]*//' | fold -s -w 80 2>/dev/null
 else
     echo "$MSG_GEN_SEL_ITEM"
 fi
