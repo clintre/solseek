@@ -188,8 +188,13 @@ fp_cache(){
 
 get_pkg_info(){
     if [ "$SS_PKG_MGR" == "eopkg" ]; then
-        if [[ -n "$SS_SOLUS_REPO_FILE" ]]; then
-            $SS_DATA_PATH/helpers/eopkg-info.py "$SS_SOLUS_REPO_FILE" "$1"
+        if [[ -n "$EPD_CACHE_FILE" ]]; then
+            awk -v RS='\x1e' -v id="ID:$1\n" '
+                index($0, id) == 1 {
+                    print substr($0, length(id) + 1)
+                    exit
+                }
+            ' "$EPD_CACHE_FILE"
         else
             ss_clean_of
             sleep 0.5 && eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
@@ -233,8 +238,14 @@ eopkg_cache(){
         echo "$MSG_GEN_PCACHE"
         rm -f "$PI_CACHE_FILE"
         rm -f "$PA_CACHE_FILE"
+        rm -f "$EPD_CACHE_FILE"
         rm -f "$RB_HISTORY_FILE"
         rm -f "$HISTORY_FILE"
+
+        # Generate text based info db file
+        if [[ -n "$SS_SOLUS_REPO_FILE" ]]; then
+            $SS_DATA_PATH/helpers/eopkg-info.py "$SS_SOLUS_REPO_FILE" > "$EPD_CACHE_FILE" &
+        fi
 
         TMP_PGK_FILE=$(mktemp)
         # Setup active Solus eopkg repo if using local cache. If the file is missing revert to online
@@ -244,7 +255,7 @@ eopkg_cache(){
             if [ ! -f "$IDX_PATH" ]; then
                 ## if we have the xz version cp it local, extract and use that
                 if [ -f "$IDX_PATH.xz" ]; then
-                    TMP_IDX_FILE=$(mktemp)
+                    #TMP_IDX_FILE=$(mktemp)
                     cp -f "$IDX_PATH.xz" "$SS_CACHE_PATH"
                     unxz -f "$SS_CACHE_PATH/eopkg-index.xml.xz"
                     IDX_PATH="$SS_CACHE_PATH/eopkg-index.xml"

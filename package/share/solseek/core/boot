@@ -1,3 +1,7 @@
+#Create cache/config directory if it does'nt exist
+mkdir -p "$HOME/.cache/solseek"
+mkdir -p "$HOME/.config/solseek"
+
 SS_LTS_KERNEL=0
 # System package manager
 if command -v "eopkg" &> /dev/null; then
@@ -13,27 +17,21 @@ else
 fi
 
 
-#Create cache/config directory if it does'nt exist
-mkdir -p "$HOME/.cache/solseek"
-mkdir -p "$HOME/.config/solseek"
-
 # Defaults
 SS_LANG=${LANG:0:2}
 . "$SS_DATA_PATH/core/defaults"
-
-# Check if systemd timer files are installed.
-# Note this does not enable them, just makes sure they are there if needed.
-if [ ! -f "$HOME/.config/systemd/user/solseek-uc.service" ] || [ ! -f "$HOME/.config/systemd/user/solseek-uc.timer" ]; then
-    mkdir -p "$HOME/.config/systemd/user"
-    cp -f /usr/share/solseek/solseek-uc.service $HOME/.config/systemd/user/
-    cp -f /usr/share/solseek/solseek-uc.timer $HOME/.config/systemd/user/
-fi
 
 # Check for local config
 if [ -f "$HOME/.config/solseek/config" ]; then
     . "$HOME/.config/solseek/config"
     SS_LOCAL_CFG=1
 fi
+
+# If alternate language is set, check to see if it exists
+if [ "$SS_LANG" != "en" ] && [ -f "$SS_DATA_PATH/lang/$SS_LANG.ini" ]; then
+    . "$SS_DATA_PATH/lang/$SS_LANG.ini"
+fi
+
 
 if [ "$SS_ASSUMEYES" -eq 1 ]; then
     SS_ASSUMEYES="-y"
@@ -44,10 +42,6 @@ fi
 # Include the default lang file as fallback
 . "$SS_DATA_PATH/lang/en.ini"
 
-# If alternate language is set, check to see if it exists
-if [ "$SS_LANG" != "en" ] && [ -f "$SS_DATA_PATH/lang/$SS_LANG.ini" ]; then
-    . "$SS_DATA_PATH/lang/$SS_LANG.ini"
-fi
 
 # Load theme
 if [ -f "$SS_DATA_PATH/themes/$SS_THEME.theme" ]; then
@@ -59,10 +53,12 @@ fi
 # Sub Action switch
 ISSA=0
 
+
 # Cache settings
 # Cache expires time in minutes - will move to config file later to override this if set
 SS_CACHE_EXPIRES=20
 IDX_CACHE_FILE="$SS_CACHE_PATH/eopkgindex"
+EPD_CACHE_FILE="$SS_CACHE_PATH/eopkgdb"
 AS_CACHE_FILE="$SS_CACHE_PATH/appstream"
 PA_CACHE_FILE="$SS_CACHE_PATH/apackages"
 PI_CACHE_FILE="$SS_CACHE_PATH/ipackages"
@@ -73,126 +69,164 @@ UL_CACHE_FILE="$SS_CACHE_PATH/updatelst"
 UP_LOCK_FILE="$SS_CACHE_PATH/update_lock"
 HISTORY_FILE="$SS_CACHE_PATH/history"
 RB_HISTORY_FILE="$SS_CACHE_PATH/rb_history"
+SESSION_SETTINGS="$SS_CACHE_PATH/session_settings"
 
-#Supported Update Systems
-CORE_PKG_TYPE=""
-INST_PKG_MGRS=""
-HAS_FLATPAK=0
-HAS_SNAP=0
-HAS_DISTROBOX=0
-HAS_FIRMWARE=0
-HAS_FASTFETCH=0
-HAS_CUSTOM=0
 
-if [ "$SS_PKG_MGR" == "eopkg" ]; then
-    CORE_PKG_TYPE="eopkg"
-    INST_PKG_MGRS="eopkg"
+# Below create session settings only on initial ss launch not every time
 
-    # Determine eopkg repo setup.
-    # Need to determine names of active repos, if there is local, and if unstable is active
-    EOPKG_VARS=$(eopkg -N list-repo | awk '
-        BEGIN {
-            found_unstable = ""
-            found_stable = ""
-            found_local = 0
-            rcnt = 0  # Initialize counter inside awk
-        }
+GEN_APP_SETTINGS=0
 
-        /^[^ ]/ {
-            if ($0 ~ /\[active\]/) {
-                current_name = $1
-                is_active = 1
-            } else {
-                is_active = 0
+if [[ $# -eq 0 || ( $# -eq 1 && "$1" == "-cc" ) ]]; then
+    GEN_APP_SETTINGS=1
+elif [ ! -f "$SESSION_SETTINGS" ]; then
+    GEN_APP_SETTINGS=1
+fi
+
+if [ "$GEN_APP_SETTINGS" -eq 1 ]; then
+    #Supported Update Systems
+    CORE_PKG_TYPE=""
+    INST_PKG_MGRS=""
+    HAS_FLATPAK=0
+    HAS_SNAP=0
+    HAS_DISTROBOX=0
+    HAS_FIRMWARE=0
+    HAS_FASTFETCH=0
+    HAS_CUSTOM=0
+
+    if [ "$SS_PKG_MGR" == "eopkg" ]; then
+        CORE_PKG_TYPE="eopkg"
+        INST_PKG_MGRS="eopkg"
+
+        # Determine eopkg repo setup.
+        # Need to determine names of active repos, if there is local, and if unstable is active
+        EOPKG_VARS=$(eopkg -N list-repo | awk '
+            BEGIN {
+                found_unstable = ""
+                found_stable = ""
+                found_local = 0
+                rcnt = 0  # Initialize counter inside awk
             }
-        }
 
-        /^[ \t]/ {
-            if (is_active) {
-                url = $1
-                if (url ~ /\/unstable\//) {
-                    found_unstable = current_name
-                    rcnt++
-                } else if (url ~ /\/(shannon|polaris)\//) {
-                    found_stable = current_name
-                    rcnt++
-                } else if (url ~ /^file:/) {
-                    found_local = 1
+            /^[^ ]/ {
+                if ($0 ~ /\[active\]/) {
+                    current_name = $1
+                    is_active = 1
+                } else {
+                    is_active = 0
                 }
             }
-        }
 
-        END {
-            if (found_unstable != "") {
-                print "SS_SOLUS_REPO=\"" found_unstable "\""
-                print "SS_SOLUS_US=1"
-            } else if (found_stable != "") {
-                print "SS_SOLUS_REPO=\"" found_stable "\""
+            /^[ \t]/ {
+                if (is_active) {
+                    url = $1
+                    if (url ~ /\/unstable\//) {
+                        found_unstable = current_name
+                        rcnt++
+                    } else if (url ~ /\/(shannon|polaris)\//) {
+                        found_stable = current_name
+                        rcnt++
+                    } else if (url ~ /^file:/) {
+                        found_local = 1
+                    }
+                }
             }
 
-            if (found_local) {
-                print "SS_SOLUS_LR=1"
+            END {
+                if (found_unstable != "") {
+                    print "SS_SOLUS_REPO=\"" found_unstable "\""
+                    print "SS_SOLUS_US=1"
+                } else if (found_stable != "") {
+                    print "SS_SOLUS_REPO=\"" found_stable "\""
+                }
+
+                if (found_local) {
+                    print "SS_SOLUS_LR=1"
+                }
+
+                # Output the final calculated integer
+                if (rcnt > 0) {
+                    print "SS_SOLUS_RCNT=" rcnt
+                }
             }
+        ')
 
-            # Output the final calculated integer
-            if (rcnt > 0) {
-                print "SS_SOLUS_RCNT=" rcnt
-            }
-        }
-    ')
+        eval "$EOPKG_VARS"
 
-    eval "$EOPKG_VARS"
+        if [ "$SS_SOLUS_US" -eq 1 ]; then
+            INST_PKG_MGRS="${INST_PKG_MGRS} ${CSS_YELLOW}(Unstable)${CSS_RESET}"
+        fi
 
-    if [ "$SS_SOLUS_US" -eq 1 ]; then
-        INST_PKG_MGRS="${INST_PKG_MGRS} ${CSS_YELLOW}(Unstable)${CSS_RESET}"
+        # Check if local eopkg index file exists
+        if [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" ]; then
+            SS_EOPKG_FINDEX=1
+            SS_SOLUS_REPO_FILE="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml"
+        elif [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml.xz" ]; then
+            SS_SOLUS_REPO_FILE="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml.xz"
+        fi
+
+    elif [ "$SS_PKG_MGR" == "moss" ]; then
+        CORE_PKG_TYPE="moss"
+        INST_PKG_MGRS="moss"
+    fi
+    if command -v "flatpak" &> /dev/null; then
+        HAS_FLATPAK=1
+        INST_PKG_MGRS="$INST_PKG_MGRS, flatpak"
+    fi
+    if command -v "snap" &> /dev/null; then
+        HAS_SNAP=1
+        INST_PKG_MGRS="$INST_PKG_MGRS, snap"
+    fi
+    if command -v "distrobox" &> /dev/null; then
+        HAS_DISTROBOX=1
+    fi
+    if command -v "fwupdmgr" &> /dev/null; then
+        HAS_FIRMWARE=1
+    fi
+    if [ -n "$SS_CUST_UPDATE" ] && [ -f "$SS_CUST_UPDATE" ]; then
+        HAS_CUSTOM=1
     fi
 
-    # Check if local eopkg index file exists
-    if [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" ]; then
-        SS_EOPKG_FINDEX=1
-        SS_SOLUS_REPO_FILE="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml"
-    elif [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml.xz" ]; then
-        SS_SOLUS_REPO_FILE="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml.xz"
+
+    if command -v "fastfetch" &> /dev/null; then
+        SS_FASTFETCH_CFG="/usr/share/solseek/solseek_fastfetch_$SS_FASTFETCH.jsonc"
+
+        # Check if user has a custom ff config
+        if [ -n "$SS_FASTFETCH_CONF" ] && [ -f "$SS_FASTFETCH_CONF" ]; then
+            SS_FASTFETCH_CFG="$SS_FASTFETCH_CONF"
+        fi
+
+        if [ "$SS_FASTFETCH" -gt 0 ] && [ -f "$SS_FASTFETCH_CFG" ]; then
+            HAS_FASTFETCH=1
+        elif [ "$SS_FASTFETCH" -eq 0 ]; then
+            HAS_FASTFETCH=0
+        fi
     fi
 
-elif [ "$SS_PKG_MGR" == "moss" ]; then
-    CORE_PKG_TYPE="moss"
-    INST_PKG_MGRS="moss"
-fi
-if command -v "flatpak" &> /dev/null; then
-    HAS_FLATPAK=1
-    INST_PKG_MGRS="$INST_PKG_MGRS, flatpak"
-fi
-if command -v "snap" &> /dev/null; then
-    HAS_SNAP=1
-    INST_PKG_MGRS="$INST_PKG_MGRS, snap"
-fi
-if command -v "distrobox" &> /dev/null; then
-    HAS_DISTROBOX=1
-fi
-if command -v "fwupdmgr" &> /dev/null; then
-    HAS_FIRMWARE=1
-fi
-if [ -n "$SS_CUST_UPDATE" ] && [ -f "$SS_CUST_UPDATE" ]; then
-    HAS_CUSTOM=1
-fi
+    cat <<EOF > "$SESSION_SETTINGS"
+# Auto-generated configuration file
+CORE_PKG_TYPE="$CORE_PKG_TYPE"
+INST_PKG_MGRS="$INST_PKG_MGRS"
+HAS_FLATPAK="$HAS_FLATPAK"
+HAS_SNAP="$HAS_SNAP"
+HAS_DISTROBOX="$HAS_DISTROBOX"
+HAS_FIRMWARE="$HAS_FIRMWARE"
+HAS_FASTFETCH="$HAS_FASTFETCH"
+HAS_CUSTOM="$HAS_CUSTOM"
+SS_SOLUS_REPO_FILE="$SS_SOLUS_REPO_FILE"
+SS_EOPKG_FINDEX="$SS_EOPKG_FINDEX"
+SS_FASTFETCH_CFG="$SS_FASTFETCH_CFG"
+EOF
 
-
-if command -v "fastfetch" &> /dev/null; then
-    SS_FASTFETCH_CFG="/usr/share/solseek/solseek_fastfetch_$SS_FASTFETCH.jsonc"
-
-    # Check if user has a custom ff config
-    if [ -n "$SS_FASTFETCH_CONF" ] && [ -f "$SS_FASTFETCH_CONF" ]; then
-        SS_FASTFETCH_CFG="$SS_FASTFETCH_CONF"
+    # Check if systemd timer files are installed.
+    # Note this does not enable them, just makes sure they are there if needed.
+    if [ ! -f "$HOME/.config/systemd/user/solseek-uc.service" ] || [ ! -f "$HOME/.config/systemd/user/solseek-uc.timer" ]; then
+        mkdir -p "$HOME/.config/systemd/user"
+        cp -f /usr/share/solseek/solseek-uc.service $HOME/.config/systemd/user/
+        cp -f /usr/share/solseek/solseek-uc.timer $HOME/.config/systemd/user/
     fi
-
-    if [ "$SS_FASTFETCH" -gt 0 ] && [ -f "$SS_FASTFETCH_CFG" ]; then
-        HAS_FASTFETCH=1
-    elif [ "$SS_FASTFETCH" -eq 0 ]; then
-        HAS_FASTFETCH=0
-    fi
+else
+    . "$SESSION_SETTINGS"
 fi
-
 
 
 # Include Function Scripts
