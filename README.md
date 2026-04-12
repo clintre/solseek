@@ -50,7 +50,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 | **Additional Languages** | Looking for translators | 🔃 |
 | **Recipes** | Looking for translators | 1.? |
 | **moss support** | AerynOS & future Solus | 1.? |
-| **tmux support** | Enhance UX | 1.0 |
+| **tmux support** | Enhance UX | 2.x |
 
 <hr>
 
