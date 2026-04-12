@@ -17,6 +17,7 @@ else
 fi
 
 
+
 # Defaults
 SS_LANG=${LANG:0:2}
 . "$SS_DATA_PATH/core/defaults"
@@ -26,6 +27,9 @@ if [ -f "$HOME/.config/solseek/config" ]; then
     . "$HOME/.config/solseek/config"
     SS_LOCAL_CFG=1
 fi
+
+# Include the default lang file as fallback
+. "$SS_DATA_PATH/lang/en.ini"
 
 # If alternate language is set, check to see if it exists
 if [ "$SS_LANG" != "en" ] && [ -f "$SS_DATA_PATH/lang/$SS_LANG.ini" ]; then
@@ -38,9 +42,6 @@ if [ "$SS_ASSUMEYES" -eq 1 ]; then
 else
     SS_ASSUMEYES=""
 fi
-
-# Include the default lang file as fallback
-. "$SS_DATA_PATH/lang/en.ini"
 
 
 # Load theme
