@@ -13,8 +13,13 @@ if [ -n "$2" ]; then
         hr "w50"
     fi
     echo -e "> $pkg_status\n"
+
+    GETEI=""
+    if [ "$1" == "-ssie" ]; then
+        GETEI="ei"
+    fi
     #get_pkg_info "$2" | fold -s -w 70 2>/dev/null
-    get_pkg_info "$2" | sed 's/^[[:space:]]*//' | fold -s -w 80 2>/dev/null
+    get_pkg_info "$2" "$GETEI" | sed 's/^[[:space:]]*//' | fold -s -w 80 2>/dev/null
 else
     echo "$MSG_GEN_SEL_ITEM"
 fi

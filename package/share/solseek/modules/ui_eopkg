@@ -8,7 +8,7 @@ else
     pkg_list_type="${ACT_MAIN_LISTAPKGS}"
 fi
 
-pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="${MSG_PKG_PROMPT}: " --header="${MSG_PKG_HEADER} - ${pkg_list_type}" --preview 'solseek -ssi {1} {+}')
+pkg=$(printf "%b" "$app_list" | pkg_fzf --prompt="${MSG_PKG_PROMPT}: " --header="${MSG_PKG_HEADER} - ${pkg_list_type}" --preview 'solseek -ssi {1} {+}' --bind 'ctrl-e:change-preview(solseek -ssie {1} {+})' --bind 'focus:change-preview(solseek -ssi {1} {+})')
 
 # Return to main menu
 [ -z "$pkg" ] && exit 0
