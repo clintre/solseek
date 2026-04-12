@@ -188,13 +188,21 @@ fp_cache(){
 
 get_pkg_info(){
     if [ "$SS_PKG_MGR" == "eopkg" ]; then
-        if [[ -n "$EPD_CACHE_FILE" ]]; then
+
+        if [ "$2" == "ei" ]; then
+            echo -e "${CSS_CYANB}EOPKG INFO${CSS_RESET}\n"
+            ss_clean_of
+            eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
+
+        elif [[ -n "$EPD_CACHE_FILE" ]]; then
             awk -v RS='\x1e' -v id="ID:$1\n" '
                 index($0, id) == 1 {
                     print substr($0, length(id) + 1)
                     exit
                 }
             ' "$EPD_CACHE_FILE"
+            echo ""
+            echo -e "💡 ${CSS_YELLOWB}ctrl+e ${CSS_YELLOW}eopkg info${CSS_RESET}"
         else
             ss_clean_of
             sleep 0.5 && eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
