@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="1.2.5"
+SS_VERSION="1.2.8"
 SS_DATA_PATH="/usr/share/solseek"
 
 # Boot / ENV
@@ -40,7 +40,7 @@ fi
 if [ "$1" == "-ssh" ]; then
     . "${SS_DATA_PATH}/modules/panel-help"
     exit 0
-elif [ "$1" == "-ssi" ]; then
+elif [ "$1" == "-ssi" ] || [ "$1" == "-ssie" ]; then
     . "${SS_DATA_PATH}/modules/panel-pkginfo"
     exit 0
 elif [ "$1" == "-ssfi" ]; then
@@ -70,7 +70,7 @@ elif [ "$1" == "subact" ]; then
 
 elif [ "$1" == "-cc" ]; then
     # force clears all cache files to start clean
-    rm -f "$HOME"/.cache/solseek/*
+    rm -rf "$HOME"/.cache/solseek/*
 elif [ "$1" == "fpasc" ]; then
     flatpak update --appstream &> /dev/null
     appstreamcli refresh --force &> /dev/null
