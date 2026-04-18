@@ -35,6 +35,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
   - Polish
   - Slovenian
   - Spanish
+  - Brazil Portuguese
 
 <hr>
 
