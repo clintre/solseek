@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="1.2.8"
+SS_VERSION="1.2.10"
 SS_DATA_PATH="/usr/share/solseek"
 
 # Boot / ENV
