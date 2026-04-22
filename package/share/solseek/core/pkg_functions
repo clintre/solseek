@@ -72,8 +72,7 @@ check_updates(){
 
             # Make sure we are getting the latest
             pkgcli refresh force &> /dev/null
-            ##UPCNT_SOLUS=`pkcon get-updates --plain | grep -E -c "^(Security|Normal|Bugfix|Important)"`
-            UPCNT_SOLUS=`pkgcli list-updates --quiet | grep -iE -c "^(security|normal|bugfix|important)"`
+            UPCNT_SOLUS=`pkgcli list-updates --quiet | grep -c "."`
 
             if [ "$2" == "force" ]; then
                 echo -e "${CSS_CYANB}█ ${CSS_CYAN}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}\n${CSS_NBSP}${CSS_NBSP}${UPCNT_SOLUS} ${MSG_GEN_AVAILABLE}"
