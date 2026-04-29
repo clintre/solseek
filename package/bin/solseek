@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="1.2.11"
+SS_VERSION="1.3.0"
 SS_DATA_PATH="/usr/share/solseek"
 
 # Boot / ENV
@@ -89,6 +89,41 @@ elif [ -n "$1" ]; then
         else
             solseek -ssu up_eo=1 up_fp=1 up_sn=1
         fi
+        exit 0
+    elif [ "$1" = "sr" ] || [ "$1" = "search" ]; then
+        shift
+        PKSR=true
+        FPSR=false
+        SRARGS=()
+
+        for arg in "$@"; do
+            if [[ "$arg" == "-f" ]]; then
+                FPSR=true
+                PKSR=false
+            elif [[ "$arg" == "-a" ]]; then
+                FPSR=true
+            elif [[ -n "$arg" ]]; then
+                SRARGS+=("$arg")
+            fi
+        done
+
+        if $PKSR; then
+            hr "w30" "cyan"
+            echo -e "${CSS_CYANB}█ EOPKG ${MSG_GEN_RESULTS} ${CSS_RESET}"
+            hr "w30" "cyan"
+            eopkg sr "${SRARGS[@]}"
+            echo ""
+        fi
+
+        if $FPSR; then
+            hr "w30" "blue"
+            echo -e "${CSS_BLUEB}█ FLATPAK ${MSG_GEN_RESULTS} ${CSS_RESET}"
+            hr "w30" "blue"
+            flatpak search --columns=application,name,description "${SRARGS[@]}"
+            echo ""
+        fi
+
+
         exit 0
     fi
     ${SS_PKG_MGR} "$@"
