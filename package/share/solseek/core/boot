@@ -28,6 +28,12 @@ if [ -f "$HOME/.config/solseek/config" ]; then
     SS_LOCAL_CFG=1
 fi
 
+if [ "$SS_EOPKG_DCACHE" -eq 1 ]; then
+    SS_EOPKG_LCACHE=0
+else
+    SS_EOPKG_LCACHE=1
+fi
+
 # Include the default lang file as fallback
 . "$SS_DATA_PATH/lang/en.ini"
 

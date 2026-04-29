@@ -146,13 +146,36 @@ fp_cache(){
             # This updates the appstream catalog for flatpaks
             solseek fpasc &
 
-            flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE"
+            #flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE"
+            flatpak list --app --columns=application,name,description | awk -F'\t' '{
+                # Skip any empty lines
+                if ($1 == "") next
 
-            flatpak remote-ls --"$SS_FLATPAK_REPTYPE" flathub --columns=application,name | \
-            awk '!seen[$1]++' | \
-            grep -v 'org\.freedesktop\.Platform\.GL32\.nvidia\|org\.freedesktop\.Platform\.GL\.nvidia' | \
-            sed -E 's/\t(.*)/|◯ \1/' | \
-            sort -t '|' -k 2 > "$FA_CACHE_FILE"
+                id = $1
+                name = $2
+                desc = $3
+
+                # Format: application_id | colored ⬤ name | description
+                print id "|\033[32m⬤ " name "\033[0m|" desc
+            }' | sort -t '|' -k 2 > "$FI_CACHE_FILE"
+
+            flatpak remote-ls --"$SS_FLATPAK_REPTYPE" flathub --columns=application,name,description | awk -F'\t' '{
+                id = $1
+                name = $2
+                desc = $3
+
+                # Skip any empty lines
+                if (id == "") next
+
+                # Deduplicate based on Application ID (replaces your first awk command)
+                if (seen[id]++) next
+
+                # Filter out Nvidia platform packages (replaces your grep -v command)
+                if (id ~ /org\.freedesktop\.Platform\.GL32?\.nvidia/) next
+
+                # Format: application_id | ◯ name | description
+                print id "|" "◯ " name "|" desc
+            }' | sort -t '|' -k 2 > "$FA_CACHE_FILE"
 
             # If the user has no flatpaks installed, lets create an empty entry for FZF
             if [ ! -s "$FI_CACHE_FILE" ]; then
@@ -246,49 +269,110 @@ eopkg_cache(){
         echo "$MSG_GEN_PCACHE"
         rm -f "$PI_CACHE_FILE"
         rm -f "$PA_CACHE_FILE"
-        rm -f "$EPD_CACHE_FILE"
         rm -f "$RB_HISTORY_FILE"
         rm -f "$HISTORY_FILE"
 
         # Generate text based info db file
         if [[ -n "$SS_SOLUS_REPO_FILE" ]]; then
-            $SS_DATA_PATH/helpers/eopkg-info.py "$SS_SOLUS_REPO_FILE" > "$EPD_CACHE_FILE" &
+            if [[ ! -f "$EPD_CACHE_FILE" || "$EPD_CACHE_FILE" -ot "$SS_SOLUS_REPO_FILE" ]]; then
+                "$SS_DATA_PATH/helpers/eopkg-info.py" "$SS_SOLUS_REPO_FILE" > "$EPD_CACHE_FILE"
+            fi
         fi
 
         TMP_PGK_FILE=$(mktemp)
         # Setup active Solus eopkg repo if using local cache. If the file is missing revert to online
         if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
-            IDX_PATH="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml"
-
-            if [ ! -f "$IDX_PATH" ]; then
-                ## if we have the xz version cp it local, extract and use that
-                if [ -f "$IDX_PATH.xz" ]; then
-                    #TMP_IDX_FILE=$(mktemp)
-                    cp -f "$IDX_PATH.xz" "$SS_CACHE_PATH"
-                    unxz -f "$SS_CACHE_PATH/eopkg-index.xml.xz"
-                    IDX_PATH="$SS_CACHE_PATH/eopkg-index.xml"
-                else
-                    SS_EOPKG_LCACHE=0
-                    echo -e "$MSG_GEN_LCMISSING.\n"
-                fi
+            if [ ! -f "$EPD_CACHE_FILE" ]; then
+                SS_EOPKG_LCACHE=0
+                echo -e "$MSG_GEN_LCMISSING.\n"
             fi
         fi
 
-        eopkg li 2>/dev/null | awk '{print $1 "|" "\033[32m⬤ " $1 "\033[0m"}' > "$PI_CACHE_FILE"
+        eopkg li 2>/dev/null | awk '{
+            pkg = $1
+
+            # Find the position of the " - " separator
+            idx = index($0, " - ")
+
+            if (idx > 0) {
+                # Extract everything after the " - "
+                summary = substr($0, idx + 3)
+
+                # Trim any lingering leading/trailing whitespace
+                sub(/^[[:space:]]+/, "", summary)
+                sub(/[[:space:]]+$/, "", summary)
+            } else {
+                summary = ""
+            }
+
+            # Print in the requested format: id | colored ⬤ name | summary
+            print pkg "|\033[32m⬤ " pkg "\033[0m|" summary
+        }' > "$PI_CACHE_FILE"
 
         if [ "$SS_EOPKG_LCACHE" -eq 1 ]; then
-            awk -F'[<>]' '/<Package>/ {in_pkg=1} in_pkg && $2=="Name" && length($3)>0 {
-            val=$3;
-            gsub(/[[:cntrl:]]/, "", val);       # Remove invisible control chars (like \r)
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", val); # Trim leading/trailing whitespace
-            if (length(val) > 0) print val "|" "◯ " val;
-            in_pkg=0
-            }' "$IDX_PATH" | sort -u > "$PA_CACHE_FILE"
+            awk '
+                BEGIN {
+                    RS="\x1e"
+                }
+                {
+                    pkg = ""
+                    summary = ""
 
+                    # Split the current chunk into individual lines
+                    n = split($0, lines, "\n")
+                    for (i=1; i<=n; i++) {
+                        line = lines[i]
+
+                        # Strip ANSI color codes from the line for clean text matching
+                        gsub(/\x1b\[[0-9;]*m/, "", line)
+
+                        # Extract the Package ID
+                        if (line ~ /^ID:/) {
+                            pkg = substr(line, 4)
+                            gsub(/[[:cntrl:]]/, "", pkg)
+                            gsub(/^[[:space:]]+|[[:space:]]+$/, "", pkg)
+                        }
+                        # Extract the Summary
+                        else if (line ~ /^Summary:/) {
+                            summary = substr(line, 10) # Grab everything after "Summary: "
+                            gsub(/[[:cntrl:]]/, "", summary)
+                            gsub(/^[[:space:]]+|[[:space:]]+$/, "", summary)
+                        }
+                    }
+
+                    # If we successfully grabbed a package ID from this block, print the format
+                    if (length(pkg) > 0) {
+                        print pkg "|" "◯ " pkg "|" summary
+                    }
+                }' "$EPD_CACHE_FILE" | sort -u > "$PA_CACHE_FILE"
             awk -F'|' 'FNR==NR {seen[$1]; next} !($1 in seen)' "$PI_CACHE_FILE" $PA_CACHE_FILE > "$TMP_PGK_FILE"
 
         else
-            eopkg la -U -N 2>/dev/null | awk 'NR>2 {print $1 "|" "◯ " $1 }' > "$TMP_PGK_FILE"
+
+           eopkg la -U -N 2>/dev/null | awk '
+            NR>2 {
+                pkg = $1
+
+                # Skip any empty lines that might get parsed
+                if (length(pkg) == 0) next
+
+                # Find the position of the " - " separator
+                idx = index($0, " - ")
+
+                if (idx > 0) {
+                    # Extract everything after the " - "
+                    summary = substr($0, idx + 3)
+
+                    # Trim any lingering leading/trailing whitespace
+                    sub(/^[[:space:]]+/, "", summary)
+                    sub(/[[:space:]]+$/, "", summary)
+                } else {
+                    summary = ""
+                }
+
+                # Print in the requested format: id | ◯ name | summary
+                print pkg "|" "◯ " pkg "|" summary
+            }' > "$TMP_PGK_FILE"
         fi
 
         cat "$PI_CACHE_FILE" "$TMP_PGK_FILE" | sort > "$PA_CACHE_FILE"

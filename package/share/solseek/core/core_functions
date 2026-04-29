@@ -190,7 +190,7 @@ pkg_fzf() {
   fzf --ansi\
       --color="$SS_FZF_COLORS" \
       --delimiter='|' \
-      --with-nth=2 \
+      --with-nth='{2}' \
       --nth=1 \
       --marker='✓ ' \
       --pointer='>' \

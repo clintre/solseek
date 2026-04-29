@@ -104,8 +104,36 @@ MENU_DRIVERS="A_BACK|< ${ACT_GEN_BACK}
 A_BLANKN|$(mst "bbr")GPU$(mst "rst")
 nvidia|- Nvidia GPU
 A_BLANK|$(mst "bbr")${MSG_GEN_PRINTER} / ${MSG_GEN_SCANNER}$(mst "rst")
-brlaser|- Brother ${MSG_GEN_PRINTER}
+brlaser|- Brother Laser
 brscan4|- Brother ${MSG_GEN_SCANNER}
+brother-dcp135c|- Brother DCP-135C
+brother-dcp1510|- Brother DCP-1510/1512
+brother-dcp1610w|- Brother DCP-1610W
+brother-dcp7010|- Brother DCP-7010
+brother-dcp7057|- Brother DCP-7057
+brother-dcp7060d|- Brother DCP-7060D
+brother-dcpj4120dw|- Brother DCP-J4120DW
+brother-dcpl2520dw|- Brother DCP-L2520DW
+brother-dcpl2530dw|- Brother DCP-L2530DW/L2532DW
+brother-dcpl2540dw|- Brother DCP-L2540DW
+brother-hl1110|- Brother HL-1110
+brother-hl1210w|- Brother HL-1210/1212W
+brother-hl2220|- Brother HL-2220
+brother-hll2300d|- Brother HL-L2300D
+brother-hll2315dw|- Brother HL-L2315DW
+brother-hll2320d|- Brother HL-L2320D
+brother-hll2360d|- Brother HL-L2360D/L2360DW
+brother-hll2375dw|- Brother HL-L2375DW
+brother-hll2390dw|- Brother HL-L2390DW
+brother-hll5100dn|- Brother HL-L5100DN
+brother-mfc1910w|- Brother MFC-1910W.
+brother-mfc440cn|- Brother MFC-440CN
+brother-mfc9130cw|- Brother MFC-9130CW
+brother-mfc9330cdw|- Brother MFC-9330CDW
+brother-mfcj220|- Brother MFC-J220
+brother-mfcj480dw|- Brother MFC-J480DW
+brother-mfcl2700dw|- Brother MFC-L2700DW/L2703DW
+brother-mfcl2740dw|- Brother MFC-L2740DW
 canon-ufriilt-common|- Canon
 dymo-cups-drivers|- Dymo
 epson-inkjet-printer-escpr|- Epson
