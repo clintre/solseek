@@ -49,11 +49,11 @@ SS_DISABLE_UPCHK=0
 ## 0 = disabled | 1 = enabled (default) | 2 = service checks only
 SS_NOTIFCATIONS=1
 
-## Use local eopkg-index.xml file for package listing instead of online
-## Warning: This is currently experimental
-## 0 = disabled (default) | 1 = enabled
-## Note: If enabled and the eopkg-index.xml it will fallback to online
-SS_EOPKG_LCACHE=0
+## Disable using local eopkg index file for cache
+## Warning: This will slow down the loading
+## 0 = local cache enabled (default) | 1 = disable
+## Note: If eopkg-index.xml is missing it will fallback to online
+SS_EOPKG_DCACHE=0
 
 ## Custom Update Script
 ## Allows user to use a custom bash script for updating other tools, like brew and AppImages
