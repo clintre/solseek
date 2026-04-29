@@ -51,12 +51,17 @@ if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
     hr "w30" "cyan"
     echo -e "${MSG_GEN_CHECKUPDS}\n"
 
-    UPGRADE_LIST=$(sudo env LC_ALL=C eopkg up -n 2>/dev/null)
-    #Check the dry-run list for our critical packages to disable soft reboot option
-    if echo "$UPGRADE_LIST" | grep -qE '\b(nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
+    #UPGRADE_LIST=$(sudo env LC_ALL=C eopkg up -n 2>/dev/null)
+    UPGRADE_LIST=$(env LC_ALL=C eopkg lu 2>/dev/null)
+    if echo "$UPGRADE_LIST" | grep -qE '^(nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
         show_softreboot=0
         reboot_msg="${MSG_GEN_REBOOTMSG}"
     fi
+    #Check the dry-run list for our critical packages to disable soft reboot option
+    #if echo "$UPGRADE_LIST" | grep -qE '\b(nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
+    #    show_softreboot=0
+    #    reboot_msg="${MSG_GEN_REBOOTMSG}"
+    #fi
 
     sudo eopkg up $SS_ASSUMEYES
 fi

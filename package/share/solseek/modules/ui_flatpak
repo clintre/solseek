@@ -16,7 +16,8 @@ pkg=$(printf "%b" "${app_list}" | pkg_fzf --prompt="${MSG_PKG_PROMPT}: " --heade
 if [[ "$pkg" == Empty* ]]; then
     continue
 fi
-package=$(echo "$pkg" | grep -o '[^ ]*|' | tr -d '|')
+
+package=$(echo "$pkg" | awk -F'|' '{print $1}' | sed 's/[^a-zA-Z0-9._+:-]//g')
 
 if grep -q "${package}|" "${FI_CACHE_FILE}"; then
     pkg_status="${MSG_GEN_INSTALLED}"

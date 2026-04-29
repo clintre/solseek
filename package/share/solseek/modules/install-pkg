@@ -4,6 +4,7 @@ read -p "$MSG_GEN_PRESSENTER..."
 else
     ccache=0
     pkgvars="${3//$'\n'/ }"
+
     if [ "$2" == "install" ]; then
         pkg_mgmt_act="it"
         pkg_mgmt_title="$ACT_PKG_INSTALL: $pkgvars"

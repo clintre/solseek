@@ -1,15 +1,21 @@
 if [ "$2" == "A_BACK" ]; then
     echo -e "⬅️ ${CSS_BOLDBRIGHT}${ACT_GEN_BACK}${CSS_RESET}"
+    hr "w30"
+    echo -e "${MSG_PNL_DRIVERS_BODY}"
     exit 0
-fi
-if [ "$2" != "A_BLANK" ] && [ "$2" != "A_BLANKN" ]; then
+elif [ "$2" == "A_BLANK" ] || [ "$2" == "A_BLANKN" ]; then
+    echo -e "${MSG_PNL_DRIVERS_TITLE}"
+    hr "w30"
+    echo -e "${MSG_PNL_DRIVERS_BODY}"
+    exit 0
+else
     echo -e "${MSG_INFO_EDITMVTOP}"
     hr "w30"
 fi
 
 if [ "$2" == "nvidia" ]; then
     check_nvidia_support "info"
-elif [ "$2" != "A_BLANK" ] && [ "$2" != "A_BLANKN" ]; then
+else
     if grep -q "$2|" "$PI_CACHE_FILE"; then
         echo -e "${MSG_GEN_CURSTATUS}: ${CSS_GREEN}${MSG_GEN_INSTALLED}${CSS_RESET}"
     else
