@@ -163,7 +163,13 @@ if [ "$GEN_APP_SETTINGS" -eq 1 ]; then
             INST_PKG_MGRS="${INST_PKG_MGRS} ${CSS_YELLOW}(Unstable)${CSS_RESET}"
         fi
 
-        # Check if local eopkg index file exists
+        # Check if neither the XML nor the XZ index exists
+        #if [[ ! -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" && \
+        #    ! -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml.xz" ]]; then
+        #
+        #    echo -e "Index missing for $SS_SOLUS_REPO. Update required to continue..."
+        #    sudo eopkg ur -f "$SS_SOLUS_REPO"
+        #fi
         if [ -f "/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml" ]; then
             SS_EOPKG_FINDEX=1
             SS_SOLUS_REPO_FILE="/var/lib/eopkg/index/$SS_SOLUS_REPO/eopkg-index.xml"
