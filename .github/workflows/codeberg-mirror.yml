@@ -1,0 +1,20 @@
+name: Mirror to Codeberg
+
+on:
+  push:
+  delete:
+
+jobs:
+  codeberg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetches all history for all branches and tags
+
+      - name: Push to Codeberg
+        run: |
+          git remote add codeberg https://clintre:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/clintre/solseek.git
+          git push codeberg --all --force
+          git push codeberg --tags --force
