@@ -1,0 +1,17 @@
+# this is experimental right now, do not use doesn't work yet with timer
+
+NOTID="11$(date +%H%M)"
+
+NOTIACT=$(notify-send \
+  --app-name="Solseek" \
+  --urgency=normal \
+  --replace-id=$NOTID \
+   --expire-time=25000 \
+  -i solseek \
+  --action="open=$MSG_GEN_OPEN Solseek" \
+  "$MSG_UPD_AVAIL_UPD:" \
+  "$2")
+
+if [ "$NOTIACT" = "open" ]; then
+    gio launch /usr/share/applications/Solseek.desktop > /tmp/solseek-final.log 2>&1 & disown
+fi
