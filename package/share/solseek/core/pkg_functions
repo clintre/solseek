@@ -68,7 +68,7 @@ check_updates(){
             UPCNT_FP=0
             UPMSG_FP=""
             NOTI_LVL="normal"
-            NOTI_ID=$(shuf -i 9000-11000 -n 1)
+            NOTI_ID="11$(date +%H%M)"
             NOTI_TIME=10000
 
             # Make sure we are getting the latest
@@ -95,7 +95,7 @@ check_updates(){
             UPCNT_TTL=$((UPCNT_SOLUS + UPCNT_FP))
 
             if [ "$UPCNT_SOLUS" -gt 0 ]; then
-                NOTI_TIME=30000
+                NOTI_TIME=20000
             fi
 
             echo "TTL_UPDCNT=$UPCNT_TTL" >> "$UP_CACHE_FILE"
@@ -120,8 +120,21 @@ check_updates(){
                     fi
                 fi
                 if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
-                    UPMSG="$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
-                    notify-send --app-name="Solseek" --urgency="$NOTI_LVL" --replace-id=$NOTI_ID --expire-time="$NOTI_TIME" -i solseek "$MSG_UPD_AVAIL_UPD: $UPMSG"
+
+                    # experimental button
+                    #solseek -ssn "$UPMSG" > /dev/null 2>&1 & disown
+                    notify-send \
+                    --app-name="Solseek" \
+                    --urgency=normal \
+                    --replace-id=$NOTI_ID \
+                    --expire-time=25000 \
+                    -i solseek \
+                    "" \
+                    "$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
+
+                    if [ "$2" == "service" ]; then
+                        "$SS_DATA_PATH/helpers/solseek-tray.py" "$MSG_UPD_AVAIL_UPD" "$MSG_GEN_OPEN" "$MSG_GEN_DISMISS"
+                    fi
                 fi
             fi
         fi
