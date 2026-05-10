@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="1.3.3"
+SS_VERSION="1.4.0"
 SS_DATA_PATH="/usr/share/solseek"
 
 # Boot / ENV
@@ -33,7 +33,7 @@ if [ "$1" == "-cu" ]; then
     if [ "${SS_NOTIFCATIONS}" -eq 2 ]; then
         SS_NOTIFCATIONS=1
     fi
-    check_updates "system"
+    check_updates "system" "service"
     exit 0
 fi
 # Internal calls
@@ -60,6 +60,9 @@ elif [ "$1" == "-ssd" ]; then
     exit 0
 elif [ "$1" == "-ssu" ]; then
     . "${SS_DATA_PATH}/modules/update-runner"
+    exit 0
+elif [ "$1" == "-ssn" ]; then
+    . "${SS_DATA_PATH}/modules/notify"
     exit 0
 elif [ "$1" == "applist" ]; then
     . "${SS_DATA_PATH}/modules/list-packages"
