@@ -1,5 +1,5 @@
 #!/bin/bash
-SS_VERSION="1.4.1"
+SS_VERSION="1.4.5"
 SS_DATA_PATH="/usr/share/solseek"
 
 # Boot / ENV
@@ -36,6 +36,7 @@ if [ "$1" == "-cu" ]; then
     check_updates "system" "service"
     exit 0
 fi
+
 # Internal calls
 if [ "$1" == "-ssh" ]; then
     . "${SS_DATA_PATH}/modules/panel-help"
@@ -74,6 +75,9 @@ elif [ "$1" == "subact" ]; then
 elif [ "$1" == "-cc" ]; then
     # force clears all cache files to start clean
     rm -rf "$HOME"/.cache/solseek/*
+    rm -f "$SS_LASTNOTI"
+    rm -f "$SESSION_SETTINGS"
+
 elif [ "$1" == "fpasc" ]; then
     flatpak update --appstream &> /dev/null
     appstreamcli refresh --force &> /dev/null
@@ -178,9 +182,9 @@ fi
 pkill -f "solseek-tray.py" || true
 # Launch main menu with a clean cache
 clean_cache "regen" "update"
-clear
-# Start Interface
 
+# Start Interface
+clear
 while true; do
     clear
     . "${SS_DATA_PATH}/modules/ui_main"
