@@ -43,7 +43,7 @@ case "$PNLKEY" in
         ss_info_pane "about" ;;
     "AMM_WELC")
         if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
-            upd_msg
+            upd_msg "wait"
         fi
         hrclr=201
         if [ "${HAS_FASTFETCH}" -eq 1 ]; then
@@ -52,10 +52,21 @@ case "$PNLKEY" in
             ss_fetch 2>/dev/null
         fi
         echo ""
-        ss_info_pane "welcome"
-        echo ""
         ss_life
-        echo -e "${CSS_BOLDBRIGHT}${MSG_GEN_PKGMGRS}:${CSS_RESET} ${INST_PKG_MGRS}"
+        hr "w50"
+        echo -e "📦 ${CSS_BOLDBRIGHT}$ACT_INFO_LREPO${CSS_RESET}"
+        echo -e "${CSS_CYANB}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}"
+        eopkg lr -N
+        echo ""
+        if [ "$HAS_FLATPAK" -eq 1 ]; then
+            echo -e "${CSS_BLUEB}$MSG_UPD_FLATPAK${CSS_RESET}"
+            flatpak remotes
+            echo ""
+        fi
+        echo -e "📦 ${CSS_BOLDBRIGHT}${MSG_GEN_PKGMGRS}:${CSS_RESET} ${INST_PKG_MGRS}"
+        hr "w50"
+        ss_info_pane "welcome"
+
       ;;
     "A_BACK")
         echo -e "⬅️ ${CSS_BOLDBRIGHT}${MSG_GEN_BACK}${CSS_RESET}" ;;
