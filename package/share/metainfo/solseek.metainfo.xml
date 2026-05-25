@@ -1,23 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.clintre.solseek</id>
-  <launchable type="desktop-id">Solseek.desktop</launchable>
-  <name>Solseek</name>
-  <summary>A TUI Package Manager for Solus</summary>
-  <metadata_license>CC0-1.0</metadata_license>
-  <project_license>GPL-3.0</project_license>
-  <categories>
-    <category>Utility</category>
-  </categories>
-  <url type="homepage">https://github.com/clintre/solseek</url>
-  <url type="bugtracker">https://github.com/clintre/solseek/issues</url>
-  <description>
-    <p>A TUI Package Manager for Solus</p>
-    <p>Solseek is a simple terminal user interface that allows you to browse, search, and manage Solus and Flatpak packages. Packages can be installed, reinstalled, updated, verified, and removed through the interface.</p>
-  </description>
-  <screenshots>
-    <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png</image>
-    </screenshot>
-  </screenshots>
+    <id>io.github.clintre.solseek</id>
+    
+    <launchable type="desktop-id">Solseek.desktop</launchable>
+    
+    <name>Solseek</name>
+    <developer id="io.github.clintre">
+        <name>clintre</name>
+    </developer>
+    
+    <summary>A TUI Package Manager for Solus</summary>
+    
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-3.0-or-later</project_license> 
+    
+    <categories>
+        <category>Utility</category>
+        <category>System</category>
+    </categories>
+    
+    <url type="homepage">https://solseek.org</url>
+    <url type="bugtracker">https://github.com/clintre/solseek/issues</url>
+    
+    <description>
+        <p>Solseek is a simple terminal user interface that allows you to browse, search, and manage packages and drivers for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It provides a wrapper for both eopkg and flatpak to provide extended capabilities.</p>
+        <p>Features:</p>
+        <ul>
+            <li>Complete app store similar to Discover or Gnome Software</li>
+            <li>Works as a desktop app or from terminal</li>
+            <li>Navigate and use with keyboard and/or mouse</li>
+            <li>Select and install multiple packages at once</li>
+            <li>Manage system updates for installed tools such as; eopkg, flatpak, snap, distrobox, and fwupd</li>
+            <li>Rollback system to help issues brought on by updates or installs</li>
+            <li>Driver manager for Nvidia and printer drivers (more coming)</li>
+            <li>Verify all packages</li>
+            <li>View and export installed packages for eopkg and flatpak (all and/or user installed)</li>
+            <li>Recall (rollback) system package actions</li>
+            <li>Update notification service (even when not running)</li>
+            <li>View system configurations</li>
+            <li>Quick update both system packages and flatpak using solseek up</li>
+        </ul>
+    </description>
+    
+    <screenshots>
+        <screenshot type="default">
+            <image type="source">https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png</image>
+        </screenshot>
+    </screenshots>
+    
+    <content_rating type="oars-1.1" />
+    
+    <releases>
+        <release version="1.0.0" date="2026-05-25" />
+    </releases>
 </component>
