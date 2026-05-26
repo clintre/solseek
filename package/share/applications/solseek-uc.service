@@ -1,0 +1,9 @@
+[Unit]
+Description=Run solseek update check
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/solseek -cu
+
+[Install]
+WantedBy=default.target
