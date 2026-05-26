@@ -64,19 +64,22 @@ ISSA=0
 # Cache settings
 # Cache expires time in minutes - will move to config file later to override this if set
 SS_CACHE_EXPIRES=20
-IDX_CACHE_FILE="$SS_CACHE_PATH/eopkgindex"
-EPD_CACHE_FILE="$SS_CACHE_PATH/eopkgdb"
-AS_CACHE_FILE="$SS_CACHE_PATH/appstream"
-PA_CACHE_FILE="$SS_CACHE_PATH/apackages"
-PI_CACHE_FILE="$SS_CACHE_PATH/ipackages"
 FA_CACHE_FILE="$SS_CACHE_PATH/aflatpaks"
-FI_CACHE_FILE="$SS_CACHE_PATH/iflatpaks"
-UP_CACHE_FILE="$SS_CACHE_PATH/updatemsg"
-UL_CACHE_FILE="$SS_CACHE_PATH/updatelst"
-UP_LOCK_FILE="$SS_CACHE_PATH/update_lock"
+PA_CACHE_FILE="$SS_CACHE_PATH/apackages"
+EPD_CACHE_FILE="$SS_CACHE_PATH/eopkgdb"
+IDX_CACHE_FILE="$SS_CACHE_PATH/eopkgindex"
 HISTORY_FILE="$SS_CACHE_PATH/history"
-RB_HISTORY_FILE="$SS_CACHE_PATH/rb_history"
-SESSION_SETTINGS="$SS_CACHE_PATH/session_settings"
+FI_CACHE_FILE="$SS_CACHE_PATH/iflatpaks"
+PI_CACHE_FILE="$SS_CACHE_PATH/ipackages"
+
+# Small short lifespan goes in/tmp
+AS_CACHE_FILE="/tmp/ss_appstream"
+SS_LASTNOTI="/tmp/ss_lastnoti"
+RB_HISTORY_FILE="/tmp/ss_rb_history"
+SESSION_SETTINGS="/tmp/ss_session"
+UP_LOCK_FILE="/tmp/ss_update_lock"
+UP_CACHE_FILE="/tmp/ss_updatemsg"
+UL_CACHE_FILE="/tmp/ss_updatelst"
 
 
 # Below create session settings only on initial ss launch not every time
@@ -205,7 +208,7 @@ if [ "$GEN_APP_SETTINGS" -eq 1 ]; then
 
         # Check if user has a custom ff config
         if [ -n "$SS_FASTFETCH_CONF" ] && [ -f "$SS_FASTFETCH_CONF" ]; then
-            SS_FASTFETCH_CFG="$SS_FASTFETCH_CONF"
+            SS_FASTFETCH_CFG="$SS_FASTFETCH_CONF" -e solseek
         fi
 
         if [ "$SS_FASTFETCH" -gt 0 ] && [ -f "$SS_FASTFETCH_CFG" ]; then

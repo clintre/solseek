@@ -5,6 +5,14 @@ upd_msg(){
     UPCNT_FP=0
     UPMSG="${CSS_BOLDBRIGHT}${MSG_UPD_AVAIL_UPD}: ${MSG_UPD_NONE}${CSS_RESET}"
 
+    if [ "$1" == "wait" ]; then
+        TIMEOUT=5 # Maximum seconds to wait to prevent an infinite hang
+        while [ -f "$UP_LOCK_FILE" ] && [ "$TIMEOUT" -gt 0 ]; do
+            sleep 1
+            ((TIMEOUT--))
+        done
+    fi
+
     if [ ! -f "$UP_LOCK_FILE" ] && [ -f "$UP_CACHE_FILE" ]; then
         . "$UP_CACHE_FILE"
     fi
@@ -38,7 +46,7 @@ upd_msg(){
               if [ "$FLATPAK_UPCNT" -gt 0 ]; then
                echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}"
                flatpak remote-ls --updates --columns=application,name,version | grep -vFw -f <(flatpak mask | awk '{print $1}') | sed 's/^[^ \t]*[ \t]*//'  | fold -s -w 70
-               #flatpak remote-ls --updates --columns=name,version | fold -s -w 70
+
               fi
         else
             UPLIST=$(<"$UL_CACHE_FILE")
@@ -79,7 +87,6 @@ check_updates(){
                 echo -e "${CSS_CYANB}█ ${CSS_CYAN}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}\n${CSS_NBSP}${CSS_NBSP}${UPCNT_SOLUS} ${MSG_GEN_AVAILABLE}"
             fi
             if [ "$HAS_FLATPAK" -eq 1 ]; then
-                #UPCNT_FP=`flatpak remote-ls --updates | wc -l`
                 UPCNT_FP=$(flatpak remote-ls --updates --columns=application | grep -vFxf <(flatpak mask | awk '{print $1}') | wc -l)
 
                 UPMSG_FP=" | $MSG_UPD_FLATPAK: $UPCNT_FP"
@@ -121,18 +128,25 @@ check_updates(){
                 fi
                 if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
 
-                    # experimental button
-                    #solseek -ssn "$UPMSG" > /dev/null 2>&1 & disown
-                    notify-send \
-                    --app-name="Solseek" \
-                    --urgency=normal \
-                    --replace-id=$NOTI_ID \
-                    --expire-time=25000 \
-                    -i solseek \
-                    "" \
-                    "$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
 
-                    if [ "$2" == "service" ]; then
+                    # notification cooldown
+                    if [[ ! -f "$SS_LASTNOTI" ]] || [[ $(( $(date +%s) - $(stat -c %Y "$SS_LASTNOTI") )) -gt 30 ]]; then
+
+                        notify-send \
+                        --app-name="Solseek" \
+                        --urgency=normal \
+                        --replace-id=$NOTI_ID \
+                        --expire-time=25000 \
+                        -i solseek \
+                        "" \
+                        "$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
+
+                        # (re)set cooldown timer
+                        touch "$SS_LASTNOTI"
+
+                    fi
+
+                    if [ "$2" = "service" ] && [ "$SS_DISABLE_SYSTRAY" -eq 0 ]; then
                         "$SS_DATA_PATH/helpers/solseek-tray.py" "$MSG_UPD_AVAIL_UPD" "$MSG_GEN_OPEN" "$MSG_GEN_DISMISS"
                     fi
                 fi
@@ -159,7 +173,6 @@ fp_cache(){
             # This updates the appstream catalog for flatpaks
             solseek fpasc &
 
-            #flatpak list --app --columns=application,name |  sed -E 's/\x09(.*)/|\o33[32m⬤ \1\o33[0m/' |  sort -t '|' -k 2 > "$FI_CACHE_FILE"
             flatpak list --app --columns=application,name,description | awk -F'\t' '{
                 # Skip any empty lines
                 if ($1 == "") next
@@ -263,6 +276,7 @@ eopkg_build_index(){
 eopkg_cache(){
     DOUPDATE=0
     rm -f "$UL_CACHE_FILE"
+
     LATESTHF=$(ls -t /var/lib/eopkg/history/*.xml 2>/dev/null | head -n 1)
 
     if [ "$1" == "force" ]; then
@@ -404,8 +418,8 @@ clean_cache(){
         echo "$MSG_GEN_CACHE"
         rm -f "$UP_LOCK_FILE"
         check_updates "system" &
-        fp_cache "force" &
-        eopkg_cache
+        fp_cache "force"
+        eopkg_cache &
     fi
 }
 
