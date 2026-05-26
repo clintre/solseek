@@ -1,1 +1,1 @@
-enable solseek-uc.service
+enable solseek-uc.timer
