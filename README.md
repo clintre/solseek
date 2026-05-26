@@ -51,15 +51,15 @@ Note: GitHub is the primary repo for Solseek at this time. Codeberg is a mirror.
 | Feature | Info | Delivery |
 | ----------- | ----------- | ----------- |
 | **Additional Languages** | Looking for translators | 🔃 |
-| **Recipes** | Looking for translators | 1.? |
-| **moss support** | AerynOS & future Solus | 1.? |
+| **Recipes** | Common configs & non-packaged apps | 1.? |
+| **moss support** | AerynOS & future Solus | 2.x |
 | **tmux support** | Enhance UX | 2.x |
 
 <hr>
 
 ## Contributing
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
-- [Adding or Correction Language Files](https://github.com/clintre/solseek/discussions/13)
+- [Adding / Correcting Language Files](https://github.com/clintre/solseek/discussions/13)
 - Adding language file guide coming, but if you are familiar with Github, copy the en directory and contents and translate.
 
 <hr>
