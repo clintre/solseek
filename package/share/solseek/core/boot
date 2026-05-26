@@ -232,13 +232,12 @@ SS_SOLUS_REPO_FILE="$SS_SOLUS_REPO_FILE"
 SS_EOPKG_FINDEX="$SS_EOPKG_FINDEX"
 SS_FASTFETCH_CFG="$SS_FASTFETCH_CFG"
 EOF
-
-    # Check if systemd timer files are installed.
-    # Note this does not enable them, just makes sure they are there if needed.
-    if [ ! -f "$HOME/.config/systemd/user/solseek-uc.service" ] || [ ! -f "$HOME/.config/systemd/user/solseek-uc.timer" ]; then
+    # Clean old service file
+    if [ -f "$HOME/.config/systemd/user/solseek-uc.service" ] || [ -f "$HOME/.config/systemd/user/solseek-uc.timer" ]; then
         mkdir -p "$HOME/.config/systemd/user"
-        cp -f /usr/share/solseek/solseek-uc.service $HOME/.config/systemd/user/
-        cp -f /usr/share/solseek/solseek-uc.timer $HOME/.config/systemd/user/
+        rm -f $HOME/.config/systemd/user/solseek-uc.service
+        rm -f $HOME/.config/systemd/user/solseek-uc.timer
+        systemctl --user daemon-reload
     fi
 else
     . "$SESSION_SETTINGS"
