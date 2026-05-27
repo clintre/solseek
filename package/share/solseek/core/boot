@@ -1,4 +1,4 @@
-#Create cache/config directory if it does'nt exist
+#Create cache/config directory if it doesn't exist
 mkdir -p "$HOME/.cache/solseek"
 mkdir -p "$HOME/.config/solseek"
 
@@ -72,14 +72,13 @@ HISTORY_FILE="$SS_CACHE_PATH/history"
 FI_CACHE_FILE="$SS_CACHE_PATH/iflatpaks"
 PI_CACHE_FILE="$SS_CACHE_PATH/ipackages"
 
-# Small short lifespan goes in/tmp
-AS_CACHE_FILE="/tmp/ss_appstream"
-SS_LASTNOTI="/tmp/ss_lastnoti"
-RB_HISTORY_FILE="/tmp/ss_rb_history"
-SESSION_SETTINGS="/tmp/ss_session"
-UP_LOCK_FILE="/tmp/ss_update_lock"
-UP_CACHE_FILE="/tmp/ss_updatemsg"
-UL_CACHE_FILE="/tmp/ss_updatelst"
+AS_CACHE_FILE="$SS_CACHE_PATH/ss_appstream"
+SS_LASTNOTI="$SS_CACHE_PATH/ss_lastnoti"
+RB_HISTORY_FILE="$SS_CACHE_PATH/ss_rb_history"
+SESSION_SETTINGS="$SS_CACHE_PATH/ss_session"
+UP_LOCK_FILE="$SS_CACHE_PATH/ss_update_lock"
+UP_CACHE_FILE="$SS_CACHE_PATH/ss_updatemsg"
+UL_CACHE_FILE="$SS_CACHE_PATH/ss_updatelst"
 
 
 # Below create session settings only on initial ss launch not every time
