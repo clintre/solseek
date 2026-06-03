@@ -40,7 +40,10 @@ upd_msg(){
                 if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
                   echo -e "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n"
                 fi
-                eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' | fold -s -w 70
+                # eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' | fold -s -w 70
+                pkgcli refresh force &> /dev/null
+                pkgcli list-updates | fold -s -w 70
+
               fi
 
               if [ "$FLATPAK_UPCNT" -gt 0 ]; then
@@ -59,14 +62,23 @@ upd_msg(){
 
 check_updates(){
     if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
-        echo "#Lock file for update checks" > "$UP_LOCK_FILE"
+
+        # FIX: Atomic lock check to prevent concurrent runs from double-appending
+        if ! ( set -o noclobber; echo "$$" > "$UP_LOCK_FILE" ) 2> /dev/null; then
+            return 0 # Exit function if already running
+        fi
+
+        # Make sure to clean up the lock file when the function exits
+        trap 'rm -f "$UP_LOCK_FILE"' RETURN
+
         if [ "$1" == "system" ] || [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
 
             PREV_UPCNT_TTL=0;
 
             if [ -f "$UP_CACHE_FILE" ]; then
                 . "$UP_CACHE_FILE"
-                PREV_UPCNT_TTL="$PREV_UPCNT_TTL"
+                # FIX: Read the correct variable from the sourced cache file
+                PREV_UPCNT_TTL="$TTL_UPDCNT"
             fi
 
             echo "#Update Count Cache File" > "$UP_CACHE_FILE"
@@ -81,14 +93,14 @@ check_updates(){
 
             # Make sure we are getting the latest
             pkgcli refresh force &> /dev/null
-            UPCNT_SOLUS=`pkgcli list-updates --quiet | grep -c "."`
+            UPCNT_SOLUS=$(pkgcli list-updates --quiet | grep -c ".")
 
             if [ "$2" == "force" ]; then
                 echo -e "${CSS_CYANB}█ ${CSS_CYAN}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}\n${CSS_NBSP}${CSS_NBSP}${UPCNT_SOLUS} ${MSG_GEN_AVAILABLE}"
             fi
+
             if [ "$HAS_FLATPAK" -eq 1 ]; then
                 UPCNT_FP=$(flatpak remote-ls --updates --columns=application | grep -vFxf <(flatpak mask | awk '{print $1}') | wc -l)
-
                 UPMSG_FP=" | $MSG_UPD_FLATPAK: $UPCNT_FP"
 
                 if [ "$2" == "force" ]; then
@@ -111,23 +123,27 @@ check_updates(){
 
             if [ "$UPCNT_TTL" -gt 0 ]; then
                 if [ "$UPCNT_TTL" -ne "$PREV_UPCNT_TTL" ] || [ ! -f "$UL_CACHE_FILE" ]; then
-                    echo "$MSG_UPD_DISCO\n\n" > "$UL_CACHE_FILE"
+
+
+                    echo -e "$MSG_UPD_DISCO\n\n" > "$UL_CACHE_FILE"
+
                     if [ "$UPCNT_SOLUS" -gt 0 ]; then
-                        echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}" >> "$UL_CACHE_FILE"
+
+                        echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Solus:${CSS_RESET}" >> "$UL_CACHE_FILE"
                         if [ "$SS_SOLUS_REPO" == "Unstable" ]; then
-                            echo "${CSS_YELLOW}""$MSG_UPD_WARN""${CSS_RESET}\n" >> "$UL_CACHE_FILE"
+                            echo -e "${CSS_YELLOW}${MSG_UPD_WARN}${CSS_RESET}\n" >> "$UL_CACHE_FILE"
                         fi
-                        eopkg lu | awk -F' - ' '{print "\033[1;92m" $1 "\033[0m\n" $2"\n"}' >> "$UL_CACHE_FILE"
+                        pkgcli list-updates >> "$UL_CACHE_FILE"
                     fi
 
                     if [ "$UPCNT_FP" -gt 0 ]; then
-                        echo "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}" >> "$UL_CACHE_FILE"
+
+                        echo -e "${CSS_BOLDBRIGHT}${CSS_CYAN}📦 Flatpak:${CSS_RESET}" >> "$UL_CACHE_FILE"
                         flatpak remote-ls --updates --columns=application,name,version | grep -vFw -f <(flatpak mask | awk '{print $1}') | sed 's/^[^ \t]*[ \t]*//' >> "$UL_CACHE_FILE"
-                        #flatpak remote-ls --updates --columns=name,version >> "$UL_CACHE_FILE"
                     fi
                 fi
-                if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
 
+                if [ "$SS_NOTIFCATIONS" -eq 1 ] && [ "$1" == "system" ]; then
 
                     # notification cooldown
                     if [[ ! -f "$SS_LASTNOTI" ]] || [[ $(( $(date +%s) - $(stat -c %Y "$SS_LASTNOTI") )) -gt 30 ]]; then
@@ -143,7 +159,6 @@ check_updates(){
 
                         # (re)set cooldown timer
                         touch "$SS_LASTNOTI"
-
                     fi
 
                     if [ "$2" = "service" ] && [ "$SS_DISABLE_SYSTRAY" -eq 0 ]; then
@@ -152,7 +167,7 @@ check_updates(){
                 fi
             fi
         fi
-        rm -f "$UP_LOCK_FILE"
+
     fi
 }
 
