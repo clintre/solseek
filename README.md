@@ -9,9 +9,7 @@ Solseek is a simple terminal user interface that allows you to browse, search, a
 
 Note: GitHub is the primary repo for Solseek at this time. Codeberg is a mirror. This may change in the near future.
 
-📽️ [Click here](https://youtu.be/MT7w6rZLmt0) or image below to see a short demo video.
-
-[![See it in Action](https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png)](https://youtu.be/MT7w6rZLmt0)
+<img src="https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png" />
 
 <hr id="features">
 
@@ -38,6 +36,7 @@ Note: GitHub is the primary repo for Solseek at this time. Codeberg is a mirror.
   - Portuguese
   - Slovenian
   - Spanish
+  - Ukrainian
 
 <hr>
 
