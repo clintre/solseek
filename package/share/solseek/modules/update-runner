@@ -39,6 +39,8 @@ reboot_msg=""
 
 hr "danger" 3
 echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
+hr "danger" 1
+echo -e "${CSS_REDB}‼️ $MSG_UPD_NOCLOSE ‼️${CSS_RESET}"
 hr "danger" 3
 if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
     ccache_eopkg=1
