@@ -1,4 +1,5 @@
 echo -e "${MSG_GEN_LOADCATALOG}"
+clear
 app_list=$(solseek "applist" "as" "$3")
 
 pkg=$(printf "%b" "${app_list}" | as_fzf --prompt="${MSG_PKG_PROMPT}: " --header="${MSG_GEN_DESKAPPS} - ${3}")
