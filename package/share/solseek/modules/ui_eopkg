@@ -1,5 +1,6 @@
 # PACKAGE LIST
 eopkg_cache
+clear
 if [ "$2" = "li" ]; then
     app_list=$(solseek "applist" "pkgi")
     pkg_list_type="${ACT_MAIN_LISTIPKGS}"

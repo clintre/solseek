@@ -1,3 +1,4 @@
+clear
 mode=$(printf "%b" "${MENU_MAIN}" | sa_fzf --prompt="" --header="Solseek" --preview 'solseek -ssh {1}')
 
 mode=${mode%|*}

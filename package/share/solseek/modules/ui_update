@@ -1,10 +1,13 @@
 ## Remove update check if updates are disabled
+echo -e "${MSG_UPD_DISCO}"
+export UPPNLMSG="$(solseek "-ssh" "AMM_UPSYS")"
+clear
 if [ "$SS_DISABLE_UPCHK" -eq 1 ]; then
     MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v '^AMU_CHECK|')
     MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v '^A_BLANK|')
 fi
 
-upmode=$(printf "%b" "${MENU_UPDATE}" | sa_fzf --prompt="" --header="${ACT_MAIN_UPDATESYS}" --preview 'solseek -ssh AMM_UPSYS')
+upmode=$(printf "%b" "${MENU_UPDATE}" | sa_fzf --prompt="" --header="${ACT_MAIN_UPDATESYS}" --preview 'echo -e "$UPPNLMSG"')
 
 upmode=${upmode%|*}
 case "$upmode" in

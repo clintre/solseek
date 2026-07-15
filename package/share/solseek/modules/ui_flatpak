@@ -1,6 +1,6 @@
 #Flatpak List
 fp_cache
-
+clear
 if [ "$2" = "lif" ]; then
     app_list=$(solseek "applist" "fpi")
     pkg_list_type="${ACT_MAIN_LISTIPKGS}"
