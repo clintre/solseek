@@ -1,6 +1,6 @@
 #!/bin/bash
-SS_VERSION="1.4.13"
 SS_DATA_PATH="/usr/share/solseek"
+SS_VERSION=$(<"${SS_DATA_PATH}/version")
 
 # Boot / ENV
 . "${SS_DATA_PATH}/core/boot"
