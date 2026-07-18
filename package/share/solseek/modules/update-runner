@@ -68,7 +68,7 @@ if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
 
     while [ "$RETRY_EOPKG" = true ]; do
 
-        sudo eopkg up $SS_ASSUMEYES 2> "$SYSUP_ERR_LOG"
+        sudo eopkg up -y 2> "$SYSUP_ERR_LOG"
         EOPKG_EXIT=$?
 
         if [ $EOPKG_EXIT -ne 0 ]; then
