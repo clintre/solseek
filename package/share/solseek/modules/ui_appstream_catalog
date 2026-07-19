@@ -31,7 +31,7 @@ else
     if grep -q "${pkgid}|" "${PI_CACHE_FILE}"; then
         pkg_status="${MSG_GEN_INSTALLED}"
 
-        MENU_PKG=$(echo "${MENU_MPKG}" | grep -v '^AMP_FPREP|')$
+        MENU_PKG=$(echo "${MENU_MPKG}" | grep -v '^AMP_FPREP|')
     else
         pkg_status="${MSG_GEN_AVAILABLE}"
         MENU_PKG="${MENU_IPKG}"
