@@ -32,12 +32,20 @@ for arg in "$@"; do
         declare "$key=$value"
     fi
 done
+
 ccache_eopkg=0
 ccache_flatpak=0
 ccache_updates=0
 show_softreboot=0
 show_hardreboot=0
 reboot_msg=""
+
+
+# If any update type requires sudo, lets take care of it here for aesthetics
+if [ "$up_eo" -eq 1 ] || [ "$up_sn" -eq 1 ] || [ "$up_fw" -eq 1 ]; then
+    sudo echo ""
+    clear
+fi
 
 hr "danger" 3
 echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
@@ -55,33 +63,47 @@ if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
     hr "w30" "cyan"
     echo -e "${MSG_GEN_CHECKUPDS}\n"
 
-    UPGRADE_LIST=$(env LC_ALL=C eopkg lu 2>/dev/null)
-    if echo "$UPGRADE_LIST" | grep -qE '^(nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
-        show_softreboot=0
-        reboot_msg="${MSG_GEN_REBOOTMSG}"
-    fi
+    #UPGRADE_LIST=$(env LC_ALL=C eopkg lu 2>/dev/null)
+    #if echo "$UPGRADE_LIST" | grep -qE '^(nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
+    #    show_softreboot=0
+    #    reboot_msg="${MSG_GEN_REBOOTMSG}"
+    #fi
 
-    ###############################################################################
-
-    SYSUP_ERR_LOG="/tmp/solseek_sysup_error.log"
+    EOPKG_LOG="/var/log/eopkg.log"
     RETRY_EOPKG=true
 
     while [ "$RETRY_EOPKG" = true ]; do
 
-        sudo eopkg up -y 2> "$SYSUP_ERR_LOG"
+        START_LINE=$(wc -l < "$EOPKG_LOG" 2>/dev/null || echo 0)
+
+        sudo eopkg up $SS_ASSUMEYES
+
         EOPKG_EXIT=$?
 
-        if [ $EOPKG_EXIT -ne 0 ]; then
+        # Read only the new lines added during execution and grep for ERROR
+        NEW_ERRORS=$(tail -n +$((START_LINE + 1)) "$EOPKG_LOG" 2>/dev/null | grep "ERROR")
+
+        #Check if eopkg exited with an error OR if the log recorded any errors
+        if [ $EOPKG_EXIT -ne 0 ] || [ -n "$NEW_ERRORS" ]; then
             hr "danger" 3
             echo -e "${CSS_REDB}⚠️ $MSG_UPD_EOPKG_EH1 ${CSS_RESET}"
             hr "danger" 1
-            cat "$SYSUP_ERR_LOG"
+
+            # Display the formatted errors
+            if [ -n "$NEW_ERRORS" ]; then
+                # Echoing through for a cleaner look
+                echo -e "$NEW_ERRORS" | sed 's/^/  /'
+            else
+                echo -e "  Process failed (exit code $EOPKG_EXIT)"
+            fi
+
             hr "danger" 3
 
-            echo "$MSG_UPD_EOPKG_EHQ1"
-            echo "  1) $MSG_UPD_EOPKG_EHO1"
-            echo "  2) $MSG_UPD_EOPKG_EHO2"
-            echo "  3) $MSG_UPD_EOPKG_EHO3"
+            echo -e "${CSS_BOLDBRIGHT}$MSG_UPD_EOPKG_EHQ1 ${CSS_RESET}"
+            echo -e "  ${CSS_BOLDBRIGHT}1)${CSS_RESET} $MSG_UPD_EOPKG_EHO1"
+            echo -e "  ${CSS_BOLDBRIGHT}2)${CSS_RESET} $MSG_UPD_EOPKG_EHO2"
+            echo -e "  ${CSS_BOLDBRIGHT}3)${CSS_RESET} $MSG_UPD_EOPKG_EHO3"
+            echo ""
 
             read -n 1 -p "$MSG_UPD_EOPKG_EHQ2 [1-3]: " USER_CHOICE
 
@@ -100,7 +122,7 @@ if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
                     ;;
                 3)
                     echo -e "\n$MSG_UPD_EOPKG_EHT3"
-                    rm -f "$ERR_LOG"
+
                     exit 0
                     ;;
                 *)
@@ -109,14 +131,16 @@ if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
                     ;;
             esac
         else
+            # Check the log delta for kernel/driver upgrades requiring a reboot
+            if tail -n +$((START_LINE + 1)) "$EOPKG_LOG" 2>/dev/null | grep -qE 'Upgraded (nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
+                show_softreboot=0
+                reboot_msg="${MSG_GEN_REBOOTMSG}"
+            fi
+
             RETRY_EOPKG=false
         fi
 
     done
-    rm -f "$SYSUP_ERR_LOG"
-
-
-
 
     ###############################################################################
 
