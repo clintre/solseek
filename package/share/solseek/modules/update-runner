@@ -43,6 +43,9 @@ reboot_msg=""
 
 # If any update type requires sudo, lets take care of it here for aesthetics
 if [ "$up_eo" -eq 1 ] || [ "$up_sn" -eq 1 ] || [ "$up_fw" -eq 1 ]; then
+    hr "danger" 3
+    echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
+    hr "danger" 1
     sudo echo ""
     clear
 fi
