@@ -56,8 +56,8 @@ fi
 
 # If running via SSH on remote system, must use sudo
 if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-    echo "Running remotely requires sudo..."
-    sudo echo ""
+    echo "Running remotely requires sudo"
+    exit 1
 fi
 
 # If running in a pure TTY without X11 or Wayland disable notifications
