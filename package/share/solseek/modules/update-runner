@@ -47,6 +47,23 @@ if [ "$up_eo" -eq 1 ] || [ "$up_sn" -eq 1 ] || [ "$up_fw" -eq 1 ]; then
     echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
     hr "danger" 1
     sudo echo ""
+
+    # Check if user has eopkg clean days set
+    if [[ "${SS_EOPKG_CLEAN_DAYS:-0}" -gt 0 ]]; then
+
+        MIN_AGE=$(( SS_EOPKG_CLEAN_DAYS * 1440 ))
+
+        # If the file does NOT exist (-f) OR if it is older than MIN_AGE
+        if [[ ! -f "$EPD_CLEAN_CHK" ]] || [[ -n "$(find "$EPD_CLEAN_CHK" -mmin +"$MIN_AGE" 2>/dev/null)" ]]; then
+
+            # Run the cleanup command silently
+            sudo eopkg dc > /dev/null 2>&1 || true
+
+            # Create the file or update its modified timestamp to now
+            touch "$EPD_CLEAN_CHK"
+        fi
+    fi
+
     clear
 fi
 
@@ -65,12 +82,6 @@ if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
     echo -e "${CSS_CYANB}█ EOPKG ${CSS_RESET}"
     hr "w30" "cyan"
     echo -e "${MSG_GEN_CHECKUPDS}\n"
-
-    #UPGRADE_LIST=$(env LC_ALL=C eopkg lu 2>/dev/null)
-    #if echo "$UPGRADE_LIST" | grep -qE '^(nvidia-(open|glx|beta|470)|linux-(current|lts|headers|firmware)|intel-microcode)\b'; then
-    #    show_softreboot=0
-    #    reboot_msg="${MSG_GEN_REBOOTMSG}"
-    #fi
 
     EOPKG_LOG="/var/log/eopkg.log"
     RETRY_EOPKG=true
