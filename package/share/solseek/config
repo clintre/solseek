@@ -40,6 +40,11 @@ SS_EDITOR="nano"
 ## 0 = disabled (default) | 1 = enabled
 SS_ASSUMEYES=0
 
+## Days between Clean the eopkg cache
+## This will run sudo eopkg dc if it had not been run for the days set below. Runs prior to an an update using solseek
+## 0 = disabled (default) | # > 0 = days
+SS_EOPKG_CLEAN_DAYS=0
+
 ## Disable Solseek check for updates on launch and in the background if the service is enabled.
 ## 0 = update checking enabled (default) | 1 = disabled
 SS_DISABLE_UPCHK=0
