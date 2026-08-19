@@ -150,14 +150,14 @@ check_updates(){
                         --expire-time=25000 \
                         -i solseek \
                         "" \
-                        "$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP"
+                        "$MSG_UPD_SYSTEM: $UPCNT_SOLUS $UPMSG_FP" > /dev/null 2>&1 || true
 
                         # (re)set cooldown timer
                         touch "$SS_LASTNOTI"
                     fi
 
                     if [ "$2" = "service" ] && [ "$SS_DISABLE_SYSTRAY" -eq 0 ]; then
-                        "$SS_DATA_PATH/helpers/solseek-tray.py" "$MSG_UPD_AVAIL_UPD" "$MSG_GEN_OPEN" "$MSG_GEN_DISMISS"
+                        "$SS_DATA_PATH/helpers/solseek-tray.py" "$MSG_UPD_AVAIL_UPD" "$MSG_GEN_OPEN" "$MSG_GEN_DISMISS" > /dev/null 2>&1 || true
                     fi
                 fi
             fi
@@ -637,6 +637,7 @@ check_nvidia_support() {
       else
           MENUDA=$(echo "$MENUDA" | grep -v '^AMP_REM|')
           MENUDA=$(echo "$MENUDA" | grep -v '^AMP_ADD32|')
+
           if [ "$SS_NVIDIA_OPEN" -eq 1 ]; then
               MENUDA=$(echo "$MENUDA" | grep -v '^AMP_INSTP')
               MENUDA=$(echo "$MENUDA" | grep -v '^AMP_INSTL')

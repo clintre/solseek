@@ -54,6 +54,17 @@ else
     SS_ASSUMEYES=""
 fi
 
+# If running via SSH on remote system, must use sudo
+if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+    echo "Running remotely requires sudo..."
+    sudo echo ""
+fi
+
+# If running in a pure TTY without X11 or Wayland disable notifications
+if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
+    SS_NOTIFCATIONS=0
+fi
+
 
 # Load theme
 if [ -f "$SS_DATA_PATH/themes/$SS_THEME.theme" ]; then
@@ -71,6 +82,7 @@ ISSA=0
 SS_CACHE_EXPIRES=20
 FA_CACHE_FILE="$SS_CACHE_PATH/aflatpaks"
 PA_CACHE_FILE="$SS_CACHE_PATH/apackages"
+EPD_CLEAN_CHK="$SS_CACHE_PATH/ecleanlast"
 EPD_CACHE_FILE="$SS_CACHE_PATH/eopkgdb"
 IDX_CACHE_FILE="$SS_CACHE_PATH/eopkgindex"
 HISTORY_FILE="$SS_CACHE_PATH/history"

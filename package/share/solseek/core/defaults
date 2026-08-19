@@ -8,6 +8,7 @@ SS_NOTIFCATIONS=1
 SS_EOPKG_DCACHE=0
 SS_EOPKG_FINDEX=0
 SS_EOPKG_FIDATE=""
+SS_EOPKG_CLEAN_DAYS=0
 SS_DISABLE_UPCHK=0
 SS_DISABLE_SYSTRAY=0
 SS_ROLLBACK_LIMIT=100
@@ -47,7 +48,7 @@ SS_NVIDIA32_MAP=(
     ["nvidia-beta-driver"]="nvidia-beta-driver-32bit"
     ["nvidia-beta-driver-current"]="nvidia-beta-driver-32bit"
     ["nvidia-470-glx-driver"]="nvidia-470-glx-driver-32bit"
-    ["nvidia-470-glx-driver-current"]="nvidia-470-glx-driver-32bit"
+    ["nvidia-580-glx-driver-current"]="nvidia-580-glx-driver-32bit"
 )
 
 
@@ -58,7 +59,8 @@ SS_NVMENU_MAP=(
     ["AMP_INSTO32"]="nvidia-open${SS_NVIDIA_CURRENT} nvidia-glx-driver-32bit"
     ["AMP_INSTP"]="nvidia-glx-driver${SS_NVIDIA_CURRENT}"
     ["AMP_INSTP32"]="nvidia-glx-driver${SS_NVIDIA_CURRENT} nvidia-glx-driver-32bit"
-    ["AMP_INSTL"]="nvidia-470-glx-driver${SS_NVIDIA_CURRENT} nvidia-470-glx-driver-32bit"
+    ["AMP_INSTL"]="nvidia-580-glx-driver${SS_NVIDIA_CURRENT} nvidia-580-glx-driver-32bit"
+    ["AMP_INSTL"]="nvidia-580-glx-driver${SS_NVIDIA_CURRENT} nvidia-580-glx-driver-32bit"
     ["AMP_ADD32"]=""
     ["AMP_REM"]=""
 )
@@ -76,9 +78,14 @@ nvidia-470-glx-driver
 nvidia-470-glx-driver-current
 nvidia-470-glx-driver-current-experimental
 nvidia-470-glx-driver-common
+nvidia-580-glx-driver
+nvidia-580-glx-driver-current
+nvidia-580-glx-driver-current-experimental
+nvidia-580-glx-driver-common
 nvidia-glx-driver-common
 nvidia-beta-driver-common
 nvidia-470-glx-driver-32bit
+nvidia-580-glx-driver-32bit
 nvidia-glx-driver-32bit
 nvidia-beta-driver-32bit
 "
