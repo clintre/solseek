@@ -31,7 +31,7 @@ def open_solseek(menu_item):
 
     try:
         subprocess.Popen(
-            ["systemd-run", "--user", "--scope", "xdg-terminal-exec", "solseek"],
+            ["systemd-run", "--user", "--scope", "xdg-terminal-exec", "solseek", "subact", "upsys", "entry"],
             env=env,
             start_new_session=True
         )
