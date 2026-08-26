@@ -177,6 +177,12 @@ if [ "$ISSA" -eq 1 ]; then
     exit 0
 fi
 
+# If running via SSH on remote system, must use sudo
+if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+    echo "Running remotely requires sudo"
+    exit 1
+fi
+
 # End Sub action area
 # If the tray indicator is live close it here
 pkill -f "solseek-tray.py" || true
