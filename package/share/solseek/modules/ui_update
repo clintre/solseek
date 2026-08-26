@@ -2,16 +2,24 @@
 echo -e "${MSG_UPD_DISCO}"
 export UPPNLMSG="$(solseek "-ssh" "AMM_UPSYS")"
 clear
+
 if [ "$SS_DISABLE_UPCHK" -eq 1 ]; then
     MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v '^AMU_CHECK|')
     MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v '^A_BLANK|')
 fi
 
+if [ "$3" == "entry" ]; then
+    MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v 'A_BACK|')
+else
+    MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v 'AMU_QUIT|')
+fi
+
+
 upmode=$(printf "%b" "${MENU_UPDATE}" | sa_fzf --prompt="" --header="${ACT_MAIN_UPDATESYS}" --preview 'echo -e "$UPPNLMSG"')
 
 upmode=${upmode%|*}
 case "$upmode" in
-    "A_BACK" | "") exit 0 ;;
+    "A_BACK" | AMU_QUIT | "") exit 0 ;;
     "AMU_EOPKG") solseek -ssu up_eo=1;;
     "AMU_FLATPAK") solseek -ssu up_fp=1;;
     "AMU_SNAP") solseek -ssu up_sn=1;;
