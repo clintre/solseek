@@ -7,9 +7,9 @@ if [ "$SS_DISABLE_UPCHK" -eq 1 ]; then
 fi
 
 if [ "$3" == "entry" ]; then
+    check_updates "system" "force"
     MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v 'A_BACK|')
 else
-    check_updates "system" "force"
     MENU_UPDATE=$(echo "${MENU_UPDATE}" | grep -v 'AMU_QUIT|')
 fi
 
