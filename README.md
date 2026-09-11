@@ -3,19 +3,22 @@
 # Solseek
 ## A TUI Package Manager for Solus
 
-🌟[Features](#features) 📑[Requirements & Installation](https://github.com/clintre/solseek/wiki#getting-started) 📗[Wiki](https://github.com/clintre/solseek/wiki) 💪[Contributing](#contributing)
+🌟[Features](#features) 📑[Requirements & Installation](https://codeberg.org/clintre/solseek/wiki#getting-started) 📗[Wiki](https://codeberg.org/clintre/solseek/wiki) 💪[Contributing](#contributing)
 
 Solseek is a simple terminal user interface that allows you to browse, search, and manage packages and drivers for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
 
-Note: GitHub is the primary repo for Solseek at this time. Codeberg is a mirror. This may change in the near future.
+### 📣 Note: Solseek has moved to Codeberg! 
+https://codeberg.org/clintre/solseek
 
-<img src="https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png" />
+GitHub will remain as a mirror, but all issues and contributions will need to be made on the new Codeberg repo
+
+<img src="https://codeberg.org/clintre/solseek/raw/branch/main/demo/demo_thumb.png" />
 
 <hr id="features">
 
 ## Features
   - Complete app store similar to Discover or Gnome Software
-  - Works as a desktop app or from terminal
+  - Works as a desktop app or from a terminal
   - Navigate and use with keyboard and/or mouse
   - Select and install multiple packages at once
   - Manage system updates for installed tools such as; eopkg, flatpak, snap, distrobox, and fwupd
@@ -58,7 +61,6 @@ Note: GitHub is the primary repo for Solseek at this time. Codeberg is a mirror.
 
 ## Contributing
 The biggest need right now is the language files. If you are not as familiar with git commands on your computer, I have created a guide so you can use the Github website to make changes easily.
-- [Adding / Correcting Language Files](https://github.com/clintre/solseek/discussions/13)
 - Adding language file guide coming, but if you are familiar with Github, copy the en directory and contents and translate.
 
 <hr>
