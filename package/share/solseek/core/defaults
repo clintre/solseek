@@ -107,10 +107,10 @@ CSS_NBSP=$'\xC2\xA0'
 
 
 ## Solseek Links / Info
-SS_WEB_WIKI="https://solseek.org/wiki"
+SS_WEB_WIKI="https://codeberg.org/clintre/solseek/wiki"
 SS_WEB_MAIN="https://solseek.org"
-SS_WEB_SUPPORT="https://solseek.org/support"
-SS_WEB_CLOG="https://solseek.org/releases"
-SS_WEB_LIC="https://github.com/clintre/solseek?tab=GPL-3.0-1-ov-file"
+SS_WEB_SUPPORT="https://codeberg.org/clintre/solseek/issues"
+SS_WEB_CLOG="https://codeberg.org/clintre/solseek/releases"
+SS_WEB_LIC="https://codeberg.org/clintre/solseek/src/branch/main/LICENSE"
 SS_WEB_SOLUS_SUPPORT="https://github.com/getsolus/packages/issues"
 SS_WEB_SOLUS_FORUM="https://discuss.getsol.us/"

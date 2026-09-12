@@ -69,6 +69,7 @@ check_updates(){
         if [ "$1" == "system" ] || [ ! -f "$UP_CACHE_FILE" ] || [ -n "$(find "$UP_CACHE_FILE" -mmin +5 2>/dev/null)" ]; then
 
             PREV_UPCNT_TTL=0;
+            UPCNT_TTL=0;
 
             if [ -f "$UP_CACHE_FILE" ]; then
                 . "$UP_CACHE_FILE"
