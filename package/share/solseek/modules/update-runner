@@ -88,6 +88,7 @@ if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
 
     EOPKG_LOG="/var/log/eopkg.log"
     RETRY_EOPKG=true
+    wait_for_eopkg
 
     while [ "$RETRY_EOPKG" = true ]; do
 
