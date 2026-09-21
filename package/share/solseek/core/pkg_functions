@@ -1,3 +1,17 @@
+wait_for_eopkg() {
+    if pgrep -x "eopkg" > /dev/null; then
+        if [ "$1" != "silent" ]; then
+            echo -n "$MSG_GEN_EOPKG_INUSE..."
+        fi
+
+        # Loop and wait as long as the process is found
+        while pgrep -x "eopkg" > /dev/null; do
+            echo -n "."
+            sleep 1
+        done
+    fi
+}
+
 upd_msg(){
     TTL_UPDCNT=0
     SOLUS_UPCNT=0
@@ -250,6 +264,7 @@ get_pkg_info(){
     if [ "$SS_PKG_MGR" == "eopkg" ]; then
 
         if [ "$2" == "ei" ]; then
+            wait_for_eopkg "silent"
             echo -e "${CSS_CYANB}EOPKG INFO${CSS_RESET}\n"
             ss_clean_of
             eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
@@ -264,6 +279,7 @@ get_pkg_info(){
             echo ""
             echo -e "💡 ${CSS_YELLOWB}ctrl+e ${CSS_YELLOW}eopkg info${CSS_RESET}"
         else
+            wait_for_eopkg "silent"
             ss_clean_of
             sleep 0.5 && eopkg info "$1" | awk 'NR==1{next} / :/{if(NR>2)print ""; sub(/\s+:\s*/, ":\n"); print; next} {sub(/^\s+/, ""); print} END{print ""}'
         fi
@@ -281,6 +297,7 @@ get_appstream_details(){
 
 eopkg_build_index(){
     echo "$MSG_GEN_PCACHE"
+    wait_for_eopkg
     eopkg la -N 2>/dev/null | awk 'NR>2 {print $1}' > "$IDX_CACHE_FILE"
 }
 
@@ -325,7 +342,7 @@ eopkg_cache(){
                 echo -e "$MSG_GEN_LCMISSING.\n"
             fi
         fi
-
+        wait_for_eopkg "silent"
         eopkg li 2>/dev/null | awk '{
             pkg = $1
 
@@ -386,7 +403,7 @@ eopkg_cache(){
             awk -F'|' 'FNR==NR {seen[$1]; next} !($1 in seen)' "$PI_CACHE_FILE" $PA_CACHE_FILE > "$TMP_PGK_FILE"
 
         else
-
+           wait_for_eopkg "silent"
            eopkg la -U -N 2>/dev/null | awk '
             NR>2 {
                 pkg = $1
@@ -428,6 +445,7 @@ clean_cache(){
     if echo "$@" | grep -q "regen";  then
         echo "$MSG_GEN_CACHE"
         rm -f "$UP_LOCK_FILE"
+        wait_for_eopkg
         check_updates "system" &
         fp_cache "force"
         eopkg_cache &
