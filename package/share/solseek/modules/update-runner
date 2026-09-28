@@ -58,7 +58,9 @@ if [ "$up_eo" -eq 1 ] || [ "$up_sn" -eq 1 ] || [ "$up_fw" -eq 1 ]; then
 
         # If the file does NOT exist (-f) OR if it is older than MIN_AGE
         if [[ ! -f "$EPD_CLEAN_CHK" ]] || [[ -n "$(find "$EPD_CLEAN_CHK" -mmin +"$MIN_AGE" 2>/dev/null)" ]]; then
-
+            
+            wait_for_eopkg 
+            
             # Run the cleanup command silently
             sudo eopkg dc > /dev/null 2>&1 || true
 

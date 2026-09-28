@@ -72,7 +72,7 @@ upd_msg(){
 check_updates(){
     if [ "$SS_DISABLE_UPCHK" -eq 0 ]; then
 
-        # FIX: Atomic lock check to prevent concurrent runs from double-appending
+        # Atomic lock check to prevent concurrent runs from double-appending
         if ! ( set -o noclobber; echo "$$" > "$UP_LOCK_FILE" ) 2> /dev/null; then
             return 0 # Exit function if already running
         fi
@@ -87,8 +87,7 @@ check_updates(){
 
             if [ -f "$UP_CACHE_FILE" ]; then
                 . "$UP_CACHE_FILE"
-                # FIX: Read the correct variable from the sourced cache file
-                PREV_UPCNT_TTL="$TTL_UPDCNT"
+                PREV_UPCNT_TTL="${TTL_UPDCNT:-0}"
             fi
 
             echo "#Update Count Cache File" > "$UP_CACHE_FILE"
