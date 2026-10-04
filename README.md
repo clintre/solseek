@@ -6,12 +6,7 @@
 
 🌟[Features](#features) 📑[Requirements & Installation](https://codeberg.org/clintre/solseek/wiki#getting-started) 📗[Wiki](https://codeberg.org/clintre/solseek/wiki) 💪[Contributing](#contributing) 
 
-Solseek is a simple terminal user interface that allows you to browse, search, and manage packages and drivers for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
-
-### 📣 Note: Solseek has moved to Codeberg! 
-https://codeberg.org/clintre/solseek
-
-GitHub will remain as a mirror, but all issues and contributions will need to be made on the new Codeberg repo
+Solseek is a terminal user interface that allows you to browse, search, and manage packages and drivers for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It is built around the native tools ( bash, eopkg, flatpak, etc.) to avoid complications.
 
 <img src="https://codeberg.org/clintre/solseek/raw/branch/main/demo/demo_thumb.png" />
 
@@ -31,6 +26,7 @@ GitHub will remain as a mirror, but all issues and contributions will need to be
   - Update notification service (even when not running)
   - View system configurations
   - Quick update both system packages and flatpak using `solseek up`
+  - Theme Support
 
 ## Language Support
   - English
@@ -54,9 +50,8 @@ GitHub will remain as a mirror, but all issues and contributions will need to be
 | Feature | Info | Delivery |
 | ----------- | ----------- | ----------- |
 | **Additional Languages** | Looking for translators | 🔃 |
-| **Recipes** | Common configs & non-packaged apps | 1.? |
+| **Recipes** | Common configs & tools | 1.? |
 | **moss support** | AerynOS & future Solus | 2.x |
-| **tmux support** | Enhance UX | 2.x |
 
 <hr>
 
@@ -74,4 +69,3 @@ There was no need to write some system to extract the data as the Solus team has
 
 ## Inspirations from other distro tools
   - [pacseek](https://github.com/moson-mo/pacseek) - Overall concept
-  - [dnfseek](https://github.com/OmarHesham2356/dnfseek) - Using fzf for handling the UI/UX
