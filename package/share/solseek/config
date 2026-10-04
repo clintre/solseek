@@ -60,6 +60,14 @@ SS_NOTIFCATIONS=1
 ## Note: If eopkg-index.xml is missing it will fallback to online
 SS_EOPKG_DCACHE=0
 
+## Display -devel and/or -dbginfo packages
+## Default both -devel and -dbginfo packaes are filtered
+## Note: Installed -devel / -dbginfo packages will show even if disabled
+## 0 = hide (default) | 1 = display
+SS_DISP_DEVEL=0
+SS_DISP_DBGINFO=0
+
+
 ## Custom Update Script
 ## Allows user to use a custom bash script for updating other tools, like brew and AppImages
 ## Must be a properly formatted bash script

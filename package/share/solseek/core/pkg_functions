@@ -428,6 +428,14 @@ eopkg_cache(){
                 print pkg "|" "◯ " pkg "|" summary
             }' > "$TMP_PGK_FILE"
         fi
+        
+        # Check if we need to display or hide devel and dbginfo packages
+        if [ "$SS_DISP_DEVEL" -eq 0 ]; then
+            sed -i '/-devel|/d' "$TMP_PGK_FILE"
+        fi
+        if [ "$SS_DISP_DBGINFO" -eq 0 ]; then
+            sed -i '/-dbginfo|/d' "$TMP_PGK_FILE"
+        fi
 
         cat "$PI_CACHE_FILE" "$TMP_PGK_FILE" | sort > "$PA_CACHE_FILE"
 
