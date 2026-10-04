@@ -16,7 +16,6 @@ else
     exit 1
 fi
 
-
 # Defaults
 . "$SS_DATA_PATH/core/defaults"
 
@@ -59,13 +58,40 @@ if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
     SS_NOTIFCATIONS=0
 fi
 
-
 # Load theme
 if [ -f "$SS_DATA_PATH/themes/$SS_THEME.theme" ]; then
     . "$SS_DATA_PATH/themes/$SS_THEME.theme"
 else
     . "$SS_DATA_PATH/themes/solus.theme"
 fi
+
+# Color variables overrides if theme is setup other than Solus
+if [ "$SS_GLOBAL_THEME" -eq 1 ]; then
+    hex_to_rgb() {
+        local hex="${1#\#}"
+        echo "$((16#${hex:0:2}));$((16#${hex:2:2}));$((16#${hex:4:2}))"
+    }
+
+    CSS_BOLDBRIGHT="\033[1;38;2;$(hex_to_rgb "$SS_THCLR_10")m"
+
+    CSS_YELLOW="\033[38;2;$(hex_to_rgb "$SS_THCLR_3")m"
+    CSS_YELLOWB="\033[1;38;2;$(hex_to_rgb "$SS_THCLR_3")m"
+
+    CSS_CYAN="\033[38;2;$(hex_to_rgb "$SS_THCLR_6")m"
+    CSS_CYANB="\033[1;38;2;$(hex_to_rgb "$SS_THCLR_6")m"
+
+    CSS_BLUE="\033[38;2;$(hex_to_rgb "$SS_THCLR_4")m"
+    CSS_BLUEB="\033[1;38;2;$(hex_to_rgb "$SS_THCLR_4")m"
+
+    CSS_GREEN="\033[38;2;$(hex_to_rgb "$SS_THCLR_2")m"
+    CSS_GREENB="\033[1;38;2;$(hex_to_rgb "$SS_THCLR_2")m"
+
+    CSS_RED="\033[38;2;$(hex_to_rgb "$SS_THCLR_1")m"
+    CSS_REDB="\033[1;38;2;$(hex_to_rgb "$SS_THCLR_1")m"
+
+fi
+
+
 
 # Sub Action switch
 ISSA=0

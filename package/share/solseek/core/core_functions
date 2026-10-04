@@ -47,6 +47,39 @@ mst(){
   echo "$OUT"
 }
 
+
+
+set_terminal_theme(){
+
+    if [ "$SS_GLOBAL_THEME" -eq 1 ]; then
+
+        printf "\033]11;${SS_THCLR_11}\a"
+        printf "\033]10;${SS_THCLR_10}\a"
+        printf "\033]4;0;${SS_THCLR_0}\a"
+        printf "\033]4;1;${SS_THCLR_1}\a"
+        printf "\033]4;2;${SS_THCLR_2}\a"
+        printf "\033]4;3;${SS_THCLR_3}\a"
+        printf "\033]4;4;${SS_THCLR_4}\a"
+        printf "\033]4;5;${SS_THCLR_5}\a"
+        printf "\033]4;6;${SS_THCLR_6}\a"
+        printf "\033]4;7;${SS_THCLR_7}\a"
+
+        printf "\033]4;8;${SS_THCLR_8}\a"
+
+    fi
+}
+
+restore_terminal_theme() {
+
+    if [[ -t 1 ]]; then
+        printf "\033]104;\a"
+        printf "\033]110;\a"
+        printf "\033]111;\a"
+    fi
+}
+
+
+
 hr(){
     line="─"
     clr=""
@@ -401,7 +434,7 @@ get_changelog(){
 		CLFILE="$SS_CACHE_PATH/changelog$CLVER"
 		if [ ! -f "$CLFILE" ]; then
 			rm -f "$SS_CACHE_PATH"/changelog*
-			curl -s https://api.github.com/repos/clintre/solseek/releases/latest | awk -F'"' '/"body":/{print $4; exit}' > "$CLFILE"
+			curl -s https://codeberg.org/api/v1/repos/clintre/solseek/releases/latest | jq -r .body > "$CLFILE"
 		fi
 		CLTXT=$(< "$CLFILE")
 		if [ -n "$CLTXT" ]; then

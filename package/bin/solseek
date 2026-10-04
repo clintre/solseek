@@ -51,18 +51,30 @@ elif [ "$1" == "-sse" ]; then
     . "${SS_DATA_PATH}/modules/tools"
     exit 0
 elif [ "$1" == "-ssp" ]; then
+    trap restore_terminal_theme EXIT INT TERM
+    set_terminal_theme
+
     . "${SS_DATA_PATH}/modules/install-pkg"
     exit 0
 elif [ "$1" == "-ssf" ]; then
+    trap restore_terminal_theme EXIT INT TERM
+    set_terminal_theme
+
     . "${SS_DATA_PATH}/modules/install-flatpak"
     exit 0
 elif [ "$1" == "-ssd" ]; then
     . "${SS_DATA_PATH}/modules/panel-drivers"
     exit 0
 elif [ "$1" == "-ssu" ]; then
+    trap restore_terminal_theme EXIT INT TERM
+    set_terminal_theme
+
     . "${SS_DATA_PATH}/modules/update-runner"
     exit 0
 elif [ "$1" == "-ssn" ]; then
+    trap restore_terminal_theme EXIT INT TERM
+    set_terminal_theme
+
     . "${SS_DATA_PATH}/modules/notify"
     exit 0
 elif [ "$1" == "applist" ]; then

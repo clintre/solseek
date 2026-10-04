@@ -1,2 +1,18 @@
 SS_COLOR_BASE=214
 SS_FZF_COLORS="fg:#ebdbb2,bg:#282828,hl:#b16286,fg+:#689d6a,bg+:#32302f,hl+:#d3869b,info:#d65d0e,prompt:#458588,pointer:#fe8019,marker:#8ec07c,spinner:#cc241d,header:#fabd2f"
+
+# To disable terminal theme set to 0
+SS_GLOBAL_THEME=1
+
+SS_THCLR_11="#282828" # Color 11: Background
+SS_THCLR_10="#ebdbb2" # Color 10: Foreground
+
+SS_THCLR_0="#282828"  # Color 0: Black
+SS_THCLR_1="#cc241d"  # Color 1: Red
+SS_THCLR_2="#98971a"  # Color 2: Green
+SS_THCLR_3="#d79921"  # Color 3: Yellow
+SS_THCLR_4="#458588"  # Color 4: Blue
+SS_THCLR_5="#b16286"  # Color 5: Magenta
+SS_THCLR_6="#689d6a"  # Color 6: Cyan
+SS_THCLR_7="#a89984"  # Color 7: White
+SS_THCLR_8="#928374"  # Color 8: Bright Black
