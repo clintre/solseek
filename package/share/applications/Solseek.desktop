@@ -1,7 +1,9 @@
 [Desktop Entry]
-Version=0.1.0
+Version=1.6
 Name=Solseek
-Comment=Solseek Package Manager
+GenericName=Package Manager
+Comment=Manage Solus packages, Flatpaks, and Snaps
+Keywords=software;package;manager;update;install;eopkg;flatpak;snap;system;
 Exec=solseek
 Icon=solseek
 Terminal=true
