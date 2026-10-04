@@ -69,3 +69,4 @@ There was no need to write some system to extract the data as the Solus team has
 
 ## Inspirations from other distro tools
   - [pacseek](https://github.com/moson-mo/pacseek) - Overall concept
+  - [topgrade](https://github.com/topgrade-rs/topgrade) - Update flow
