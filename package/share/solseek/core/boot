@@ -173,7 +173,7 @@ if [ "$GEN_APP_SETTINGS" -eq 1 ]; then
         eval "$EOPKG_VARS"
 
         if [ "$SS_SOLUS_US" -eq 1 ]; then
-            INST_PKG_MGRS="${INST_PKG_MGRS} ${CSS_YELLOW}(Unstable)${CSS_RESET}"
+            INST_PKG_MGRS="${INST_PKG_MGRS} ${CSS_RED}(Unstable)${CSS_RESET}"
         fi
 
         # Check if neither the XML nor the XZ index exists

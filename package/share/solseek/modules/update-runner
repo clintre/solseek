@@ -10,7 +10,7 @@ if [ "$2" == 'check' ]; then
     check_updates "system" "force"
     echo ""
     hr "success" 3
-    echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP ${CSS_RESET}"
+    echo -e "${CSS_GREENB}✓ $MSG_GEN_PROCCOMP ${CSS_RESET}"
     hr "success" 3
     read -p "$MSG_GEN_PRESSENTER..."
     exit 0
@@ -74,18 +74,19 @@ fi
 
 hr "danger" 3
 echo -e "${CSS_BOLDBRIGHT}📦 $MSG_UPD_TTLSTART${CSS_RESET}"
-hr "danger" 1
-echo -e "${CSS_REDB}‼️ $MSG_UPD_NOCLOSE ‼️${CSS_RESET}"
 hr "danger" 3
+echo ""
+echo -e "${CSS_REDB}‼️ $MSG_UPD_NOCLOSE ‼️${CSS_RESET}"
+echo ""
 if [ "$up_eo" -eq 1 ] && [ "$SS_PKG_MGR" == "eopkg" ]; then
     ccache_eopkg=1
     ccache_updates=1
     show_hardreboot=1
     show_softreboot=1
 
-    hr "w30" "cyan"
-    echo -e "${CSS_CYANB}█ EOPKG ${CSS_RESET}"
-    hr "w30" "cyan"
+    hr "w50" "noclr" 3
+    echo -e "${CSS_BOLDBRIGHT} $(date +"%T") - EOPKG ${CSS_RESET}"
+    hr "w50" "noclr" 3
     echo -e "${MSG_GEN_CHECKUPDS}\n"
 
     EOPKG_LOG="/var/log/eopkg.log"
@@ -168,44 +169,51 @@ fi
 if [ "$up_fp" -eq 1 ] && [ "$HAS_FLATPAK" -eq 1 ]; then
     ccache_flatpak=1
     ccache_updates=1
-    hr "w30" "blue"
-    echo -e "${CSS_BLUEB}█ FLATPAK ${CSS_RESET}"
-    hr "w30" "blue"
+
+    echo ""
+    hr "w50" "noclr" 3
+    echo -e "${CSS_BOLDBRIGHT} $(date +"%T") - FLATPAK ${CSS_RESET}"
+    hr "w50" "noclr" 3
     flatpak update -y
     flatpak mask
 fi
 if [ "$up_sn" -eq 1 ] && [ "$HAS_SNAP" -eq 1 ]; then
-    hr "w30" "red"
-    echo -e "${CSS_REDB}█ SNAP ${CSS_RESET}"
-    hr "w30" "red"
+    echo ""
+    hr "w50" "noclr" 3
+    echo -e "${CSS_BOLDBRIGHT} $(date +"%T") - SNAP ${CSS_RESET}"
+    hr "w50" "noclr" 3
     sudo snap refresh
 fi
 if [ "$up_db" -eq 1 ] && [ "$HAS_DISTROBOX" -eq 1 ]; then
-    hr "w30" "yellow"
-    echo -e "${CSS_YELLOWB}█ DISTROBOX ${CSS_RESET}"
-    hr "w30" "yellow"
+    echo ""
+    hr "w50" "noclr" 3
+    echo -e "${CSS_BOLDBRIGHT} $(date +"%T") - DISTROBOX ${CSS_RESET}"
+    hr "w50" "noclr" 3
     distrobox upgrade -a
 fi
 if [ "$up_cu" -eq 1 ] && [ "$HAS_CUSTOM" -eq 1 ]; then
-    hr "w30" "red"
-    echo -e "${CSS_REDB}█ $MSG_UPD_CUSTOM ${CSS_RESET}"
-    hr "w30" "red"
+    echo ""
+    hr "w50" "noclr" 3
+    echo -e "${CSS_BOLDBRIGHT} $(date +"%T") - $MSG_UPD_CUSTOM ${CSS_RESET}"
+    hr "w50" "noclr" 3
     sh "$SS_CUST_UPDATE"
 fi
 
 if [ "$up_fw" -eq 1 ] && [ "$HAS_FIRMWARE" -eq 1 ]; then
-    hr "w30" "yellow"
-    echo -e "${CSS_YELLOWB}█ FIRMWARE ${CSS_RESET}"
-    hr "w30" "yellow"
+    echo ""
+    hr "w50" "noclr" 3
+    echo -e "${CSS_BOLDBRIGHT} $(date +"%T") - FIRMWARE ${CSS_RESET}"
+    hr "w50" "noclr" 3
     sudo fwupdmgr refresh --force
     sudo fwupdmgr get-updates -y > /dev/null
     sudo fwupdmgr update
 fi
 
 if [ "$ccache_updates" -eq 1 ]; then
-    hr "w30" "noclr" 3
-    echo -e "${CSS_BOLDBRIGHT}█ ${MSG_GEN_CACHE} ${CSS_RESET}"
-    hr "w30" "noclr" 3
+    echo ""
+    hr "w50" "noclr" 3
+    echo -e "${CSS_BOLDBRIGHT}▒ $(date +"%T") - ${MSG_GEN_CACHE} ${CSS_RESET}"
+    hr "w50" "noclr" 3
     check_updates "system" &
     if [ "$ccache_eopkg" -eq 1 ]; then
         eopkg_cache "force"
@@ -214,8 +222,9 @@ if [ "$ccache_updates" -eq 1 ]; then
         fp_cache "force"
     fi
 fi
+echo ""
 hr "success" 3
-echo -e "${CSS_GREENB}█ $MSG_GEN_PROCCOMP${CSS_RESET}"
+echo -e "${CSS_GREENB}✓ $(date +"%T") - $MSG_GEN_PROCCOMP${CSS_RESET}"
 hr "success" 3
 
 OPTION_MENU="${CSS_GREENB}> ${MSG_GEN_PRESSENTER}"
@@ -228,9 +237,9 @@ fi
 echo ""
 
 if [ -n "$reboot_msg" ]; then
-    hr "w30" "red"
-    echo -e "${CSS_REDB}!!! ${reboot_msg} !!!${CSS_RESET}"
-    hr "w30" "red"
+    hr "w50" "red"
+    echo -e "${CSS_REDB}‼️ ${reboot_msg} ‼️${CSS_RESET}"
+    hr "w50" "red"
     echo ""
 fi
 # Clean up
@@ -245,10 +254,10 @@ case "$PUCHOICE" in
         if [ "$show_softreboot" -eq 0 ]; then
             exit 0
         fi
-        echo -e "\n\n${CSS_BOLDBRIGHT}█ $MSG_GEB_REBOOTIN... ${CSS_RESET}"
+        echo -e "\n\n${CSS_BOLDBRIGHT} $MSG_GEB_REBOOTIN... ${CSS_RESET}"
         RBCNT=3
         for (( i=$RBCNT; i>0; i-- )); do
-            echo -ne "${CSS_BOLDBRIGHT}█ $i ${CSS_RESET}\r"
+            echo -ne "${CSS_BOLDBRIGHT} $i ${CSS_RESET}\r"
             sleep 1
         done
         systemctl soft-reboot
@@ -259,10 +268,10 @@ case "$PUCHOICE" in
         if [ "$show_hardreboot" -eq 0 ]; then
             exit 0
         fi
-        echo -e "\n\n${CSS_BOLDBRIGHT}█ $MSG_GEB_REBOOTIN... ${CSS_RESET}"
+        echo -e "\n\n${CSS_BOLDBRIGHT} $MSG_GEB_REBOOTIN... ${CSS_RESET}"
         RBCNT=3
         for (( i=$RBCNT; i>0; i-- )); do
-            echo -ne "${CSS_BOLDBRIGHT}█ $i ${CSS_RESET}\r"
+            echo -ne "${CSS_BOLDBRIGHT} $i ${CSS_RESET}\r"
             sleep 1
         done
         reboot

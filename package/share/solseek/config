@@ -26,8 +26,8 @@ SS_MAINMENU=1
 
 ## Set Theme
 ## Changes color set of Solseek
-## Current options are "base" and "solus" (default)
-## Check the Wiki for new options in the future
+## Default: "solus" (terminal with Solus accents)
+## For options see: https://codeberg.org/clintre/solseek/wiki/Configuration#themes
 SS_THEME="solus"
 
 ## Default terminal based editor for config files

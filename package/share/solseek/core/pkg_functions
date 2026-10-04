@@ -276,7 +276,7 @@ get_pkg_info(){
                 }
             ' "$EPD_CACHE_FILE"
             echo ""
-            echo -e "💡 ${CSS_YELLOWB}ctrl+e ${CSS_YELLOW}eopkg info${CSS_RESET}"
+            echo -e "💡 ${CSS_BLUEB}ctrl+e ${CSS_BLUE}eopkg info${CSS_RESET}"
         else
             wait_for_eopkg "silent"
             ss_clean_of

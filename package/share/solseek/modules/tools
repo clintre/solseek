@@ -27,7 +27,7 @@ if [ "$sse_type" == "solseek" ]; then
             if command -v "$SS_EDITOR" &> /dev/null; then
                 "$SS_EDITOR" "$HOME/.config/solseek/config"
             else
-                echo -e "$(mst "rb")█ "$SS_EDITOR" not found. Using nano.$(mst "rst")"
+                echo -e "$(mst "rb") "$SS_EDITOR" not found. Using nano.$(mst "rst")"
                 nano "$HOME/.config/solseek/config"
             fi
 
@@ -51,7 +51,7 @@ if [ "$sse_type" == "solseek" ]; then
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_EDITPVTOP
-            hr "w30"
+            hr "w50"
             ss_info_pane "sscfg"
         fi
     elif [ "$2" = "AMT_SSTMR" ]; then
@@ -78,9 +78,9 @@ if [ "$sse_type" == "solseek" ]; then
                     systemctl --user "$TMR_CHG_ACTION" solseek-uc.service
                     TMR_STATUS=$(LC_ALL=C systemctl --user show --value -p ActiveState solseek-uc.timer)
                     echo ""
-                    hr "w30" "noclr" 3
+                    hr "w50" "noclr" 3
                     echo -e "$MSG_GEN_NEWSTATUS: ${TMR_STATUS^^}"
-                    hr "w30" "noclr" 3
+                    hr "w50" "noclr" 3
                     echo ""
                     hr "success" 3
                     read -p "$MSG_GEN_PRESSENTER..."
@@ -94,7 +94,7 @@ if [ "$sse_type" == "solseek" ]; then
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_EDITPVTOP
-            hr "w30"
+            hr "w50"
             ss_info_pane "sstmr"
             echo -e "$TMR_STATUS_DISP"
         fi
@@ -115,7 +115,7 @@ if [ "$sse_type" == "solseek" ]; then
             esac
         else
             echo $MSG_INFO_RUNPVTOP
-            hr "w30"
+            hr "w50"
             echo -e "${ACT_INFO_RBFW}";
         fi
     fi
@@ -161,14 +161,14 @@ elif [ "$sse_type" = "eopkg" ]; then
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
-            hr "w30"
+            hr "w50"
             echo -e "$MSG_GEN_RUN: eopkg check\n";
             ss_format_help eopkg check
         fi
         exit 0
     elif [ "$2" == "AMT_ERBCK" ]; then
         echo $MSG_INFO_ACCESSPVTOP
-        hr "w30"
+        hr "w50"
         ss_info_pane "rollback"
         exit 0
     elif [ "$2" = "AMT_ERMO" ]; then
@@ -182,7 +182,7 @@ elif [ "$sse_type" = "eopkg" ]; then
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
-            hr "w30"
+            hr "w50"
             echo -e "$ACT_INFO_ERMO: eopkg remove-orphans\n";
             ss_format_help eopkg remove-orphans
         fi
@@ -198,7 +198,7 @@ elif [ "$sse_type" = "eopkg" ]; then
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
-            hr "w30"
+            hr "w50"
             echo -e "$ACT_INFO_EDC eopkg delete-cache\n";
             ss_format_help eopkg delete-cache
         fi
@@ -214,7 +214,7 @@ elif [ "$sse_type" = "eopkg" ]; then
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
-            hr "w30"
+            hr "w50"
             echo -e "$ACT_INFO_EUR eopkg update-repo\n";
             ss_format_help eopkg update-repo
         fi
@@ -238,7 +238,7 @@ elif [ "$sse_type" = "eopkg" ]; then
         read -p "$MSG_GEN_PRESSENTER..."
     else
         echo "$MSG_INFO_EXPPVTOP"
-        hr "w30"
+        hr "w50"
         ss_clean_of
         sleep 0.5 && eopkg $sse_cmd
     fi
@@ -253,7 +253,7 @@ elif [ "$sse_type" == "flatpak" ]; then
           read -p "$MSG_GEN_PRESSENTER..."
       else
           echo $MSG_INFO_RUNPVTOP
-          hr "w30"
+          hr "w50"
           echo -e "$ACT_INFO_CHECK: flatpak uninstall --unused\n";
           ss_format_help flatpak uninstall --unused
       fi
@@ -268,7 +268,7 @@ elif [ "$sse_type" == "flatpak" ]; then
             read -p "$MSG_GEN_PRESSENTER..."
         else
             echo $MSG_INFO_RUNPVTOP
-            hr "w30"
+            hr "w50"
             echo -e "$MSG_GEN_RUN - flatpak repair\n";
             ss_format_help flatpak repair --unused
         fi
@@ -298,7 +298,7 @@ elif [ "$sse_type" == "flatpak" ]; then
         read -p "$MSG_GEN_PRESSENTER..."
     else
         echo "$MSG_INFO_EXPPVTOP"
-        hr "w30"
+        hr "w50"
         printf "$(flatpak $sse_cmd 2>/dev/null)"
     fi
 elif [ "$sse_type" == "inxi" ]; then
@@ -313,7 +313,7 @@ elif [ "$sse_type" == "inxi" ]; then
       read -p "$MSG_GEN_PRESSENTER..."
   else
       echo "$MSG_INFO_EXPPVTOP"
-      hr "w30"
+      hr "w50"
       inxi -b --tty -y 80 2>/dev/null
   fi
 fi

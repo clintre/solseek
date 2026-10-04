@@ -2,7 +2,7 @@ if [ -n "$2" ]; then
     if grep -q "^$2|" "$PI_CACHE_FILE"; then
         pkg_status="${CSS_GREEN}$MSG_GEN_INSTALLED${CSS_RESET}"
     else
-        pkg_status="${CSS_YELLOW}$MSG_GEN_AVAILABLE${CSS_RESET}"
+        pkg_status="${CSS_BLUE}$MSG_GEN_AVAILABLE${CSS_RESET}"
     fi
 
     if [ -n "$3" ]; then

@@ -55,7 +55,7 @@ case "$PNLKEY" in
         ss_life
         hr "w50"
         echo -e "📦 ${CSS_BOLDBRIGHT}$ACT_INFO_LREPO${CSS_RESET}"
-        echo -e "${CSS_CYANB}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}"
+        echo -e "${CSS_BLUEB}${MSG_GEN_SYSTEM} (${SS_PKG_MGR})${CSS_RESET}"
         eopkg lr -N
         echo ""
         if [ "$HAS_FLATPAK" -eq 1 ]; then

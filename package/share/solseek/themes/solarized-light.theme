@@ -1,0 +1,2 @@
+SS_COLOR_BASE=32
+SS_FZF_COLORS="fg:#657b83,bg:#fdf6e3,hl:#cb4b16,fg+:#586e75,bg+:#eee8d5,hl+:#cb4b16,info:#b58900,prompt:#2aa198,pointer:#268bd2,marker:#859900,spinner:#d33682,header:#268bd2"
