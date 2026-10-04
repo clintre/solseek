@@ -9,7 +9,7 @@
         <name>clintre</name>
     </developer>
     
-    <summary>A TUI Package Manager for Solus</summary>
+    <summary>TUI Package Manager for Solus</summary>
     
     <metadata_license>CC0-1.0</metadata_license>
     <project_license>GPL-3.0-or-later</project_license> 
@@ -20,7 +20,7 @@
     </categories>
     
     <url type="homepage">https://solseek.org</url>
-    <url type="bugtracker">https://github.com/clintre/solseek/issues</url>
+    <url type="bugtracker">https://codeberg.org/clintre/solseek/issues</url>
     
     <description>
         <p>Solseek is a simple terminal user interface that allows you to browse, search, and manage packages and drivers for Solus and Flatpak. Packages can be installed, reinstalled, updated, verified, and removed through the interface. It provides a wrapper for both eopkg and flatpak to provide extended capabilities.</p>
@@ -44,7 +44,7 @@
     
     <screenshots>
         <screenshot type="default">
-            <image type="source">https://raw.githubusercontent.com/clintre/solseek/main/demo/demo_thumb.png</image>
+            <image type="source">https://codeberg.org/clintre/solseek/raw/branch/main/demo/demo_thumb.png</image>
         </screenshot>
     </screenshots>
     
